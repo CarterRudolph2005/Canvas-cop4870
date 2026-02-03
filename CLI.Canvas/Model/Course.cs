@@ -1,0 +1,27 @@
+/*
+Course
+    - Id
+    - Code
+    - Name
+    - Description
+    - Roster (list of students)
+    - Modules (list of modules)
+    - Assignments (list of assignments)
+*/
+
+using System.Collections.Generic;
+
+
+namespace CLI.Canvas.Model
+{
+    public class Course
+    {
+        public int Id {get; set;}
+        public string? Code {get; set;}
+        public string? Name {get; set;}
+        public string? Description {get; set;}
+        public List<Student>? Roster {get; set;}
+        public List<Module>? Modules {get; set;}
+        // public List<Assignment> Assignments{get; set;}
+    }
+}
