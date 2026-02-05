@@ -1,6 +1,7 @@
-﻿using CLI.Canvas;
-// using CLI.CLI.LMS.Model;
-using System;
+﻿using System;
+using System.Collections.Generic;
+using CLI.Canvas.Model;
+
 
 namespace CLI.Canvas
 {
@@ -8,6 +9,7 @@ namespace CLI.Canvas
     {
         static void Main(string[] args)
         {
+
             //Main Program Goes Here!
             Console.WriteLine("Choose one of the following: ");
             Console.WriteLine("1. Teacher");
