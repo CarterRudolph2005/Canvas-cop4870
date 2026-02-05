@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using CLI.Canvas.Model;
+using CLI.Canvas.Services;
 
 
 namespace CLI.Canvas
@@ -10,32 +11,112 @@ namespace CLI.Canvas
         static void Main(string[] args)
         {
 
+            var courses = CourseServiceProxy.Current.Courses;
+            var choice = string.Empty;
+
             //Main Program Goes Here!
-            Console.WriteLine("Choose one of the following: ");
-            Console.WriteLine("1. Teacher");
-            Console.WriteLine("2. Student");
-            
-            var choice = Console.ReadLine();
-            if(int.TryParse(choice, out int intChoice))
-            {
-                switch (intChoice)
+            do{
+                Console.WriteLine("Choose one of the following: ");
+                Console.WriteLine("1. Teacher");
+                Console.WriteLine("2. Student");
+                Console.WriteLine("3. Leave Application");
+                
+                choice = Console.ReadLine();
+                if(int.TryParse(choice, out int intChoice))
                 {
-                    case 1:
-                        Console.WriteLine("Hello Teacher!");
-
-
-                        break;
-                    case 2:
-                        Console.WriteLine("Hello Student!");
-
-                        break;
-                    default:
-                        Console.WriteLine("ERROR: Invalid input! Try again.");
+                    var subChoice = string.Empty;
+                    
+                        switch (intChoice)
+                        {
                         
-                        break;
+                            case 1:
+                                do{
+                                    Console.WriteLine("Teacher Menu");
+                                    Console.WriteLine("A. Add a new course");
+                                    Console.WriteLine("S. Show all courses");
+                                    Console.WriteLine("U. Edit an existing course");
+                                    Console.WriteLine("Q. Quit the teacher menu");
+
+                                    //office hours
+                                    do{
+                                        subChoice = Console.ReadLine();
+                                    } while(string.IsNullOrWhiteSpace(subChoice));
+                                
+                                
+                                    if(subChoice.Equals("A", StringComparison.InvariantCultureIgnoreCase))
+                                    {
+                                        Console.WriteLine("Course Name:");
+                                        var name = Console.ReadLine();
+                                        Console.WriteLine("Description");
+                                        var description = Console.ReadLine();
+                                        Console.WriteLine("Course Code:");
+                                        var code = Console.ReadLine();
+
+                                        var course = new Course
+                                        {
+                                            Name = name,
+                                            Description = description,
+                                            Code = code
+                                        };
+                                        CourseServiceProxy.Current.AddOrUpdate(course);
+
+                                        Console.WriteLine(course);
+                                    }
+                                    else if(subChoice.Equals("U", StringComparison.InvariantCultureIgnoreCase))
+                                    {
+                                        courses.ForEach(Console.WriteLine);
+
+                                        //choose to update logic
+                                        var editChoice = int.Parse(Console.ReadLine() ?? "0");
+                                        var courseToEdit = courses.FirstOrDefault(i => i.Id == editChoice);
+
+                                        if(courseToEdit != null)
+                                        {
+                                            Console.WriteLine("New Name:");
+                                            var newName = Console.ReadLine();
+                                            if(!string.IsNullOrEmpty(newName)){
+                                                courseToEdit.Name = newName;
+                                            }
+                                            Console.WriteLine("New Code:");
+                                            var code = Console.ReadLine();
+                                            if(!string.IsNullOrEmpty(code)){
+                                                courseToEdit.Code = code;
+                                            }
+                                            Console.WriteLine("New Description:");
+                                            var newDesc = Console.ReadLine();
+                                            if(!string.IsNullOrEmpty(newDesc)){
+                                                courseToEdit.Description = newDesc;
+                                            }
+                                        }
+                                    }
+                                    else if(subChoice.Equals("S", StringComparison.InvariantCultureIgnoreCase))
+                                    {
+                                        courses.ForEach(Console.WriteLine);
+                                    }
+                                    else if(subChoice.Equals("Q", StringComparison.InvariantCultureIgnoreCase))
+                                    {
+                                        Console.WriteLine("Happy teaching!");
+                                    }
+                            
+                                } while(!subChoice.Equals("Q", StringComparison.InvariantCultureIgnoreCase));
+                                break;
+                            case 2:
+                                Console.WriteLine("Hello Student!");
+
+                                break;
+                            case 3:
+                                Console.WriteLine("Bye!");
+
+                                break;
+                            default:
+                                Console.WriteLine("ERROR: Invalid input! Try again.");
+                                
+                                break;
+                        }
+                    
                 }
-            }
-            
+            } while (!choice.Equals("3", StringComparison.OrdinalIgnoreCase));
         }
+            
     }
 }
