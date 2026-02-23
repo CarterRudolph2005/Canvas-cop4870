@@ -14,6 +14,12 @@ namespace CLI.Canvas.Model
     {
         public Classification Classification{get; set;}
 
-       
+       public override string ToString()
+        {
+            return $"{Id}. {Name} - {Code}: {Classification}";
+        }
+        //for UI to find override
+        public string Display => ToString() ?? string.Empty;
     }
+    
 }
