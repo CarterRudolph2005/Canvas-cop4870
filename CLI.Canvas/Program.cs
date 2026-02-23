@@ -14,6 +14,7 @@ namespace CLI.Canvas
         {
 
             var courses = CourseServiceProxy.Current.Courses;
+            var students = StudentServiceProxy.Current.Students;
             var choice = string.Empty;
 
             //Main Program Goes Here!
@@ -123,6 +124,25 @@ namespace CLI.Canvas
                                 break;
                             case 2:
                                 Console.WriteLine("Hello Student!");
+                                students.ForEach(Console.WriteLine);
+                                string studnetIDInput;
+                                int proxyStudentID;
+                                do {
+                                    Console.Write("Select your identity: ");
+                                    studnetIDInput = Console.ReadLine();
+                                } while (string.IsNullOrWhiteSpace(studnetIDInput) || !int.TryParse(studnetIDInput, out proxyStudentID));
+
+                                StudentServiceProxy.Current.ProxyAs(proxyStudentID);
+                                Console.WriteLine($"Hello {StudentServiceProxy.Current.CurrentStudent.Name}!");
+                                do
+                                {
+                                    Console.WriteLine("Student Menu: ");
+                                    Console.WriteLine("Q. Quit");
+                                     do{
+                                        subChoice = Console.ReadLine();
+                                    } while(string.IsNullOrWhiteSpace(subChoice));
+
+                                }while(!subChoice.Equals("Q", StringComparison.InvariantCultureIgnoreCase));
 
                                 break;
                             case 3:
