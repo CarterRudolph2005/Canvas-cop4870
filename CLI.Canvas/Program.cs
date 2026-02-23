@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Transactions;
 using CLI.Canvas.Model;
 using CLI.Canvas.Services;
 
@@ -35,6 +37,7 @@ namespace CLI.Canvas
                                     Console.WriteLine("A. Add a new course");
                                     Console.WriteLine("S. Show all courses");
                                     Console.WriteLine("U. Edit an existing course");
+                                    Console.WriteLine("D. Delete course");
                                     Console.WriteLine("Q. Quit the teacher menu");
 
                                     //office hours
@@ -66,9 +69,16 @@ namespace CLI.Canvas
                                     {
                                         courses.ForEach(Console.WriteLine);
 
-                                        //choose to update logic
-                                        var editChoice = int.Parse(Console.ReadLine() ?? "0");
-                                        var courseToEdit = courses.FirstOrDefault(i => i.Id == editChoice);
+                                        //choose to update login
+                                        string editInput;
+                                        int editCourseID;
+
+                                        do {
+                                            Console.Write("Enter your choice: ");
+                                            editInput = Console.ReadLine();
+                                        } while (string.IsNullOrWhiteSpace(editInput) || !int.TryParse(editInput, out editCourseID));
+
+                                        var courseToEdit = courses.FirstOrDefault(i => i.Id == editCourseID);
 
                                         if(courseToEdit != null)
                                         {
@@ -96,6 +106,17 @@ namespace CLI.Canvas
                                     else if(subChoice.Equals("Q", StringComparison.InvariantCultureIgnoreCase))
                                     {
                                         Console.WriteLine("Happy teaching!");
+                                    }else if(subChoice.Equals("D", StringComparison.InvariantCultureIgnoreCase))
+                                    {
+                                        courses.ForEach(Console.WriteLine);
+                                        string editInput;
+                                        int deleteCourseID;
+                                        do {
+                                            Console.WriteLine("Enter the number of the course you woipuld like to delete:");
+                                            editInput = Console.ReadLine();
+                                        } while (string.IsNullOrWhiteSpace(editInput) || !int.TryParse(editInput, out deleteCourseID));
+                                        var courseToDelete = courses.FirstOrDefault(i => i.Id == deleteCourseID);
+                                        CourseServiceProxy.Current.Delete(courseToDelete);
                                     }
                             
                                 } while(!subChoice.Equals("Q", StringComparison.InvariantCultureIgnoreCase));
