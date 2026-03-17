@@ -38,6 +38,7 @@ namespace CLI.Canvas
                                     Console.WriteLine("A. Add a new course");
                                     Console.WriteLine("S. Show all courses");
                                     Console.WriteLine("U. Edit an existing course");
+                                    Console.WriteLine("E. Enter the course's Main Menu");
                                     Console.WriteLine("D. Delete course");
                                     Console.WriteLine("Q. Quit the teacher menu");
 
@@ -118,6 +119,57 @@ namespace CLI.Canvas
                                         } while (string.IsNullOrWhiteSpace(editInput) || !int.TryParse(editInput, out deleteCourseID));
                                         var courseToDelete = courses.FirstOrDefault(i => i.Id == deleteCourseID);
                                         CourseServiceProxy.Current.Delete(courseToDelete);
+                                    }
+                                    else if(subChoice.Equals("E", StringComparison.InvariantCultureIgnoreCase))
+                                    {
+                                        Console.WriteLine("Your courses:");
+                                        courses.ForEach(Console.WriteLine);
+                                        string editInput;
+                                        int CourseID;
+                                        do {
+                                            Console.WriteLine("Type the number of a course to explore:");
+                                            editInput = Console.ReadLine();
+                                        } while (string.IsNullOrWhiteSpace(editInput) || !int.TryParse(editInput, out CourseID));
+                                        var SelectedCourse = CourseServiceProxy.Current.Courses.FirstOrDefault(i => i.Id == CourseID);
+                                        if(SelectedCourse == null)  {Console.WriteLine("A course with that ID could not be found.");}
+                                        else{
+                                            var courseMenuOption = String.Empty;
+                                            do{
+                                                Console.WriteLine("Welcome to " + SelectedCourse.Name + "!");
+                                                Console.WriteLine("Course code: " + SelectedCourse.Code);
+                                                Console.WriteLine("\nCourse Description: " + SelectedCourse.Description);
+                                                Console.WriteLine("\n\nCourse Modules: ");
+                                                try { SelectedCourse.Modules.ForEach(Console.WriteLine);}
+                                                    catch
+                                                        {Console.WriteLine("No modules for this course.");}
+                                                Console.WriteLine("\n\nCourse Assignments: ");
+                                                try { SelectedCourse.Assignments.ForEach(Console.WriteLine);}
+                                                    catch
+                                                        { Console.WriteLine("No assignments for this course.");}
+                                                Console.WriteLine("\n\nCourse Students: ");
+                                                try{ SelectedCourse.Roster.ForEach(Console.WriteLine);}
+                                                    catch{ Console.WriteLine("No students are enrolled in this course.");}
+                                                Console.WriteLine("Course Menu:");
+                                                Console.WriteLine("M. Add Module");
+                                                Console.WriteLine("Q. Quit the " + SelectedCourse.Name + " course menu.");
+                                                do{
+                                                    courseMenuOption = Console.ReadLine();
+                                                } while(string.IsNullOrWhiteSpace(courseMenuOption));
+                                                if (courseMenuOption.Equals("M", StringComparison.InvariantCultureIgnoreCase))
+                                                {
+                                                    var newModuleName = String.Empty;
+                                                    Console.WriteLine("Please enter the name of the new module:");
+                                                    do{
+                                                        newModuleName = Console.ReadLine();
+                                                    } while(string.IsNullOrWhiteSpace(newModuleName));
+                                                    CourseServiceProxy.Current.AddModule(CourseID, newModuleName);
+                                                }
+                                                else if (courseMenuOption.Equals("Q", StringComparison.InvariantCultureIgnoreCase)){
+                                                    Console.WriteLine("Bye!");
+                                                }
+                                            }while (!courseMenuOption.Equals("Q", StringComparison.InvariantCultureIgnoreCase));
+                                        }
+                                        
                                     }
                             
                                 } while(!subChoice.Equals("Q", StringComparison.InvariantCultureIgnoreCase));

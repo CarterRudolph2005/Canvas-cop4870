@@ -5,6 +5,7 @@ Module
 */
 
 using System.Collections.Generic;
+using System.Security.Cryptography.X509Certificates;
 
 namespace CLI.Canvas.Model
 {
@@ -12,5 +13,11 @@ namespace CLI.Canvas.Model
     {
         public int Id {get; set;}
         public List<string>? Content;
+        public string ModuleName;
+
+        public override string ToString()
+        {
+            return $"{Id}. {ModuleName}";
+        }
     }
 }
