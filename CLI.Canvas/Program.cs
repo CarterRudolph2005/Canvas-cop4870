@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Transactions;
-using CLI.Canvas.Model;
-using CLI.Canvas.Services;
+using Canvas.Library.Model;
+using Canvas.Library.Services;
 
 
 namespace CLI.Canvas
