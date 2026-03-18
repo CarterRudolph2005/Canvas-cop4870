@@ -1,4 +1,5 @@
 using CLI.Canvas.Model;
+using Microsoft.VisualBasic;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -112,6 +113,25 @@ namespace CLI.Canvas.Services
                     Id = NextModuleKey
                 };
                 Courses.FirstOrDefault(c => c.Id == CourseID)?.Modules.Add(module);
+            }
+        }
+
+        public bool AddModuleContent(int CourseID, int ModuleID, string newContent)
+        {
+            try
+            {
+                var course = Courses.FirstOrDefault(i => i.Id == CourseID);
+                var module = course.Modules.FirstOrDefault(i => i.Id == ModuleID);
+                if (module.Content == null)
+                {
+                    module.Content = new List<string>();
+                }
+                module.Content.Add(newContent);
+                return true;
+            }
+            catch
+            {
+                return false;
             }
         }
     }

@@ -139,7 +139,26 @@ namespace CLI.Canvas
                                                 Console.WriteLine("Course code: " + SelectedCourse.Code);
                                                 Console.WriteLine("\nCourse Description: " + SelectedCourse.Description);
                                                 Console.WriteLine("\n\nCourse Modules: ");
-                                                try { SelectedCourse.Modules.ForEach(Console.WriteLine);}
+                                                try 
+                                                { 
+                                                    // SelectedCourse.Modules.ForEach(Console.WriteLine);
+                                                    
+                                                    SelectedCourse.Modules.ForEach(m => 
+                                                        {
+                                                            Console.WriteLine(m); 
+                                                            if (m.Content != null && m.Content.Any())
+                                                            {
+                                                                foreach (var item in m.Content)
+                                                                {
+                                                                    Console.WriteLine($"\t- {item}"); 
+                                                                }
+                                                            }
+                                                            else 
+                                                            {
+                                                                Console.WriteLine("\t(No content added yet)");
+                                                            }
+                                                        });
+                                                }
                                                     catch
                                                         {Console.WriteLine("No modules for this course.");}
                                                 Console.WriteLine("\n\nCourse Assignments: ");
@@ -151,6 +170,7 @@ namespace CLI.Canvas
                                                     catch{ Console.WriteLine("No students are enrolled in this course.");}
                                                 Console.WriteLine("Course Menu:");
                                                 Console.WriteLine("M. Add Module");
+                                                Console.WriteLine("A. Add Content to a Module");
                                                 Console.WriteLine("Q. Quit the " + SelectedCourse.Name + " course menu.");
                                                 do{
                                                     courseMenuOption = Console.ReadLine();
@@ -163,6 +183,32 @@ namespace CLI.Canvas
                                                         newModuleName = Console.ReadLine();
                                                     } while(string.IsNullOrWhiteSpace(newModuleName));
                                                     CourseServiceProxy.Current.AddModule(CourseID, newModuleName);
+                                                }
+                                                else if (courseMenuOption.Equals("A", StringComparison.InvariantCultureIgnoreCase)){
+                                                    try{ 
+                                                        SelectedCourse.Modules.ForEach(Console.WriteLine);
+                                                        int ModuleID;
+                                                        do {
+                                                            Console.WriteLine("Enter the Id of the module you'd like to add to.");
+                                                            editInput = Console.ReadLine();
+                                                        } while (string.IsNullOrWhiteSpace(editInput) || !int.TryParse(editInput, out ModuleID));
+                                                        var SelectedModule = SelectedCourse.Modules.FirstOrDefault(i => i.Id == ModuleID);
+                                                        if(SelectedModule == null)  {Console.WriteLine("No module exists with that Id.");}
+                                                        else
+                                                        {
+                                                            // SelectedModule.ForEach(Console.WriteLine);
+                                                            Console.WriteLine("Please enter the new content:");
+                                                            var ModuleNewContent = String.Empty;
+                                                            do{
+                                                                ModuleNewContent = Console.ReadLine();
+                                                            } while(string.IsNullOrWhiteSpace(ModuleNewContent));
+                                                            CourseServiceProxy.Current.AddModuleContent(CourseID, ModuleID, ModuleNewContent);
+                                                        }
+                                                    }
+                                                    catch
+                                                    {
+                                                       Console.WriteLine("\t\t\t******\nThere was an issue. Please ensure there are modules to add to.\n\t\t\t******");
+                                                    }
                                                 }
                                                 else if (courseMenuOption.Equals("Q", StringComparison.InvariantCultureIgnoreCase)){
                                                     Console.WriteLine("Bye!");
