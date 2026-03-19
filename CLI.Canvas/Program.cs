@@ -1,10 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.ComponentModel.DataAnnotations;
+using System.Data;
+using System.Diagnostics;
 using System.Linq.Expressions;
+using System.Reflection.Emit;
+using System.Runtime.InteropServices.Marshalling;
+using System.Text;
 using System.Transactions;
 using Canvas.Library.Model;
 using Canvas.Library.Services;
+using Microsoft.VisualBasic;
 
 
 namespace CLI.Canvas
@@ -171,6 +178,7 @@ namespace CLI.Canvas
                                                     catch{ Console.WriteLine("No students are enrolled in this course.");}
                                                 Console.WriteLine("Course Menu:");
                                                 Console.WriteLine("A. Add an Assignment");
+                                                Console.WriteLine("U. Update and Assignment");
                                                 Console.WriteLine("M. Add Module");
                                                 Console.WriteLine("C. Add Content to a Module");
                                                 Console.WriteLine("Q. Quit the " + SelectedCourse.Name + " course menu.");
@@ -256,9 +264,71 @@ namespace CLI.Canvas
                                                     }
                                                     else
                                                     {
-                                                        Console.WriteLine("Invalid format. Using the existing date or default.");
+                                                        Console.WriteLine("Invalid format. Using the default date.");
                                                     }
                                                     AssignmentServiceProxy.Current.AddAssignment(SelectedCourse.Id, assignmentClone);
+                                                }
+                                                else if (courseMenuOption.Equals("U", StringComparison.InvariantCultureIgnoreCase))
+                                                {
+                                                    Console.WriteLine("Existing Assignments:");
+                                                    if(SelectedCourse.Assignments == null || !SelectedCourse.Assignments.Any())
+                                                    {
+                                                        Console.WriteLine("You have no existing assignments");
+                                                    }
+                                                    else
+                                                    {
+                                                        SelectedCourse.Assignments.ForEach(Console.WriteLine);
+                                                        string? inputData;
+                                                        int AssignmentID;
+                                                        do {
+                                                            Console.WriteLine("Enter the ID of the assignment you'd like to edit:");
+                                                            inputData = Console.ReadLine();
+                                                        } while (string.IsNullOrWhiteSpace(inputData) || !int.TryParse(inputData, out AssignmentID));
+                                                        var originalAssignment = SelectedCourse.Assignments.FirstOrDefault(i => i.Id == AssignmentID);
+                                                        if(originalAssignment != null){
+                                                            Assignment assignmentClone = new Assignment(originalAssignment);
+                                                            Console.WriteLine("Enter the updated title of the assignment:");
+                                                            inputData = Console.ReadLine();
+                                                            if (!string.IsNullOrWhiteSpace(inputData)){}
+                                                            assignmentClone.Name = inputData;
+                                                            inputData = String.Empty;
+                                                            Console.WriteLine("Enter the description:");
+                                                                inputData = Console.ReadLine();
+                                                            if (!string.IsNullOrWhiteSpace(inputData)){}
+                                                            assignmentClone.Description = inputData;
+                                                            inputData = String.Empty;
+                                                            int assignmentPoints = assignmentClone.AvailablePoints;
+                                                            bool isValid;
+                                                            do
+                                                            {
+                                                                Console.Write("Enter Total Points for this Assignment: ");
+                                                                inputData = Console.ReadLine();
+                                                                isValid = int.TryParse(inputData, out assignmentPoints);
+                                                                if (isValid && assignmentPoints < 0)
+                                                                {
+                                                                    Console.WriteLine("Points cannot be negative.");
+                                                                    isValid = false;
+                                                                }
+                                                                else
+                                                                {
+                                                                    if(!isValid) {isValid = true;}
+                                                                }
+                                                            } while (!isValid);
+                                                            assignmentClone.AvailablePoints = assignmentPoints;
+                                                            Console.WriteLine("Enter Due Date (MM/DD/YYYY):");
+                                                            string dateInput = Console.ReadLine();
+                                                            DateTime dueDate = assignmentClone.DueDate;
+                                                            if (DateTime.TryParse(dateInput, out dueDate))
+                                                            {
+                                                                assignmentClone.DueDate = dueDate;
+                                                            }
+                                                            else
+                                                            {
+                                                                Console.WriteLine("Invalid format. Using the existing date.");
+                                                            }
+                                                            AssignmentServiceProxy.Current.UpdateAssignment(SelectedCourse.Id, AssignmentID, assignmentClone);
+                                                        }
+                                                    }                                                    
                                                 }
                                                 else if (courseMenuOption.Equals("Q", StringComparison.InvariantCultureIgnoreCase)){
                                                     Console.WriteLine("Bye!");
