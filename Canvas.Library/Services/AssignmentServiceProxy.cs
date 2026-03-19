@@ -42,17 +42,20 @@ namespace Canvas.Library.Services
             return 1;
         }
 
-        // public bool UpdateAssignment(int CourseID, int AssignmentID, Assignment assignmentClone)
-        // {
-        //     var course = CourseServiceProxy.Current.Courses.FirstOrDefault(i => i.Id == CourseID);
-        //     if (course == null) {return false;}
-        //     var assignment = course.Assignments?.FirstOrDefault(i => i.Id == AssignmentID);
-        //     if (assignment == null) {return false;}
-        //     else
-        //     {
-
-        //         return true;   
-        //     }
-        // }
+        public bool UpdateAssignment(int CourseID, int AssignmentID, Assignment assignmentClone)
+        {
+            var course = CourseServiceProxy.Current.Courses.FirstOrDefault(i => i.Id == CourseID);
+            if (course == null) {return false;}
+            var assignment = course.Assignments?.FirstOrDefault(i => i.Id == AssignmentID);
+            if (assignment == null) {return false;}
+            else
+            {
+                assignment.Name = assignmentClone.Name;
+                assignment.Description = assignmentClone.Description;
+                assignment.AvailablePoints = assignmentClone.AvailablePoints;
+                assignment.DueDate = assignmentClone.DueDate;
+                return true;   
+            }
+        }
     }
 }

@@ -21,9 +21,18 @@ namespace Canvas.Library.Model
         public int AvailablePoints {get; set;}
         public DateTime DueDate {get; set;}
         public List<Submission>? Submissions {get; set;}
+        public Assignment() {}                                  //required if implementing the copy constructor
+        public Assignment(Assignment other)                     //copy constructor for cloning implementation
+        {
+            this.Id = other.Id;
+            this.Name = other.Name;
+            this.Description = other.Description;
+            this.DueDate = other.DueDate;
+            this.AvailablePoints = other.AvailablePoints;
+        }
         public override string ToString()
         {
-            return $"{Id}. {Name} - {AvailablePoints}: {Description}";
+            return $"Id:{Id}. {Name} - {Description} (Available points: {AvailablePoints})";
         }
 
         //for UI to find override
