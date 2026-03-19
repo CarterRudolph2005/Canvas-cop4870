@@ -6,7 +6,9 @@ using System.Data;
 using System.Diagnostics;
 using System.Linq.Expressions;
 using System.Net.Http.Headers;
+using System.Reflection;
 using System.Reflection.Emit;
+using System.Reflection.Metadata;
 using System.Runtime.InteropServices.Marshalling;
 using System.Text;
 using System.Transactions;
@@ -182,6 +184,7 @@ namespace CLI.Canvas
                                                 Console.WriteLine("U. Update an Assignment");
                                                 Console.WriteLine("D. Delete an Assignment");
                                                 Console.WriteLine("M. Add Module");
+                                                Console.WriteLine("R. Modify Content in a Module");
                                                 Console.WriteLine("C. Add Content to a Module");
                                                 Console.WriteLine("Q. Quit the " + SelectedCourse.Name + " course menu.");
                                                 do{
@@ -349,6 +352,54 @@ namespace CLI.Canvas
                                                     else
                                                     {
                                                         Console.WriteLine("There was an issue (check assignment Id). Nothing was deleted.");
+                                                    }
+                                                }
+                                                else if (courseMenuOption.Equals("R", StringComparison.InvariantCultureIgnoreCase))
+                                                {
+                                                    Console.WriteLine("Existing Modules:");
+                                                    if (SelectedCourse.Modules != null && SelectedCourse.Modules.Any())
+                                                    {
+                                                        SelectedCourse.Modules.ForEach(Console.WriteLine);
+                                                        string? inputData;
+                                                        int ModuleID;
+                                                        do
+                                                        {
+                                                            Console.WriteLine("Please enter the number for the module with the content you'd like to edit:");
+                                                            inputData = Console.ReadLine();
+                                                        } while (!int.TryParse(inputData, out ModuleID));
+
+                                                        var module = SelectedCourse.Modules.FirstOrDefault(i => i.Id == ModuleID);
+                                                        if (module != null)
+                                                        {
+                                                            if (module.Content != null && module.Content.Any())
+                                                            {
+                                                                Console.WriteLine("Existing Content:");
+                                                                module.Content.ForEach(m =>
+                                                                {
+                                                                    int i = 1;
+                                                                    Console.WriteLine(i + ". " + m);
+                                                                    i++;
+                                                                });
+                                                                inputData = String.Empty;
+                                                                int ContentID;
+                                                                do
+                                                                {
+                                                                    Console.WriteLine("Please enter the number associated with the content you'd like to edit:");
+                                                                    inputData = Console.ReadLine();
+                                                                } while (!int.TryParse(inputData, out ContentID) && ContentID - 1 > 0 && ContentID - 1 < module.Content.Count);
+                                                                ContentID -= 1;
+                                                                string newContent;
+                                                                inputData = String.Empty;
+                                                                Console.WriteLine("Enter the updated content");
+                                                                inputData = Console.ReadLine();
+                                                                if(!string.IsNullOrWhiteSpace(inputData)) 
+                                                                {
+                                                                    newContent = inputData;
+                                                                    CourseServiceProxy.Current.UpdateModuleContent(CourseID, ModuleID, ContentID, newContent);
+                                                                }
+                                                            }
+
+                                                        }
                                                     }
                                                 }
                                                 else if (courseMenuOption.Equals("Q", StringComparison.InvariantCultureIgnoreCase)){
