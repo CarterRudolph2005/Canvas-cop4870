@@ -127,5 +127,21 @@ namespace Canvas.Library.Services
             module.Content.Add(newContent);
             return true;
         }
+
+        public void UpdateModuleContent(int CourseId, int ModuleId, int ContentIndex, string newContent)
+        {
+            //there is also this error checking in the CLI because I had to search the Lists, but can't have too much (for now at least)
+            var course = CourseServiceProxy.Current.Courses
+                .FirstOrDefault(c => c.Id == CourseId);
+            var module = course?.Modules?
+                .FirstOrDefault(m => m.Id == ModuleId);
+            if (module != null && module.Content != null)
+            {
+                if (ContentIndex >= 0 && ContentIndex < module.Content.Count)
+                {
+                    module.Content[ContentIndex] = newContent;
+                }
+            }
+        }
     }
 }
