@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.Diagnostics;
 using System.Linq.Expressions;
+using System.Net.Http.Headers;
 using System.Reflection.Emit;
 using System.Runtime.InteropServices.Marshalling;
 using System.Text;
@@ -149,8 +150,7 @@ namespace CLI.Canvas
                                                 Console.WriteLine("\n\nCourse Modules: ");
                                                 try 
                                                 { 
-                                                    // SelectedCourse.Modules.ForEach(Console.WriteLine);
-                                                    
+                                                    if (!SelectedCourse.Modules.Any())  {Console.WriteLine("No modules for this course.");}  
                                                     SelectedCourse.Modules.ForEach(m => 
                                                         {
                                                             Console.WriteLine(m); 
@@ -170,7 +170,8 @@ namespace CLI.Canvas
                                                     catch
                                                         {Console.WriteLine("No modules for this course.");}
                                                 Console.WriteLine("\n\nCourse Assignments: ");
-                                                try { SelectedCourse.Assignments.ForEach(Console.WriteLine);}
+                                                try { SelectedCourse.Assignments.ForEach(Console.WriteLine);
+                                                      if (!SelectedCourse.Assignments.Any()) {Console.WriteLine("No assignments for this course.");}}
                                                     catch
                                                         { Console.WriteLine("No assignments for this course.");}
                                                 Console.WriteLine("\n\nCourse Students: ");
@@ -178,7 +179,8 @@ namespace CLI.Canvas
                                                     catch{ Console.WriteLine("No students are enrolled in this course.");}
                                                 Console.WriteLine("Course Menu:");
                                                 Console.WriteLine("A. Add an Assignment");
-                                                Console.WriteLine("U. Update and Assignment");
+                                                Console.WriteLine("U. Update an Assignment");
+                                                Console.WriteLine("D. Delete an Assignment");
                                                 Console.WriteLine("M. Add Module");
                                                 Console.WriteLine("C. Add Content to a Module");
                                                 Console.WriteLine("Q. Quit the " + SelectedCourse.Name + " course menu.");
@@ -329,6 +331,25 @@ namespace CLI.Canvas
                                                             AssignmentServiceProxy.Current.UpdateAssignment(SelectedCourse.Id, AssignmentID, assignmentClone);
                                                         }
                                                     }                                                    
+                                                }
+                                                else if (courseMenuOption.Equals("D", StringComparison.InvariantCultureIgnoreCase))
+                                                {
+                                                    Console.WriteLine("Existing Assignements:");
+                                                    SelectedCourse.Assignments.ForEach(Console.WriteLine);
+                                                    int AssignmentID;
+                                                    string? inputData;
+                                                    do{
+                                                        Console.WriteLine("Enter the Id of the assignment you'd like to delete:");
+                                                        inputData = Console.ReadLine();
+                                                    } while(!int.TryParse(inputData, out AssignmentID));
+                                                    if (AssignmentServiceProxy.Current.DeleteAssignment(SelectedCourse.Id, AssignmentID))
+                                                    {
+                                                        Console.WriteLine("Assignment deleted!");
+                                                    }
+                                                    else
+                                                    {
+                                                        Console.WriteLine("There was an issue (check assignment Id). Nothing was deleted.");
+                                                    }
                                                 }
                                                 else if (courseMenuOption.Equals("Q", StringComparison.InvariantCultureIgnoreCase)){
                                                     Console.WriteLine("Bye!");
