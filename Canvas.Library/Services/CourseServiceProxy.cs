@@ -1,14 +1,14 @@
 using Canvas.Library.Model;
-using Microsoft.VisualBasic;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data.Common;
-using System.Net;
-using System.Net.ServerSentEvents;
-using System.Reflection;
-using System.Text;
+// using Microsoft.VisualBasic;
+// using System;
+// using System.Collections;
+// using System.Collections.Generic;
+// using System.ComponentModel;
+// using System.Data.Common;
+// using System.Net;
+// using System.Net.ServerSentEvents;
+// using System.Reflection;
+// using System.Text;
 
 namespace Canvas.Library.Services
 {
@@ -118,21 +118,14 @@ namespace Canvas.Library.Services
 
         public bool AddModuleContent(int CourseID, int ModuleID, string newContent)
         {
-            try
-            {
-                var course = Courses.FirstOrDefault(i => i.Id == CourseID);
-                var module = course.Modules.FirstOrDefault(i => i.Id == ModuleID);
-                if (module.Content == null)
-                {
-                    module.Content = new List<string>();
-                }
-                module.Content.Add(newContent);
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
+            var module = Courses.FirstOrDefault(c => c.Id == CourseID)
+                        ?.Modules?.FirstOrDefault(m => m.Id == ModuleID);
+
+            if (module == null) return false;
+
+            module.Content ??= new List<string>(); // Initialize if null
+            module.Content.Add(newContent);
+            return true;
         }
     }
 }

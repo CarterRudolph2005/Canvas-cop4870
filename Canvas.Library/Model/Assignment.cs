@@ -21,5 +21,12 @@ namespace Canvas.Library.Model
         public int AvailablePoints {get; set;}
         public DateTime DueDate {get; set;}
         public List<Submission>? Submissions {get; set;}
+        public override string ToString()
+        {
+            return $"{Id}. {Name} - {AvailablePoints}: {Description}";
+        }
+
+        //for UI to find override
+        public string Display => ToString() ?? string.Empty;
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq.Expressions;
 using System.Transactions;
 using Canvas.Library.Model;
 using Canvas.Library.Services;
@@ -169,8 +170,9 @@ namespace CLI.Canvas
                                                 try{ SelectedCourse.Roster.ForEach(Console.WriteLine);}
                                                     catch{ Console.WriteLine("No students are enrolled in this course.");}
                                                 Console.WriteLine("Course Menu:");
+                                                Console.WriteLine("A. Add an Assignment");
                                                 Console.WriteLine("M. Add Module");
-                                                Console.WriteLine("A. Add Content to a Module");
+                                                Console.WriteLine("C. Add Content to a Module");
                                                 Console.WriteLine("Q. Quit the " + SelectedCourse.Name + " course menu.");
                                                 do{
                                                     courseMenuOption = Console.ReadLine();
@@ -184,7 +186,7 @@ namespace CLI.Canvas
                                                     } while(string.IsNullOrWhiteSpace(newModuleName));
                                                     CourseServiceProxy.Current.AddModule(CourseID, newModuleName);
                                                 }
-                                                else if (courseMenuOption.Equals("A", StringComparison.InvariantCultureIgnoreCase)){
+                                                else if (courseMenuOption.Equals("C", StringComparison.InvariantCultureIgnoreCase)){
                                                     try{ 
                                                         SelectedCourse.Modules.ForEach(Console.WriteLine);
                                                         int ModuleID;
@@ -209,6 +211,54 @@ namespace CLI.Canvas
                                                     {
                                                        Console.WriteLine("\t\t\t******\nThere was an issue. Please ensure there are modules to add to.\n\t\t\t******");
                                                     }
+                                                }
+                                                else if (courseMenuOption.Equals("A", StringComparison.InvariantCultureIgnoreCase))
+                                                {
+                                                    string? inputData;
+                                                    Assignment assignmentClone = new Assignment();
+                                                    Console.WriteLine("Enter the title of the assignment:");
+                                                    do
+                                                    {
+                                                        inputData = Console.ReadLine();
+                                                    } while(string.IsNullOrWhiteSpace(inputData));
+                                                    assignmentClone.Name = inputData;
+                                                    inputData = String.Empty;
+                                                    Console.WriteLine("Enter the description:");
+                                                    do
+                                                    {
+                                                        inputData = Console.ReadLine();
+                                                    } while(string.IsNullOrWhiteSpace(inputData));
+                                                    assignmentClone.Description = inputData;
+                                                    inputData = String.Empty;
+                                                    int assignmentPoints;
+                                                    bool isValid;
+                                                    do
+                                                    {
+                                                        Console.Write("Enter Total Points for this Assignment: ");
+                                                        inputData = Console.ReadLine();
+                                                        isValid = int.TryParse(inputData, out assignmentPoints);
+                                                        if (!isValid)
+                                                        {
+                                                            Console.WriteLine("Invalid entry. Please enter a whole number (e.g., 50 or 100).");
+                                                        }
+                                                        else if (assignmentPoints < 0)
+                                                        {
+                                                            Console.WriteLine("Points cannot be negative.");
+                                                            isValid = false; 
+                                                        }
+                                                    } while (!isValid);
+                                                    assignmentClone.AvailablePoints = assignmentPoints;
+                                                    Console.WriteLine("Enter Due Date (MM/DD/YYYY):");
+                                                    string dateInput = Console.ReadLine();
+                                                    if (DateTime.TryParse(dateInput, out DateTime dueDate))
+                                                    {
+                                                        assignmentClone.DueDate = dueDate;
+                                                    }
+                                                    else
+                                                    {
+                                                        Console.WriteLine("Invalid format. Using the existing date or default.");
+                                                    }
+                                                    AssignmentServiceProxy.Current.AddAssignment(SelectedCourse.Id, assignmentClone);
                                                 }
                                                 else if (courseMenuOption.Equals("Q", StringComparison.InvariantCultureIgnoreCase)){
                                                     Console.WriteLine("Bye!");

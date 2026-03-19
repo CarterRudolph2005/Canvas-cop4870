@@ -22,7 +22,7 @@ namespace Canvas.Library.Model
         public string? Description {get; set;}
         public List<Student>? Roster {get; set;}
         public List<Module>? Modules {get; set;}
-        public List<Assignment>? Assignments{get; set;}
+        public List<Assignment>? Assignments{get; set;} = new List<Assignment>();
 
         //what printing a course will look like
         public override string ToString()
