@@ -57,5 +57,22 @@ namespace Canvas.Library.Services
                 return true;   
             }
         }
+
+        public bool DeleteAssignment(int courseId, int assignmentId)
+        {
+            var course = CourseServiceProxy.Current.Courses
+                .FirstOrDefault(c => c.Id == courseId);
+            if (course != null && course.Assignments != null)
+            {
+                var assignmentToRemove = course.Assignments
+                    .FirstOrDefault(a => a.Id == assignmentId);
+                if (assignmentToRemove != null)
+                {
+                    course.Assignments.Remove(assignmentToRemove);
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 }
