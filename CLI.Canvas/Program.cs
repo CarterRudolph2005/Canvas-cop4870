@@ -179,6 +179,19 @@ namespace CLI.Canvas
                                                 Console.WriteLine("\n\nCourse Students: ");
                                                 try{ SelectedCourse.Roster.ForEach(Console.WriteLine);}
                                                     catch{ Console.WriteLine("No students are enrolled in this course.");}
+                                                Console.WriteLine("Course Schedule:");
+                                                if (SelectedCourse.Assignments == null || !SelectedCourse.Assignments.Any())
+                                                {
+                                                    Console.WriteLine("No due assignments found for this course.");
+                                                }
+                                                else
+                                                {
+                                                    var sortedAssignments = SelectedCourse.Assignments.OrderBy(a => a.DueDate).ToList();
+                                                    foreach (var assignment in sortedAssignments)
+                                                    {
+                                                        Console.WriteLine($"[{assignment.DueDate:MM/dd/yyyy}] - {assignment.Name} ({assignment.AvailablePoints} pts)");
+                                                    }
+                                                }
                                                 Console.WriteLine("Course Menu:");
                                                 Console.WriteLine("A. Add an Assignment");
                                                 Console.WriteLine("U. Update an Assignment");
@@ -295,13 +308,13 @@ namespace CLI.Canvas
                                                             Assignment assignmentClone = new Assignment(originalAssignment);
                                                             Console.WriteLine("Enter the updated title of the assignment:");
                                                             inputData = Console.ReadLine();
-                                                            if (!string.IsNullOrWhiteSpace(inputData)){}
-                                                            assignmentClone.Name = inputData;
+                                                            if (!string.IsNullOrWhiteSpace(inputData))
+                                                                assignmentClone.Name = inputData;
                                                             inputData = String.Empty;
                                                             Console.WriteLine("Enter the description:");
                                                                 inputData = Console.ReadLine();
-                                                            if (!string.IsNullOrWhiteSpace(inputData)){}
-                                                            assignmentClone.Description = inputData;
+                                                            if (!string.IsNullOrWhiteSpace(inputData))
+                                                                assignmentClone.Description = inputData;
                                                             inputData = String.Empty;
                                                             int assignmentPoints = assignmentClone.AvailablePoints;
                                                             bool isValid;

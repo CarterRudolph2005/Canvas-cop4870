@@ -52,9 +52,67 @@ namespace Canvas.Library.Services
         {
             courses = new List<Course>
             {
-                new Course{Id = 1, Code = "COP4530", Name = "Data structures II", Description = "This course is about Data Structures."}
-            };
-        }
+                    new Course
+                    {
+                        Id = 1, 
+                        Code = "COP4530", 
+                        Name = "Data Structures II", 
+                        Description = "Advanced data structures and algorithmic analysis.",
+                        // 1. Pre-populated Assignments with varying Due Dates
+                        Assignments = new List<Assignment>
+                        {
+                            new Assignment { 
+                                Id = 1, 
+                                Name = "Binary Search Tree Lab", 
+                                Description = "Implement a thread-safe BST.", 
+                                AvailablePoints = 100, 
+                                DueDate = new DateTime(2026, 3, 10) // Past date
+                            },
+                            new Assignment { 
+                                Id = 2, 
+                                Name = "B-Tree Research Paper", 
+                                Description = "Analyze disk-based data structures.", 
+                                AvailablePoints = 50, 
+                                DueDate = new DateTime(2026, 4, 15) // Future date
+                            },
+                            new Assignment { 
+                                Id = 3, 
+                                Name = "Final Project: Graph Database", 
+                                Description = "Build a social network graph.", 
+                                AvailablePoints = 200, 
+                                DueDate = new DateTime(2026, 5, 1) // Further future
+                            }
+                        },
+                        // 2. Pre-populated Modules with Content
+                        Modules = new List<Module>
+                        {
+                            new Module { 
+                                Id = 1, 
+                                ModuleName = "Unit 1: Review of Linked Lists", 
+                                Content = new List<string> { 
+                                    "Singly Linked Lists Video", 
+                                    "Doubly Linked Lists PDF", 
+                                    "Big O Notation Cheat Sheet" 
+                                }
+                            },
+                            new Module { 
+                                Id = 2, 
+                                ModuleName = "Unit 2: Trees and Graphs", 
+                                Content = new List<string> { 
+                                    "AVL Tree Visualization", 
+                                    "Dijkstra's Algorithm Overview" 
+                                }
+                            }
+                        },
+                        // 3. Pre-populated Students (Assuming you have a Student model)
+                        Roster = new List<Student>
+                        {
+                            new Student { Id = 101, Name = "John Doe", Classification = Classification.Sophomore },
+                            new Student { Id = 102, Name = "Jane Smith", Classification = Classification.None }
+                        }
+                    }
+                };
+            }
 
         public void AddOrUpdate(Course? course)
         {
