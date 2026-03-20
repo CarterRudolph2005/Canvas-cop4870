@@ -6,7 +6,7 @@ using System.Data;
 using System.Diagnostics;
 using System.Linq.Expressions;
 using System.Net.Http.Headers;
-using System.Reflection;
+// using System.Reflection;
 using System.Reflection.Emit;
 using System.Reflection.Metadata;
 using System.Runtime.InteropServices.Marshalling;
@@ -184,9 +184,10 @@ namespace CLI.Canvas
                                                 Console.WriteLine("U. Update an Assignment");
                                                 Console.WriteLine("D. Delete an Assignment");
                                                 Console.WriteLine("M. Add Module");
-                                                Console.WriteLine("R. Modify Content in a Module");
-                                                Console.WriteLine("C. Add Content to a Module");
-                                                Console.WriteLine("Q. Quit the " + SelectedCourse.Name + " course menu.");
+                                                Console.WriteLine("R. Modify Content in a module");
+                                                Console.WriteLine("C. Add content to a module");
+                                                Console.WriteLine("X. Remove content from a module");
+                                                Console.WriteLine($"Q. Quit the {SelectedCourse.Name} course menu.");
                                                 do{
                                                     courseMenuOption = Console.ReadLine();
                                                 } while(string.IsNullOrWhiteSpace(courseMenuOption));
@@ -399,6 +400,65 @@ namespace CLI.Canvas
                                                                 }
                                                             }
 
+                                                        }
+                                                    }
+                                                }
+                                                else if (courseMenuOption.Equals("X", StringComparison.InvariantCultureIgnoreCase))
+                                                {
+                                                    if (SelectedCourse.Modules == null || !SelectedCourse.Modules.Any())
+                                                    {
+                                                        Console.WriteLine("No modules exist in this course.");
+                                                    }
+                                                    else
+                                                    {
+                                                        Console.WriteLine("Existing Modules: ");
+                                                        SelectedCourse.Modules.ForEach(Console.WriteLine);
+                                                        int moduleId;
+                                                        Module? selectedModule = null;
+                                                        do
+                                                        {
+                                                            Console.Write("Enter the ID of the module: ");
+                                                            if (int.TryParse(Console.ReadLine(), out moduleId))
+                                                            {
+                                                                selectedModule = SelectedCourse.Modules.FirstOrDefault(m => m.Id == moduleId);
+                                                            }
+
+                                                            if (selectedModule == null)
+                                                            {
+                                                                Console.WriteLine("Invalid Module ID. Please try again.");
+                                                            }
+                                                        } while (selectedModule == null);
+                                                        if (selectedModule.Content == null || !selectedModule.Content.Any())
+                                                        {
+                                                            Console.WriteLine("This module has no content to delete.");
+                                                        }
+                                                        else
+                                                        {
+                                                            Console.WriteLine("Content:");
+                                                            for (int i = 0; i < selectedModule.Content.Count; i++)
+                                                            {
+                                                                Console.WriteLine($"{i + 1}. {selectedModule.Content[i]}");
+                                                            }
+                                                            int displayIndex;
+                                                            bool isValidIndex = false;
+                                                            do
+                                                            {
+                                                                Console.Write("Enter the number of the content to remove: ");
+                                                                if (int.TryParse(Console.ReadLine(), out displayIndex))
+                                                                {
+                                                                    int actualIndex = displayIndex - 1;
+                                                                    if (actualIndex >= 0 && actualIndex < selectedModule.Content.Count)
+                                                                    {
+                                                                        CourseServiceProxy.Current.DeleteModuleContent(SelectedCourse.Id, moduleId, actualIndex);
+                                                                        Console.WriteLine("Content removed successfully.");
+                                                                        isValidIndex = true;
+                                                                    }
+                                                                }
+                                                                if (!isValidIndex)
+                                                                {
+                                                                    Console.WriteLine($"Invalid selection. Please choose a number between 1 and {selectedModule.Content.Count}.");
+                                                                }
+                                                            } while (!isValidIndex);
                                                         }
                                                     }
                                                 }

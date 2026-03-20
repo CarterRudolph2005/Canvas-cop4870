@@ -143,5 +143,17 @@ namespace Canvas.Library.Services
                 }
             }
         }
+
+        public void DeleteModuleContent(int CourseId, int ModuleId, int ContentIndex)
+        {
+            var course = Courses?.FirstOrDefault(c => c.Id == CourseId);
+            if (course == null) return;
+            var module = course.Modules?.FirstOrDefault(m => m.Id == ModuleId);
+            if (module == null || module.Content == null) return;
+            if (ContentIndex >= 0 && ContentIndex < module.Content.Count)
+            {
+                module.Content.RemoveAt(ContentIndex);
+            }
+        }
     }
 }
