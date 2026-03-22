@@ -218,5 +218,14 @@ namespace Canvas.Library.Services
                 module.Content.RemoveAt(ContentIndex);
             }
         }
+
+        public void UnenrollStudent(int CourseID, int StudnetID)
+        {
+            var course = Courses.FirstOrDefault(i => i.Id == CourseID);
+            var studentToRemove = course.Roster.FirstOrDefault(i => i.Id == StudnetID);
+
+            if (studentToRemove != null) 
+                course.Roster.Remove(studentToRemove);
+        }
     }
 }
