@@ -1,4 +1,5 @@
 <Solution>
   <Project Path="Canvas.Library/Canvas.Library.csproj" />
-  <Project Path="ConsoleApp1/ConsoleApp1.csproj" />
+  <Project Path="Canvas.MAUI/Canvas.MAUI.csproj" />
+  <Project Path="CLI.Canvas/CLI.Canvas.csproj" />
 </Solution>
