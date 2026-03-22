@@ -4,11 +4,23 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:local="clr-namespace:Canvas.MAUI"
-    Title="Canvas.MAUI">
+    xmlns:views="clr-namespace:Canvas.MAUI.Views"
+    Title="Canvas.MAUI"
+    FlyoutBehavior="Disabled">
 
     <ShellContent
         Title="Home"
         ContentTemplate="{DataTemplate local:MainPage}"
         Route="MainPage" />
+    
+    <ShellContent
+        Title="Teacher Main View"
+        ContentTemplate="{DataTemplate views:TeacherMainView}"
+        Route="TeacherMainView" />
+
+    <ShellContent
+        Title="Student Main View"
+        ContentTemplate="{DataTemplate views:StudentMainView}"
+        Route="StudentMainView" />
 
 </Shell>
