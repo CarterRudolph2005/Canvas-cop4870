@@ -87,5 +87,14 @@ namespace Canvas.Library.Services
             submission.Id = nextId;
             assignment.Submissions.Add(submission);
         }
+        
+        public void GradeSubmission(int CourseID, int AssignmentID, int SubmissionID, int Points)
+        {
+            var submission = CourseServiceProxy.Current.Courses.FirstOrDefault(i => i.Id == CourseID)
+                .Assignments.FirstOrDefault(i => i.Id == AssignmentID)
+                .Submissions.FirstOrDefault(i => i.Id == SubmissionID);
+            submission.PointsAwarded = Points;
+
+        }
     }
 }

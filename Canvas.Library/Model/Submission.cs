@@ -20,6 +20,13 @@ namespace Canvas.Library.Model
         public int AssignmentId {get; set;}
         public string? Content {get; set;}
         public DateTime SubmissionDate {get; set;}
-        public int PointsAwarded {get; set;}
+        public int? PointsAwarded {get; set;}
+
+        public override string ToString()
+        {
+            string gradeDisplay = PointsAwarded.HasValue ? $"{PointsAwarded}" : "Pending";
+            return $"[{Id}] Student {StudentId}: Points Awarded: {gradeDisplay}";
+        }
+
     }
 }
