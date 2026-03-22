@@ -201,6 +201,7 @@ namespace CLI.Canvas
                                                 Console.WriteLine("C. Add content to a module");
                                                 Console.WriteLine("X. Remove content from a module");
                                                 Console.WriteLine("G. Grade a submission");
+                                                Console.WriteLine("W. Remove a student from the course.");
                                                 Console.WriteLine($"Q. Quit the {SelectedCourse.Name} course menu.");
                                                 do{
                                                     courseMenuOption = Console.ReadLine();
@@ -526,6 +527,17 @@ namespace CLI.Canvas
                                                     }
 
                                                 }
+                                                else if (courseMenuOption.Equals("W", StringComparison.InvariantCultureIgnoreCase))
+                                                {
+                                                    var inputData = String.Empty;
+                                                    int StudentID;
+                                                    do
+                                                    {
+                                                        Console.WriteLine("Enter the Id of the student you'd like to remove.");
+                                                        inputData = Console.ReadLine();
+                                                    } while (!int.TryParse(inputData, out StudentID));
+                                                    CourseServiceProxy.Current.UnenrollStudent(SelectedCourse.Id, StudentID);
+                                                }
                                                 else if (courseMenuOption.Equals("Q", StringComparison.InvariantCultureIgnoreCase)){
                                                     Console.WriteLine("Bye!");
                                                 }
@@ -629,6 +641,7 @@ namespace CLI.Canvas
                                                 }
                                                 Console.WriteLine("\n\nStudent Course Menu:");
                                                 Console.WriteLine("S. Submit assignment");
+                                                Console.WriteLine("D. Drop the course");
                                                 Console.WriteLine($"Q. Quit the {SelectedCourse.Name} Menu");
                                                 do
                                                 {
@@ -660,6 +673,11 @@ namespace CLI.Canvas
                                                         SubmissionDate = DateTime.Now
                                                     };
                                                     AssignmentServiceProxy.Current.SubmitAssignment(SelectedCourse.Id, submission);
+                                                }
+                                                else if(courseMenuOption.Equals("D", StringComparison.InvariantCultureIgnoreCase))
+                                                {
+                                                    CourseServiceProxy.Current.UnenrollStudent(SelectedCourse.Id, StudentServiceProxy.Current.CurrentStudent.Id);
+                                                    courseMenuOption = "Q";
                                                 }
                                                 else if(courseMenuOption.Equals("Q", StringComparison.InvariantCultureIgnoreCase))
                                                 {
