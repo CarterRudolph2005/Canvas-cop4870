@@ -496,14 +496,133 @@ namespace CLI.Canvas
                                 } while (string.IsNullOrWhiteSpace(studnetIDInput) || !int.TryParse(studnetIDInput, out proxyStudentID));
 
                                 StudentServiceProxy.Current.ProxyAs(proxyStudentID);
-                                Console.WriteLine($"Hello {StudentServiceProxy.Current.CurrentStudent.Name}!");
+                                Console.WriteLine($"\n\nHello {StudentServiceProxy.Current.CurrentStudent.Name}!");
                                 do
                                 {
+                                    var studentCourses = CourseServiceProxy.Current.Courses
+                                        .Where(c => c.Roster.Any(s => s.Id == proxyStudentID)).ToList();
+                                    if (studentCourses != null && !studentCourses.Any())
+                                    {
+                                        Console.WriteLine("Not enrolled in any courses.");
+                                    }
+                                    else 
+                                    {
+                                        studentCourses.ForEach(Console.WriteLine);
+                                    }
                                     Console.WriteLine("Student Menu: ");
+                                    Console.WriteLine("E. Explore a course ");
                                     Console.WriteLine("Q. Quit");
                                      do{
                                         subChoice = Console.ReadLine();
                                     } while(string.IsNullOrWhiteSpace(subChoice));
+
+                                    if (subChoice.Equals("E", StringComparison.InvariantCultureIgnoreCase))
+                                    {
+                                        var inputData = String.Empty;
+                                        int CourseID;
+                                        do
+                                        {
+                                            Console.WriteLine("Please enter a course Id from above:");
+                                            inputData = Console.ReadLine();
+                                        } while (!int.TryParse(inputData, out CourseID));
+                                        var SelectedCourse = studentCourses.FirstOrDefault(i => i.Id == CourseID);
+                                        if (SelectedCourse != null)
+                                        {
+                                            var courseMenuOption = String.Empty;
+                                            do{
+                                                Console.WriteLine("\n\nWelcome to " + SelectedCourse.Name + "!");
+                                                Console.WriteLine("Course code: " + SelectedCourse.Code);
+                                                Console.WriteLine("\nCourse Description: " + SelectedCourse.Description);
+                                                Console.WriteLine("\nCourse Modules: ");
+                                                try 
+                                                { 
+                                                    if (!SelectedCourse.Modules.Any())  {Console.WriteLine("No modules for this course.");}  
+                                                    SelectedCourse.Modules.ForEach(m => 
+                                                        {
+                                                            Console.WriteLine(m); 
+                                                            if (m.Content != null && m.Content.Any())
+                                                            {
+                                                                foreach (var item in m.Content)
+                                                                {
+                                                                    Console.WriteLine($"\t- {item}"); 
+                                                                }
+                                                            }
+                                                            else 
+                                                            {
+                                                                Console.WriteLine("\t(No content added yet)");
+                                                            }
+                                                        });
+                                                }
+                                                    catch
+                                                        {Console.WriteLine("No modules for this course.");}
+                                                Console.WriteLine("\n\nCourse Assignments: ");
+                                                try { SelectedCourse.Assignments.ForEach(Console.WriteLine);
+                                                        if (!SelectedCourse.Assignments.Any()) {Console.WriteLine("No assignments for this course.");}}
+                                                    catch
+                                                        { Console.WriteLine("No assignments for this course.");}
+                                                Console.WriteLine("\n\nCourse Students: ");
+                                                try{ SelectedCourse.Roster.ForEach(Console.WriteLine);}
+                                                    catch{ Console.WriteLine("No students are enrolled in this course.");}
+                                                Console.WriteLine("\n\nCourse Schedule:");
+                                                if (SelectedCourse.Assignments == null || !SelectedCourse.Assignments.Any())
+                                                {
+                                                    Console.WriteLine("No due assignments found for this course.");
+                                                }
+                                                else
+                                                {
+                                                    var sortedAssignments = SelectedCourse.Assignments.OrderBy(a => a.DueDate).ToList();
+                                                    foreach (var assignment in sortedAssignments)
+                                                    {
+                                                        Console.WriteLine($"[{assignment.DueDate:MM/dd/yyyy}] - {assignment.Name} ({assignment.AvailablePoints} pts)");
+                                                    }
+                                                }
+                                                Console.WriteLine("\n\nStudent Course Menu:");
+                                                Console.WriteLine("S. Submit assignment");
+                                                Console.WriteLine($"Q. Quit the {SelectedCourse.Name} Menu");
+                                                do
+                                                {
+                                                   courseMenuOption = Console.ReadLine(); 
+                                                } while (String.IsNullOrWhiteSpace(courseMenuOption));
+                                                
+                                                if(courseMenuOption.Equals("S", StringComparison.InvariantCultureIgnoreCase))
+                                                {
+                                                    Console.WriteLine("Due assignments:");
+                                                    SelectedCourse.Assignments.ForEach(Console.WriteLine);
+                                                    inputData = String.Empty;
+                                                    int AssignmentID;
+                                                    do
+                                                    {
+                                                        Console.WriteLine("Enter the Id of the assignment you'd like to submit");
+                                                        inputData = Console.ReadLine();
+                                                    } while (!int.TryParse(inputData, out AssignmentID));
+                                                    inputData = String.Empty;
+                                                    do
+                                                    {
+                                                        Console.WriteLine("Please enter your submission:");
+                                                        inputData = Console.ReadLine();
+                                                    } while(String.IsNullOrWhiteSpace(inputData));
+                                                    var submission = new Submission
+                                                    {
+                                                        StudentId = StudentServiceProxy.Current.CurrentStudent.Id,
+                                                        AssignmentId = AssignmentID,
+                                                        Content = inputData,
+                                                        SubmissionDate = DateTime.Now
+                                                    };
+                                                    AssignmentServiceProxy.Current.SubmitAssignment(SelectedCourse.Id, submission);
+                                                }
+                                                else if(courseMenuOption.Equals("Q", StringComparison.InvariantCultureIgnoreCase))
+                                                {
+                                                    Console.WriteLine("Leaving menu...");
+                                                }
+
+                                            } while (!courseMenuOption.Equals("Q", StringComparison.InvariantCultureIgnoreCase));
+                                        }
+                                    }
+                                    else if (subChoice.Equals("Q", StringComparison.InvariantCultureIgnoreCase))
+                                    {
+                                        Console.WriteLine("\n***************************\n\tSiging out...\n***************************\n");
+                                    }
+
 
                                 }while(!subChoice.Equals("Q", StringComparison.InvariantCultureIgnoreCase));
 

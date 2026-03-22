@@ -74,5 +74,18 @@ namespace Canvas.Library.Services
             }
             return false;
         }
+
+        public void SubmitAssignment(int CourseID, Submission submission)
+        {
+            var course = CourseServiceProxy.Current.Courses.FirstOrDefault(i => i.Id == CourseID);
+            var assignment = course.Assignments.FirstOrDefault(i => i.Id == submission.AssignmentId);
+            if(assignment.Submissions == null)  {assignment.Submissions = new List<Submission>();}
+            int nextId = assignment.Submissions.Any() 
+                ? assignment.Submissions.Max(s => s.Id) + 1 
+                : 1;
+
+            submission.Id = nextId;
+            assignment.Submissions.Add(submission);
+        }
     }
 }
