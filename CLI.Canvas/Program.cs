@@ -200,6 +200,7 @@ namespace CLI.Canvas
                                                 Console.WriteLine("R. Modify Content in a module");
                                                 Console.WriteLine("C. Add content to a module");
                                                 Console.WriteLine("X. Remove content from a module");
+                                                Console.WriteLine("G. Grade a submission");
                                                 Console.WriteLine($"Q. Quit the {SelectedCourse.Name} course menu.");
                                                 do{
                                                     courseMenuOption = Console.ReadLine();
@@ -474,6 +475,56 @@ namespace CLI.Canvas
                                                             } while (!isValidIndex);
                                                         }
                                                     }
+                                                }
+                                                else if (courseMenuOption.Equals("G", StringComparison.InvariantCultureIgnoreCase))
+                                                {
+                                                    Console.WriteLine("Submissions:");
+                                                    SelectedCourse.Assignments.ForEach(m =>
+                                                    {   
+                                                        Console.WriteLine(m);
+                                                        if(m.Submissions != null && m.Submissions.Any()){
+                                                            m.Submissions.ForEach(m => Console.WriteLine("\t" + m));
+                                                        }
+                                                        else{
+                                                            Console.WriteLine("\tThere are no submissions for this assignment.");
+                                                        }
+
+                                                    });
+                                                    var inputData = String.Empty;
+                                                    int AssignmentID;
+                                                    do
+                                                    {
+                                                        Console.WriteLine("Enter the Id of the assignment you would like to grade a submission for:");
+                                                        inputData = Console.ReadLine();
+                                                    } while (!int.TryParse(inputData, out AssignmentID));
+                                                    inputData = String.Empty;
+                                                    int SubmissionID;
+                                                    do
+                                                    {
+                                                        Console.WriteLine("Enter the Id of the submission you would like to grade.");
+                                                        inputData = Console.ReadLine();
+                                                    } while (!int.TryParse(inputData, out SubmissionID));
+                                                    try
+                                                    {
+                                                        Console.WriteLine("Student's Submission:");
+                                                        Console.WriteLine(SelectedCourse.Assignments.FirstOrDefault(i => i.Id == AssignmentID).Submissions.FirstOrDefault(i => i.Id == SubmissionID).Content);
+                                                        int PointsAwarded;
+                                                        inputData = String.Empty;
+                                                        do
+                                                        {
+                                                            Console.WriteLine("\n\nEnter their grade:");
+                                                            inputData = Console.ReadLine();
+                                                        } while (!int.TryParse(inputData, out PointsAwarded));
+                                                        AssignmentServiceProxy.Current.GradeSubmission(SelectedCourse.Id, AssignmentID, SubmissionID, PointsAwarded);
+                                                        // var sub = SelectedCourse.Assignments.FirstOrDefault(i => i.Id == AssignmentID).Submissions.FirstOrDefault(i => i.Id == SubmissionID);
+                                                        Console.WriteLine(SelectedCourse.Assignments.FirstOrDefault(i => i.Id == AssignmentID).Submissions.FirstOrDefault(i => i.Id == SubmissionID));
+
+                                                    }
+                                                    catch
+                                                    {
+                                                        Console.WriteLine("There was an error. Check you Ids.");
+                                                    }
+
                                                 }
                                                 else if (courseMenuOption.Equals("Q", StringComparison.InvariantCultureIgnoreCase)){
                                                     Console.WriteLine("Bye!");
