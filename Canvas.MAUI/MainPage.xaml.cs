@@ -1,21 +1,21 @@
-﻿namespace Canvas.MAUI;
-
-public partial class MainPage : ContentPage
+﻿namespace Canvas.MAUI
 {
-	int count = 0;
-
-	public MainPage()
+	public partial class MainPage : ContentPage
 	{
-		InitializeComponent();
-	}
 
-	private  void OnTeacherClicked(object sender, EventArgs e)
-	{
-		DisplayAlert("Teacher Mode", "Loading Teacher Dashboard...", "OK");
-	}
+		public MainPage()
+		{
+			InitializeComponent();
+		}
 
-	private void OnStudentClicked(object sender, EventArgs e)
-	{
-		DisplayAlert("Student Mode", "Loading Student Selection...", "OK");
+		private  void OnTeacherClicked(object sender, EventArgs e)
+		{
+			Shell.Current.GoToAsync("//TeacherMainView");
+		}
+
+		private void OnStudentClicked(object sender, EventArgs e)
+		{
+			Shell.Current.GoToAsync("//StudentMainView");
+		}
 	}
 }
