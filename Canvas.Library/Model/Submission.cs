@@ -20,5 +20,6 @@ namespace Canvas.Library.Model
         public int AssignmentId {get; set;}
         public string? Content {get; set;}
         public DateTime SubmissionDate {get; set;}
+        public int PointsAwarded {get; set;}
     }
 }

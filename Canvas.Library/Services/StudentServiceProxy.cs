@@ -50,7 +50,16 @@ namespace Canvas.Library.Services
         {
             students = new List<Student>
             {
-                new Student{Id = 1, Code = "24c", Name = "Carter Rudolph", Classification = Classification.Sophomore}
+                new Student { Id = 1,  Code = "cr24", Name = "Carter Rudolph", Classification = Classification.Sophomore },
+                new Student { Id = 2,  Code = "jd24", Name = "John Doe", Classification = Classification.Junior },
+                new Student { Id = 3,  Code = "js25", Name = "Jane Smith", Classification = Classification.Sophomore },
+                new Student { Id = 4,  Code = "ab26", Name = "Alice Brown", Classification = Classification.Freshman },
+                new Student { Id = 5,  Code = "bc24", Name = "Bob Clark", Classification = Classification.Senior },
+                new Student { Id = 6,  Code = "dm25", Name = "Diana Miller", Classification = Classification.Sophomore },
+                new Student { Id = 7,  Code = "ew26", Name = "Ethan Wright", Classification = Classification.Freshman },
+                new Student { Id = 8,  Code = "fl24", Name = "Fiona Lewis", Classification = Classification.Junior },
+                new Student { Id = 9,  Code = "gh25", Name = "George Hall", Classification = Classification.Sophomore },
+                new Student { Id = 10, Code = "iy26", Name = "Isabel Young", Classification = Classification.Freshman }
             };
         }
 

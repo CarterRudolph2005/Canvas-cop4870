@@ -107,8 +107,13 @@ namespace Canvas.Library.Services
                         // 3. Pre-populated Students (Assuming you have a Student model)
                         Roster = new List<Student>
                         {
-                            new Student { Id = 101, Name = "John Doe", Classification = Classification.Sophomore },
-                            new Student { Id = 102, Name = "Jane Smith", Classification = Classification.None }
+                            StudentServiceProxy.Current.Students.FirstOrDefault(i => i.Id == 1),
+                            StudentServiceProxy.Current.Students.FirstOrDefault(i => i.Id == 2),
+                            StudentServiceProxy.Current.Students.FirstOrDefault(i => i.Id == 3),
+                            StudentServiceProxy.Current.Students.FirstOrDefault(i => i.Id == 4),
+                            StudentServiceProxy.Current.Students.FirstOrDefault(i => i.Id == 5),
+                            StudentServiceProxy.Current.Students.FirstOrDefault(i => i.Id == 6),
+                            StudentServiceProxy.Current.Students.FirstOrDefault(i => i.Id == 7),
                         }
                     }
                 };
