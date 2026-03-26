@@ -9,18 +9,40 @@
     FlyoutBehavior="Disabled">
 
     <ShellContent
-        Title="Home"
+        Title="Login"
         ContentTemplate="{DataTemplate local:MainPage}"
         Route="MainPage" />
     
-    <ShellContent
-        Title="Teacher Main View"
-        ContentTemplate="{DataTemplate views:TeacherMainView}"
-        Route="TeacherMainView" />
+
+
+    <TabBar Route="TeacherHome">
+        <Tab Title="Courses" Route="TeacherDashboard">
+            <Tab.Icon>
+                <FontImageSource Glyph="&#xf02d;" 
+                    FontFamily="FontAwesome" 
+                    Size="64" />
+            </Tab.Icon>
+            <ShellContent ContentTemplate="{DataTemplate views:TeacherMainView}"/>
+        </Tab>
+
+        <Tab Title="Manage Students" Route="TeacherStudentManagement">
+            <Tab.Icon>
+                <FontImageSource Glyph="&#xf02d;" 
+                    FontFamily="FontAwesome" 
+                    Size="64" />
+            </Tab.Icon>
+            <ShellContent ContentTemplate="{DataTemplate views:TeacherStudentManagementView}" />
+        </Tab>
+    </TabBar>
 
     <ShellContent
         Title="Student Main View"
         ContentTemplate="{DataTemplate views:StudentMainView}"
         Route="StudentMainView" />
+
+    <ShellContent
+        Title="Student Details"
+        ContentTemplate="{DataTemplate views:StudentDetailView}"
+        Route="StudentDetailPage"/>
 
 </Shell>

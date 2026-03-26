@@ -77,5 +77,36 @@ namespace Canvas.Library.Services
                 return 1;
             }
         }
+
+        public Student? GetById(int ID)
+        {
+            if(ID == 0)
+            {
+                return null;
+            }
+            return Students.FirstOrDefault(i => i.Id == ID);
+        }
+
+        public void AddOrUpdate(Student? student)
+        {
+            if (student == null) return;
+
+            if (student.Id == 0)
+            {
+                student.Id = NextKey; 
+                Students.Add(student);
+            }
+            else
+            {
+                var existingStudent = Students.FirstOrDefault(s => s.Id == student.Id);
+
+                if (existingStudent != null)
+                {
+                    existingStudent.Name = student.Name;
+                    existingStudent.Code = student.Code;
+                    existingStudent.Classification = student.Classification;
+                }
+            }
+        }
     }
 }
