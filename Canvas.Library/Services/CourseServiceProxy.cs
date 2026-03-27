@@ -227,5 +227,35 @@ namespace Canvas.Library.Services
             if (studentToRemove != null) 
                 course.Roster.Remove(studentToRemove);
         }
+
+        public bool UnenrollStudentFromAllCourses(int studentId)
+        {
+            DeleteAllStudentsSubmissions(studentId);
+            bool found = false;
+            foreach (var course in Courses)
+            {
+                var studentToRemove = course.Roster.FirstOrDefault(i => i.Id == studentId);
+                if (studentToRemove != null)
+                {
+                    course.Roster.Remove(studentToRemove);
+                    found = true;
+                }
+            }
+            return found;
+        }
+
+        public void DeleteAllStudentsSubmissions(int studentID)
+        {
+            Courses.ForEach(m =>
+            {
+                m.Assignments.ForEach (n => {
+                    var index = n.Submissions.FindIndex(i => i.StudentId == studentID);
+                    if(index >= 0)
+                    {
+                        n.Submissions.RemoveAt(index);
+                    }
+                });
+            });
+        }
     }
 }

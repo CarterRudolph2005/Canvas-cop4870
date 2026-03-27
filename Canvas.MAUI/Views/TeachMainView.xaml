@@ -11,6 +11,11 @@
             HorizontalOptions="Center"
             TextColor="#FF660080" />
 
+        <!-- <Button Text="Manage Studnets"
+                Clicked="ManageStudentsClicked"
+                HeightRequest="60"
+                BackgroundColor="#FF008053" /> -->
+        
         <Button Text="Leave Menu"
                 Clicked="LeaveMenuClicked"
                 HeightRequest="60"

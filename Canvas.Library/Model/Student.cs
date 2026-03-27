@@ -7,13 +7,21 @@ Student should be derived from User and add the following properties:
 namespace Canvas.Library.Model
 {
     public enum Classification
-        {
-            None, Freshman, Sophomore, Junior, Senior, NonDegree
-        }
+    {
+        None, Freshman, Sophomore, Junior, Senior, NonDegree
+    }    
+
     public class Student: User
     {
         public Classification Classification{get; set;}
-
+        public Student() {}
+        public Student(Student student)
+        {
+            this.Id = student.Id;
+            this.Code = student.Code;
+            this.Name = student.Name;
+            this.Classification = student.Classification;
+        }
        public override string ToString()
         {
             return $"{Id}. {Name} - {Code}: {Classification}";

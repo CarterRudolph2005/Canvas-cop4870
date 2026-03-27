@@ -1,4 +1,6 @@
-﻿namespace Canvas.MAUI
+﻿using System.Threading.Tasks;
+
+namespace Canvas.MAUI
 {
 	public partial class MainPage : ContentPage
 	{
@@ -8,14 +10,14 @@
 			InitializeComponent();
 		}
 
-		private  void OnTeacherClicked(object sender, EventArgs e)
+		private async void OnTeacherClicked(object sender, EventArgs e)
 		{
-			Shell.Current.GoToAsync("//TeacherMainView");
+			await Shell.Current.GoToAsync("//TeacherHome");
 		}
 
-		private void OnStudentClicked(object sender, EventArgs e)
+		private async void OnStudentClicked(object sender, EventArgs e)
 		{
-			Shell.Current.GoToAsync("//StudentMainView");
+			await Shell.Current.GoToAsync("//StudentMainView");
 		}
 	}
 }

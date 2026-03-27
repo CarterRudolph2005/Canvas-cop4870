@@ -77,5 +77,48 @@ namespace Canvas.Library.Services
                 return 1;
             }
         }
+
+        public Student? GetById(int ID)
+        {
+            if(ID == 0)
+            {
+                return null;
+            }
+            return Students.FirstOrDefault(i => i.Id == ID);
+        }
+
+        public void AddOrUpdate(Student? student)
+        {
+            if (student == null) return;
+
+            if (student.Id == 0)
+            {
+                student.Id = NextKey; 
+                Students.Add(student);
+            }
+            else
+            {
+                var existingStudent = Students.FirstOrDefault(s => s.Id == student.Id);
+
+                if (existingStudent != null)
+                {
+                    existingStudent.Name = student.Name;
+                    existingStudent.Code = student.Code;
+                    existingStudent.Classification = student.Classification;
+                }
+            }
+        }
+
+        public Task<Student> DeleteStudent(int studentID)
+        {
+            CourseServiceProxy.Current.UnenrollStudentFromAllCourses(studentID);
+            int index = Students.FindIndex(s => s.Id == studentID);
+            if (index >= 0){
+                var student = new Student(Students[index]);
+                Students.RemoveAt(index);
+                return Task.FromResult(student);
+            }
+            return Task.FromResult<Student>(null);
+        }
     }
 }

@@ -11,5 +11,10 @@ namespace Canvas.MAUI.Views
         {
             Shell.Current.GoToAsync("//MainPage");
         }
+
+        private void ManageStudentsClicked(object sender, EventArgs e)
+        {
+            Shell.Current.GoToAsync("//TeacherStudentManagementView");
+        }
     }
 }
