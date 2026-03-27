@@ -14,13 +14,13 @@ namespace Canvas.MAUI.Views
         public List<Classification> ClassificationOptions =>
             Enum.GetValues(typeof(Classification)).Cast<Classification>().ToList();
         
-
-
-        private void ContentPage_NavigatedTo(object sender, NavigatedToEventArgs e)
+        private async void ContentPage_NavigatedTo(object sender, NavigatedToEventArgs e)
         {
-            if(StudentId == 0)
+            await Task.Delay(100);
+            
+            if (StudentId == 0)
             {
-                BindingContext = new Canvas.Library.Model.Student();
+                BindingContext = new Student();
             }
             else
             {

@@ -56,7 +56,7 @@
             <Button 
                 x:Name="EditBtn"
                 Text="Edit Selected Student"
-                Clicked="AddStudentClicked"
+                Clicked="EditStudentClicked"
                 BackgroundColor="blue"
                 HeightRequest="50"
                 IsEnabled="False"

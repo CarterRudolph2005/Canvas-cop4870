@@ -13,6 +13,15 @@ namespace Canvas.MAUI.Views
         {
             await Shell.Current.GoToAsync("//StudentDetailPage?studentId=0");
         }
+        private async void EditStudentClicked(object sender, EventArgs e)
+        {
+            var context = BindingContext as TeacherStudentManagementViewModel;
+            if (context?.SelectedStudent != null)
+            {
+                await Shell.Current.GoToAsync($"//StudentDetailPage?studentId={context.SelectedStudent.Id}");
+            }
+            context?.SelectedStudent = null;
+        }
         private void ContentPage_NavigatedTo(object sender, NavigatedToEventArgs e)
         {
             (BindingContext as TeacherStudentManagementViewModel).Refresh();
@@ -23,6 +32,8 @@ namespace Canvas.MAUI.Views
         {
             DeleteBtn.IsEnabled = e.CurrentSelection.Count > 0;
             DeleteBtn.Opacity = e.CurrentSelection.Count > 0 ? 1 : 0.5;
+            EditBtn.IsEnabled = e.CurrentSelection.Count > 0;
+            EditBtn.Opacity = e.CurrentSelection.Count > 0 ? 1 : 0.5;
         }
         
         private async void DeleteStudentClicked(object sender, EventArgs e)
@@ -33,14 +44,17 @@ namespace Canvas.MAUI.Views
                 var studnet = await context.Delete();
                 if(studnet == null)
                 {
-                    DisplayAlert("No Student Found", "There is no student selected to delete", "Okay");
-                }else{
-                DisplayAlert("Success", "Student deleted!", "Okay");}
+                    await DisplayAlertAsync("No Student Found", "There is no student selected to delete", "Okay");
+                }else
+                {
+                    await DisplayAlertAsync("Success", "Student deleted!", "Okay");
+                }
             }
             else
             {
-                await DisplayAlert("Error", "Could not load student management context.", "Okay");
+                await DisplayAlertAsync("Error", "Could not load student management context.", "Okay");
             }
+            context?.SelectedStudent = null;
         }
     }
 }

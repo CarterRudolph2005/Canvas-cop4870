@@ -230,6 +230,7 @@ namespace Canvas.Library.Services
 
         public bool UnenrollStudentFromAllCourses(int studentId)
         {
+            DeleteAllStudentsSubmissions(studentId);
             bool found = false;
             foreach (var course in Courses)
             {
@@ -241,6 +242,20 @@ namespace Canvas.Library.Services
                 }
             }
             return found;
+        }
+
+        public void DeleteAllStudentsSubmissions(int studentID)
+        {
+            Courses.ForEach(m =>
+            {
+                m.Assignments.ForEach (n => {
+                    var index = n.Submissions.FindIndex(i => i.StudentId == studentID);
+                    if(index >= 0)
+                    {
+                        n.Submissions.RemoveAt(index);
+                    }
+                });
+            });
         }
     }
 }
