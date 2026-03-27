@@ -25,11 +25,13 @@ namespace Canvas.MAUI.ViewModels
 
         public event PropertyChangedEventHandler? PropertyChanged;
         
-        // public void Delete()
-        // {
-        //     StudentServiceProxy.Current.DeleteStudnet(SelectedStudent);
-        //     Refresh();
-        // }
+        public async Task<Student> Delete()
+        {
+            var student = await StudentServiceProxy.Current.DeleteStudent(SelectedStudent.Id);
+            SelectedStudent = null;
+            Refresh();
+            return student;
+        }
         public void Refresh()
         {
             NotifyPropertyChanged(nameof(Students)); //will be replaced at compile time (will notify me of any refactoring issues)

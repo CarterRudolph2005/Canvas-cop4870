@@ -227,5 +227,20 @@ namespace Canvas.Library.Services
             if (studentToRemove != null) 
                 course.Roster.Remove(studentToRemove);
         }
+
+        public bool UnenrollStudentFromAllCourses(int studentId)
+        {
+            bool found = false;
+            foreach (var course in Courses)
+            {
+                var studentToRemove = course.Roster.FirstOrDefault(i => i.Id == studentId);
+                if (studentToRemove != null)
+                {
+                    course.Roster.Remove(studentToRemove);
+                    found = true;
+                }
+            }
+            return found;
+        }
     }
 }

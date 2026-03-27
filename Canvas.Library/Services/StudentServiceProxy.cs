@@ -108,5 +108,17 @@ namespace Canvas.Library.Services
                 }
             }
         }
+
+        public Task<Student> DeleteStudent(int studentID)
+        {
+            CourseServiceProxy.Current.UnenrollStudentFromAllCourses(studentID);
+            int index = Students.FindIndex(s => s.Id == studentID);
+            if (index >= 0){
+                var student = new Student(Students[index]);
+                Students.RemoveAt(index);
+                return Task.FromResult(student);
+            }
+            return Task.FromResult<Student>(null);
+        }
     }
 }

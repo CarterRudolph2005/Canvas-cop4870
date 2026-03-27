@@ -4,73 +4,71 @@
              x:Class="Canvas.MAUI.Views.TeacherStudentManagementView"
              Title="Student Management Menu"
              NavigatedTo="ContentPage_NavigatedTo">
-
     <Grid RowDefinitions="Auto, *, Auto" Padding="30">
+        <VerticalStackLayout Grid.Row="0" Spacing="10">
+            <Label 
+                Text="Student Management"
+                HorizontalOptions="Center"
+                FontSize="32"
+                FontAttributes="Bold"
+                TextColor="#FF660080" />
+            <Label 
+                Text="Select a student to Edit or Delete, or Add a new one below."
+                HorizontalOptions="Center"
+                HorizontalTextAlignment="Center"
+                FontSize="14" />
+        </VerticalStackLayout>
 
-        <Label Grid.Row="0" 
-               Text="Welcome to the student management menu!"
-               FontSize="32"
-               HorizontalOptions="Center"
-               HorizontalTextAlignment="Center"
-               TextColor="#FF660080"
-               Margin="0,0,0,10"/>
-
-        <CollectionView Grid.Row="1"
-                        ItemsSource="{Binding Students}"
-                        SelectedItem="{Binding SelectedItem}"
-                        SelectionMode="Single"
-                        Margin="0,0,0,10">
-            
-            <CollectionView.Header>
-                <Grid Padding="10, 20, 10, 10"> 
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="3*"/>
-                        <ColumnDefinition Width="2*"/>
-                    </Grid.ColumnDefinitions>
-                    
-                    <Label Text="STUDENT INFO" 
-                           FontSize="24" 
-                           FontAttributes="Bold" 
-                           TextColor="White" 
-                           Grid.Column="0" />
-                           
-                    <Label Text="ACTIONS" 
-                           FontSize="24" 
-                           FontAttributes="Bold" 
-                           TextColor="White" 
-                           HorizontalOptions="End" 
-                           Grid.Column="1" />
-                </Grid>
-            </CollectionView.Header>
-
+        <CollectionView
+            x:Name="StudentList"
+            Grid.Row="1"
+            ItemsSource="{Binding Students}"
+            SelectedItem="{Binding SelectedStudent}"
+            SelectionMode="Single"
+            SelectionChanged="StudentList_SelectionChanged"
+            Margin="0,20">
             <CollectionView.ItemTemplate>
                 <DataTemplate>
-                    <Grid Padding="10">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="3*"/> 
-                            <ColumnDefinition Width="2*"/> 
-                        </Grid.ColumnDefinitions>
-
-                        <VerticalStackLayout Grid.Column="0">
-                            <Label Text="{Binding Name}" FontAttributes="Bold" FontSize="18"/>
-                            <Label Text="{Binding Id}" TextColor="Gray"/>
-                        </VerticalStackLayout>
-
-                        <HorizontalStackLayout Grid.Column="1" Spacing="12" HorizontalOptions="End">
-                            <Button Text="Edit" Scale="0.9" />
-                            <Button Text="Delete" Scale="0.9" BackgroundColor="Red"/>
-                        </HorizontalStackLayout>
+                    <Grid Padding="10" ColumnDefinitions="Auto, *">
+                        <Label 
+                            Text="{Binding Id}" 
+                            Grid.Column="0" 
+                            TextColor="Gray" 
+                            Margin="0,0,15,0" 
+                            VerticalOptions="Center"/>
+                        <Label 
+                            Text="{Binding Name}" 
+                            Grid.Column="1" 
+                            FontAttributes="Bold" 
+                            FontSize="18" 
+                            VerticalOptions="Center"/>
                     </Grid>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>
 
-        <Button Grid.Row="2"
-                Text="Add Student"
+        <VerticalStackLayout Grid.Row="2" Spacing="10">
+            <Button 
+                Text="Add New Student" 
+                Clicked="AddStudentClicked" 
+                BackgroundColor="#FF008053" 
+                HeightRequest="50"/>
+            <Button 
+                x:Name="EditBtn"
+                Text="Edit Selected Student"
                 Clicked="AddStudentClicked"
-                HeightRequest="60"
-                BackgroundColor="#FF008053"
-                Margin="0,10,0,20" />
-
+                BackgroundColor="blue"
+                HeightRequest="50"
+                IsEnabled="False"
+                Opacity="0.5"/>
+            <Button 
+                x:Name="DeleteBtn"
+                Text="Delete Selected Student"
+                Clicked="DeleteStudentClicked"
+                BackgroundColor="Red"
+                HeightRequest="50"
+                IsEnabled="False"
+                Opacity="0.5"/>
+        </VerticalStackLayout>
     </Grid>
 </ContentPage>
