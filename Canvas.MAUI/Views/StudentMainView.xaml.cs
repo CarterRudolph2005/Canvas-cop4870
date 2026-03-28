@@ -16,7 +16,7 @@ namespace Canvas.MAUI.Views
             ((CollectionView)sender).SelectedItem = null;
             await Shell.Current.GoToAsync($"//StudentCourseMenu?courseId={selected.Id}");
         }
-        private async void LeaveMenuClicked(object sender, EventArgs e)
+        private async void BackClicked(object sender, EventArgs e)
         {
             await Shell.Current.GoToAsync("//MainPage");
         }
