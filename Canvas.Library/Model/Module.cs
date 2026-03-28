@@ -13,7 +13,7 @@ namespace Canvas.Library.Model
     {
         public int Id {get; set;}
         public List<string>? Content;
-        public string ModuleName;
+        public string ModuleName {get; set;}
 
         public override string ToString()
         {

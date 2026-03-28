@@ -9,17 +9,12 @@ namespace Canvas.MAUI.Views
             InitializeComponent();
             BindingContext = new StudentMainViewModel();
         }
-        // public void ApplyQueryAttributes(IDictionary<string, object> query)
-        // {
-        //     ViewModels.StudentMainViewModel.ApplyQueryAttributes(query);
-        // }
         private async void CourseTapped(object sender, SelectionChangedEventArgs e)
         {
-            await Shell.Current.GoToAsync("//MainPage");
-            // if (e.CurrentSelection.Count == 0) return;
-            // var selected = e.CurrentSelection[0] as Course;
-            // ((CollectionView)sender).SelectedItem = null;
-            // await Shell.Current.GoToAsync($"//CourseView?courseId={selected.Id}");
+            if (e.CurrentSelection.Count == 0) return;
+            var selected = e.CurrentSelection[0] as Course;
+            ((CollectionView)sender).SelectedItem = null;
+            await Shell.Current.GoToAsync($"//StudentCourseMenu?courseId={selected.Id}");
         }
         private async void LeaveMenuClicked(object sender, EventArgs e)
         {

@@ -48,10 +48,11 @@
         Title="Student Details"
         ContentTemplate="{DataTemplate views:StudentDetailView}"
         Route="StudentDetailPage"/>
-    <!-- <ShellContent
+    
+    <ShellContent
         Title="Course Menu"
         ContentTemplate="{DataTemplate views:StudentCourseView}"
-        Route="StudentCourseMenu"/> -->
+        Route="StudentCourseMenu"/>
     
 
 </Shell>
