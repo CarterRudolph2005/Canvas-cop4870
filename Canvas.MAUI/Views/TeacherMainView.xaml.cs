@@ -1,3 +1,5 @@
+using Canvas.MAUI.ViewModels;
+using Canvas.Library.Model;
 namespace Canvas.MAUI.Views
 {
     public partial class TeacherMainView : ContentPage
@@ -5,9 +7,10 @@ namespace Canvas.MAUI.Views
         public TeacherMainView()
         {
             InitializeComponent();
+            BindingContext = new TeacherMainViewModel();
         }
 
-        private void LeaveMenuClicked(object sender, EventArgs e)
+        private void BackClicked(object sender, EventArgs e)
         {
             Shell.Current.GoToAsync("//MainPage");
         }
@@ -16,5 +19,21 @@ namespace Canvas.MAUI.Views
         {
             Shell.Current.GoToAsync("//TeacherStudentManagementView");
         }
+
+        private async void CourseTapped(object sender, SelectionChangedEventArgs e)
+        {
+            if (e.CurrentSelection.Count == 0) return;
+            var selected = e.CurrentSelection[0] as Course;
+            ((CollectionView)sender).SelectedItem = null;
+            await Shell.Current.GoToAsync($"StudentCourseMenu?courseId={selected.Id}");
+        }
+        // private async void CourseTapped(object sender, SelectionChangedEventArgs e)
+        // {
+        //     await Application.Current.MainPage.DisplayAlert("Tapped", $"Count: {e.CurrentSelection.Count}", "OK");
+        //     if (e.CurrentSelection.Count == 0) return;
+        //     var selected = e.CurrentSelection[0] as Course;
+        //     ((CollectionView)sender).SelectedItem = null;
+        //     await Shell.Current.GoToAsync($"//StudentCourseView?courseId={selected.Id}");
+        // }
     }
 }

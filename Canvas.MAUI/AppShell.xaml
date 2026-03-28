@@ -15,7 +15,7 @@
     
 
 
-    <TabBar Route="TeacherHome">
+    <TabBar Route="TeacherMainView">
         <Tab Title="Courses" Route="TeacherDashboard">
             <Tab.Icon>
                 <FontImageSource Glyph="&#xf02d;" 
@@ -49,10 +49,10 @@
         ContentTemplate="{DataTemplate views:StudentDetailView}"
         Route="StudentDetailPage"/>
     
-    <ShellContent
+    <!-- <ShellContent
         Title="Course Menu"
         ContentTemplate="{DataTemplate views:StudentCourseView}"
-        Route="StudentCourseMenu"/>
+        Route="StudentCourseMenu"/> -->
     
 
 </Shell>

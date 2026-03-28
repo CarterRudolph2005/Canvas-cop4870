@@ -12,7 +12,7 @@ namespace Canvas.MAUI
 
 		private async void OnTeacherClicked(object sender, EventArgs e)
 		{
-			await Shell.Current.GoToAsync("//TeacherHome");
+			await Shell.Current.GoToAsync($"//TeacherMainView?teacherId=1");
 		}
 
 		private async void OnStudentClicked(object sender, EventArgs e)
