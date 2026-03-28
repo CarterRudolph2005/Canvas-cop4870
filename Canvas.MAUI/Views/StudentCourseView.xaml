@@ -1,0 +1,201 @@
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Canvas.MAUI.Views.StudentCourseView"
+             Title="{Binding Name}">
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Back"
+                    Clicked="BackClicked"/>
+    </ContentPage.ToolbarItems>
+    <ScrollView>
+        <VerticalStackLayout Spacing="16" Margin="16">
+
+            <!-- Course Header -->
+            <Border StrokeThickness="0"
+                    StrokeShape="RoundRectangle 12"
+                    BackgroundColor="#1565C0"
+                    Padding="16">
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="{Binding Code}"
+                           FontSize="12"
+                           FontAttributes="Bold"
+                           TextColor="#90CAF9"
+                           CharacterSpacing="1.5"/>
+                    <Label Text="{Binding Name}"
+                           FontSize="20"
+                           FontAttributes="Bold"
+                           TextColor="White"/>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Assignments -->
+            <Label Text="Assignments"
+                   FontSize="16"
+                   FontAttributes="Bold">
+                <Label.Triggers>
+                    <DataTrigger TargetType="Label"
+                                 Binding="{Binding Source={x:Static Application.Current}, Path=RequestedTheme}"
+                                 Value="Dark">
+                        <Setter Property="TextColor" Value="#E0E0E0"/>
+                    </DataTrigger>
+                    <DataTrigger TargetType="Label"
+                                 Binding="{Binding Source={x:Static Application.Current}, Path=RequestedTheme}"
+                                 Value="Light">
+                        <Setter Property="TextColor" Value="#1A1A1A"/>
+                    </DataTrigger>
+                </Label.Triggers>
+            </Label>
+
+            <CollectionView ItemsSource="{Binding Assignments}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Border StrokeThickness="1"
+                                StrokeShape="RoundRectangle 10"
+                                Padding="14"
+                                Margin="0,0,0,8">
+                            <Border.Triggers>
+                                <DataTrigger TargetType="Border"
+                                             Binding="{Binding Source={x:Static Application.Current}, Path=RequestedTheme}"
+                                             Value="Dark">
+                                    <Setter Property="BackgroundColor" Value="#2A2A2A"/>
+                                    <Setter Property="Stroke" Value="#444444"/>
+                                </DataTrigger>
+                                <DataTrigger TargetType="Border"
+                                             Binding="{Binding Source={x:Static Application.Current}, Path=RequestedTheme}"
+                                             Value="Light">
+                                    <Setter Property="BackgroundColor" Value="White"/>
+                                    <Setter Property="Stroke" Value="#E0E0E0"/>
+                                </DataTrigger>
+                            </Border.Triggers>
+                            <Grid ColumnDefinitions="*,Auto">
+                                <VerticalStackLayout Grid.Column="0" Spacing="4">
+                                    <Label Text="{Binding Name}"
+                                           FontSize="14"
+                                           FontAttributes="Bold">
+                                        <Label.Triggers>
+                                            <DataTrigger TargetType="Label"
+                                                         Binding="{Binding Source={x:Static Application.Current}, Path=RequestedTheme}"
+                                                         Value="Dark">
+                                                <Setter Property="TextColor" Value="#FFFFFF"/>
+                                            </DataTrigger>
+                                            <DataTrigger TargetType="Label"
+                                                         Binding="{Binding Source={x:Static Application.Current}, Path=RequestedTheme}"
+                                                         Value="Light">
+                                                <Setter Property="TextColor" Value="#1A1A1A"/>
+                                            </DataTrigger>
+                                        </Label.Triggers>
+                                    </Label>
+                                    <Label Text="{Binding Description}"
+                                           FontSize="12"
+                                           TextColor="#888888"/>
+                                    <Label Text="{Binding AvailablePoints, StringFormat='Points: {0}'}"
+                                           FontSize="12"
+                                           TextColor="#888888"/>
+                                </VerticalStackLayout>
+                                <Label Grid.Column="1"
+                                       Text="{Binding DueDate, StringFormat='Due {0:MMM dd}'}"
+                                       FontSize="12"
+                                       FontAttributes="Bold"
+                                       TextColor="#42A5F5"
+                                       VerticalOptions="Start"/>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+                <CollectionView.EmptyView>
+                    <Label Text="No assignments"
+                           FontSize="14"
+                           TextColor="#888888"
+                           HorizontalOptions="Center"/>
+                </CollectionView.EmptyView>
+            </CollectionView>
+
+            <!-- Modules -->
+            <Label Text="Modules"
+                   FontSize="16"
+                   FontAttributes="Bold">
+                <Label.Triggers>
+                    <DataTrigger TargetType="Label"
+                                 Binding="{Binding Source={x:Static Application.Current}, Path=RequestedTheme}"
+                                 Value="Dark">
+                        <Setter Property="TextColor" Value="#E0E0E0"/>
+                    </DataTrigger>
+                    <DataTrigger TargetType="Label"
+                                 Binding="{Binding Source={x:Static Application.Current}, Path=RequestedTheme}"
+                                 Value="Light">
+                        <Setter Property="TextColor" Value="#1A1A1A"/>
+                    </DataTrigger>
+                </Label.Triggers>
+            </Label>
+
+            <CollectionView ItemsSource="{Binding Modules}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Border StrokeThickness="1"
+                                StrokeShape="RoundRectangle 10"
+                                Padding="14"
+                                Margin="0,0,0,8">
+                            <Border.Triggers>
+                                <DataTrigger TargetType="Border"
+                                             Binding="{Binding Source={x:Static Application.Current}, Path=RequestedTheme}"
+                                             Value="Dark">
+                                    <Setter Property="BackgroundColor" Value="#2A2A2A"/>
+                                    <Setter Property="Stroke" Value="#444444"/>
+                                </DataTrigger>
+                                <DataTrigger TargetType="Border"
+                                             Binding="{Binding Source={x:Static Application.Current}, Path=RequestedTheme}"
+                                             Value="Light">
+                                    <Setter Property="BackgroundColor" Value="White"/>
+                                    <Setter Property="Stroke" Value="#E0E0E0"/>
+                                </DataTrigger>
+                            </Border.Triggers>
+                            <VerticalStackLayout Spacing="8">
+                                <Label Text="{Binding ModuleName}"
+                                       FontSize="14"
+                                       FontAttributes="Bold">
+                                    <Label.Triggers>
+                                        <DataTrigger TargetType="Label"
+                                                     Binding="{Binding Source={x:Static Application.Current}, Path=RequestedTheme}"
+                                                     Value="Dark">
+                                            <Setter Property="TextColor" Value="#FFFFFF"/>
+                                        </DataTrigger>
+                                        <DataTrigger TargetType="Label"
+                                                     Binding="{Binding Source={x:Static Application.Current}, Path=RequestedTheme}"
+                                                     Value="Light">
+                                            <Setter Property="TextColor" Value="#1A1A1A"/>
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
+
+                                <!-- Fixed: VerticalStackLayout instead of CollectionView for strings -->
+                                <BindableLayout.ItemsSource>
+                                    <x:Reference Name="ModuleContent"/>
+                                </BindableLayout.ItemsSource>
+                                <VerticalStackLayout x:Name="ModuleContent"
+                                                     BindableLayout.ItemsSource="{Binding Content}"
+                                                     Spacing="4">
+                                    <BindableLayout.ItemTemplate>
+                                        <DataTemplate>
+                                            <Label Text="{Binding .}"
+                                                   FontSize="12"
+                                                   TextColor="#888888"
+                                                   Margin="8,2"/>
+                                        </DataTemplate>
+                                    </BindableLayout.ItemTemplate>
+                                </VerticalStackLayout>
+
+                            </VerticalStackLayout>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+                <CollectionView.EmptyView>
+                    <Label Text="No modules"
+                           FontSize="14"
+                           TextColor="#888888"
+                           HorizontalOptions="Center"/>
+                </CollectionView.EmptyView>
+            </CollectionView>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

@@ -17,7 +17,7 @@ namespace Canvas.MAUI
 
 		private async void OnStudentClicked(object sender, EventArgs e)
 		{
-			await Shell.Current.GoToAsync("//StudentMainView");
+			await Shell.Current.GoToAsync("//ProxyStudentSelection");
 		}
 	}
 }

@@ -1,3 +1,5 @@
+using Canvas.MAUI.ViewModels;
+using Canvas.Library.Model;
 namespace Canvas.MAUI.Views
 {
     public partial class StudentMainView : ContentPage
@@ -5,11 +7,18 @@ namespace Canvas.MAUI.Views
         public StudentMainView()
         {
             InitializeComponent();
+            BindingContext = new StudentMainViewModel();
         }
-
-        private void LeaveMenuClicked(object sender, EventArgs e)
+        private async void CourseTapped(object sender, SelectionChangedEventArgs e)
         {
-            Shell.Current.GoToAsync("//MainPage");
+            if (e.CurrentSelection.Count == 0) return;
+            var selected = e.CurrentSelection[0] as Course;
+            ((CollectionView)sender).SelectedItem = null;
+            await Shell.Current.GoToAsync($"//StudentCourseMenu?courseId={selected.Id}");
+        }
+        private async void LeaveMenuClicked(object sender, EventArgs e)
+        {
+            await Shell.Current.GoToAsync("//MainPage");
         }
     }
 }

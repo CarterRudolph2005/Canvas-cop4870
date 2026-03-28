@@ -1,21 +1,78 @@
-<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Canvas.MAUI.Views.StudentMainView"
-             Title="Student Main View">
-    
-    <VerticalStackLayout Spacing="25" Padding="30" VerticalOptions="Center">
+             Title="My Courses">
 
-    <Label Text="Welcome to the student menu!"
-        FontSize="32"
-        HorizontalOptions="Center"
-        TextColor="#FF660080" />
+    <ScrollView>
+        <CollectionView ItemsSource="{Binding Courses}"
+                        Margin="16"
+                        SelectionMode="Single"
+                        SelectionChanged="CourseTapped">
 
-    <Button Text="Leave Menu"
-            Clicked="LeaveMenuClicked"
-            HeightRequest="60"
-            BackgroundColor="#FF008053" />
+            <CollectionView.ItemsLayout>
+                <GridItemsLayout Orientation="Vertical"
+                                 Span="2"
+                                 HorizontalItemSpacing="12"
+                                 VerticalItemSpacing="12"/>
+            </CollectionView.ItemsLayout>
 
-    </VerticalStackLayout>
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Border StrokeThickness="0"
+                            StrokeShape="RoundRectangle 16"
+                            BackgroundColor="#42A5F5"
+                            Padding="0">
+
+                        <Border.Shadow>
+                            <Shadow Brush="Black"
+                                    Offset="0,4"
+                                    Radius="8"
+                                    Opacity="0.15"/>
+                        </Border.Shadow>
+
+                        <Grid RowDefinitions="Auto,*">
+
+                            <!-- Header band with course code -->
+                            <BoxView Grid.Row="0"
+                                     BackgroundColor="#1565C0"
+                                     HeightRequest="48"/>
+
+                            <Label Grid.Row="0"
+                                   Text="{Binding Code}"
+                                   FontSize="12"
+                                   FontAttributes="Bold"
+                                   TextColor="White"
+                                   CharacterSpacing="1.5"
+                                   VerticalOptions="Center"
+                                   Margin="14,0"/>
+
+                            <!-- Course Name -->
+                            <Label Grid.Row="1"
+                                   Text="{Binding Name}"
+                                   FontSize="15"
+                                   FontAttributes="Bold"
+                                   TextColor="White"
+                                   LineBreakMode="WordWrap"
+                                   Margin="14,12"/>
+
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+
+            <CollectionView.EmptyView>
+                <VerticalStackLayout HorizontalOptions="Center"
+                                     VerticalOptions="Center"
+                                     Spacing="8"
+                                     Margin="0,60">
+                    <Label Text="No courses enrolled"
+                           FontSize="16"
+                           TextColor="#AAAAAA"
+                           HorizontalOptions="Center"/>
+                </VerticalStackLayout>
+            </CollectionView.EmptyView>
+
+        </CollectionView>
+    </ScrollView>
 
 </ContentPage>

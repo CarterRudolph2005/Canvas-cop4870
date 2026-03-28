@@ -1,3 +1,4 @@
+using System.Dynamic;
 using Canvas.Library.Model;
 // using Microsoft.VisualBasic;
 // using System;
@@ -257,5 +258,13 @@ namespace Canvas.Library.Services
                 });
             });
         }
+
+        public List<Course> GetCoursesForStudent(int studentID)
+        {
+            return Courses
+                .Where(c => c.Roster != null && c.Roster.Any(m => m != null && m.Id == studentID))
+                .ToList();
+        }
+
     }
 }
