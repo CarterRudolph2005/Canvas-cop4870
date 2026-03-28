@@ -39,10 +39,19 @@
         Title="Student Main View"
         ContentTemplate="{DataTemplate views:StudentMainView}"
         Route="StudentMainView" />
+    <ShellContent
+        Title="Proxy Studnet Selection"
+        ContentTemplate="{DataTemplate views:ProxyStudentSelectionView}"
+        Route="ProxyStudentSelection"/>
 
     <ShellContent
         Title="Student Details"
         ContentTemplate="{DataTemplate views:StudentDetailView}"
         Route="StudentDetailPage"/>
+    <!-- <ShellContent
+        Title="Course Menu"
+        ContentTemplate="{DataTemplate views:StudentCourseView}"
+        Route="StudentCourseMenu"/> -->
+    
 
 </Shell>

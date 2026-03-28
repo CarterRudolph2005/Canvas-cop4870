@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Canvas.MAUI.Views.ProxyStudentSelectionView"
+             Title="Proxy Student Selection"
+             NavigatedTo="ContentPage_NavigatedTo">
+    <Grid RowDefinitions="Auto, *, Auto" Padding="30">
+        <VerticalStackLayout Grid.Row="0" Spacing="10">
+            <Label 
+                Text="Students"
+                HorizontalOptions="Center"
+                FontSize="32"
+                FontAttributes="Bold"
+                TextColor="#FF660080" />
+            <Label 
+                Text="Select a student to proxy as."
+                HorizontalOptions="Center"
+                HorizontalTextAlignment="Center"
+                FontSize="14" />
+        </VerticalStackLayout>
+
+        <CollectionView
+            x:Name="StudentList"
+            Grid.Row="1"
+            ItemsSource="{Binding Students}"
+            SelectedItem="{Binding SelectedStudent}"
+            SelectionMode="Single"
+            SelectionChanged="StudentList_SelectionChanged"
+            Margin="0,20">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Grid Padding="10" ColumnDefinitions="Auto, *">
+                        <Label 
+                            Text="{Binding Id}" 
+                            Grid.Column="0" 
+                            TextColor="Gray" 
+                            Margin="0,0,15,0" 
+                            VerticalOptions="Center"/>
+                        <Label 
+                            Text="{Binding Name}" 
+                            Grid.Column="1" 
+                            FontAttributes="Bold" 
+                            FontSize="18" 
+                            VerticalOptions="Center"/>
+                    </Grid>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <VerticalStackLayout Grid.Row="2" Spacing="10">
+
+            <Button 
+                x:Name="SelectBtn"
+                Text="Select Student"
+                Clicked="SelectStudentClicked"
+                BackgroundColor="blue"
+                HeightRequest="50"
+                IsEnabled="False"
+                Opacity="0.5"/>
+            <Button 
+                Text="Exit Menu" 
+                Clicked="ExitMenuClicked" 
+                BackgroundColor="#FF008053" 
+                HeightRequest="50"/>
+
+        </VerticalStackLayout>
+    </Grid>
+</ContentPage>
