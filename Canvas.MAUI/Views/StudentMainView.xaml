@@ -2,6 +2,10 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Canvas.MAUI.Views.StudentMainView"
              Title="My Courses">
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Back"
+                    Clicked="BackClicked"/>
+    </ContentPage.ToolbarItems>
 
     <ScrollView>
         <CollectionView ItemsSource="{Binding Courses}"
