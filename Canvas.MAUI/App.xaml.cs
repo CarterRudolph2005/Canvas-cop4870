@@ -8,6 +8,8 @@ public partial class App : Application
 	{
 		InitializeComponent();
 		Routing.RegisterRoute("StudentCourseMenu", typeof(StudentCourseView));
+		Routing.RegisterRoute("TeacherCourseView", typeof(TeacherCourseView));
+        // Routing.RegisterRoute("AssignmentEditView", typeof(AssignmentEditView));
 	}
 
 	protected override Window CreateWindow(IActivationState? activationState)

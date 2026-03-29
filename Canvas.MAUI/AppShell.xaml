@@ -54,5 +54,6 @@
         ContentTemplate="{DataTemplate views:StudentCourseView}"
         Route="StudentCourseMenu"/> -->
     
+    
 
 </Shell>

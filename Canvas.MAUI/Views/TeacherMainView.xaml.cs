@@ -22,18 +22,11 @@ namespace Canvas.MAUI.Views
 
         private async void CourseTapped(object sender, SelectionChangedEventArgs e)
         {
+            // await Application.Current.MainPage.DisplayAlert("Tapped", $"Count: {e.CurrentSelection.Count}", "OK");
             if (e.CurrentSelection.Count == 0) return;
             var selected = e.CurrentSelection[0] as Course;
             ((CollectionView)sender).SelectedItem = null;
-            await Shell.Current.GoToAsync($"StudentCourseMenu?courseId={selected.Id}");
+            await Shell.Current.GoToAsync($"TeacherCourseView?courseId={selected.Id}");
         }
-        // private async void CourseTapped(object sender, SelectionChangedEventArgs e)
-        // {
-        //     await Application.Current.MainPage.DisplayAlert("Tapped", $"Count: {e.CurrentSelection.Count}", "OK");
-        //     if (e.CurrentSelection.Count == 0) return;
-        //     var selected = e.CurrentSelection[0] as Course;
-        //     ((CollectionView)sender).SelectedItem = null;
-        //     await Shell.Current.GoToAsync($"//StudentCourseView?courseId={selected.Id}");
-        // }
     }
 }

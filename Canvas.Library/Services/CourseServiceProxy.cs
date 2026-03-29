@@ -52,13 +52,21 @@ namespace Canvas.Library.Services
 
         public void AddOrUpdate(Course? course)
         {
-            if (course == null){
-                return;
-            }
-
-            if (course.Id == 0){
+            if (course == null) return;
+            if (course.Id == 0)
+            {
                 course.Id = NextKey;
                 Courses.Add(course);
+            }
+            else 
+            {
+                var existing = Courses.FirstOrDefault(c => c.Id == course.Id);
+                if (existing != null)
+                {
+                    existing.Name = course.Name;
+                    existing.Code = course.Code;
+                    existing.Description = course.Description;
+                }
             }
         }
 
@@ -196,6 +204,125 @@ namespace Canvas.Library.Services
                 .ToList();
         }
 
+        public void EnrollStudent(int studentId, int courseId)
+        {
+            var student = StudentServiceProxy.Current.GetById(studentId);
+            var course = Courses.FirstOrDefault(i => i.Id == courseId);
+            if (student == null || course == null) return;
+            if (course.Roster?.Any(s => s.Id == studentId) == true) return;
+            course.Roster?.Add(student);
+        }
+
+
+        public bool AddAssignment(int CourseID, Assignment assignment)
+        {
+            var course = Courses.FirstOrDefault(i => i.Id == CourseID);
+            if (course == null) {return false;}
+            if (assignment.Id == 0)
+            {
+                course.Assignments ??= new List<Assignment>();
+                assignment.Id = AssignmentNextKey(course);
+                course.Assignments.Add(assignment);
+            }
+            return true;
+        }
+        private int AssignmentNextKey(Course course) 
+        {
+            if (course.Assignments != null && course.Assignments.Any()) {
+                return course.Assignments.Max(a => a.Id) + 1;
+            }
+            return 1;
+        }
+
+        public bool UpdateAssignment(int CourseID, int AssignmentID, Assignment assignmentClone)
+        {
+            var course = Courses.FirstOrDefault(i => i.Id == CourseID);
+            if (course == null) {return false;}
+            var assignment = course.Assignments?.FirstOrDefault(i => i.Id == AssignmentID);
+            if (assignment == null) {return false;}
+            else
+            {
+                assignment.Name = assignmentClone.Name;
+                assignment.Description = assignmentClone.Description;
+                assignment.AvailablePoints = assignmentClone.AvailablePoints;
+                assignment.DueDate = assignmentClone.DueDate;
+                return true;   
+            }
+        }
+        public bool DeleteAssignment(int courseId, int assignmentId)
+        {
+            var course = Courses
+                .FirstOrDefault(c => c.Id == courseId);
+            if (course != null && course.Assignments != null)
+            {
+                var assignmentToRemove = course.Assignments
+                    .FirstOrDefault(a => a.Id == assignmentId);
+                if (assignmentToRemove != null)
+                {
+                    course.Assignments.Remove(assignmentToRemove);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public void SubmitAssignment(int CourseID, Submission submission)
+        {
+            var course = Courses.FirstOrDefault(i => i.Id == CourseID);
+            var assignment = course.Assignments.FirstOrDefault(i => i.Id == submission.AssignmentId);
+            if(assignment.Submissions == null)  {assignment.Submissions = new List<Submission>();}
+            int nextId = assignment.Submissions.Any() 
+                ? assignment.Submissions.Max(s => s.Id) + 1 
+                : 1;
+
+            submission.Id = nextId;
+            assignment.Submissions.Add(submission);
+        }
+
+        public void GradeSubmission(int CourseID, int AssignmentID, int SubmissionID, int Points)
+        {
+            var submission = Courses?.FirstOrDefault(i => i.Id == CourseID)
+                .Assignments?.FirstOrDefault(i => i.Id == AssignmentID)
+                .Submissions?.FirstOrDefault(i => i.Id == SubmissionID);
+            if (submission != null)
+                submission.PointsAwarded = Points;
+        }
+        public void AddAnnouncement(int courseId, Announcement announcement)
+        {
+            var course = Courses.FirstOrDefault(c => c.Id == courseId);
+            if (course == null) return;
+
+            course.Announcements ??= new List<Announcement>();
+            announcement.Id = course.Announcements.Any()
+                ? course.Announcements.Max(a => a.Id) + 1
+                : 1;
+            course.Announcements.Add(announcement);
+        }
+
+        public void DeleteAnnouncement(int courseId, int announcementId)
+        {
+            var course = Courses.FirstOrDefault(c => c.Id == courseId);
+            var announcement = course?.Announcements?.FirstOrDefault(a => a.Id == announcementId);
+            if (announcement != null)
+                course.Announcements.Remove(announcement);
+        }
+
+        public void UpdateAnnouncement(int courseId, Announcement updated)
+        {
+            var course = Courses.FirstOrDefault(c => c.Id == courseId);
+            var announcement = course?.Announcements?.FirstOrDefault(a => a.Id == updated.Id);
+            if (announcement == null) return;
+            announcement.Title = updated.Title;
+            announcement.Body = updated.Body;
+        }
+
+        public void DeleteModule(int courseId, int moduleId)
+        {
+            var course = Courses.FirstOrDefault(c => c.Id == courseId);
+            var module = course?.Modules?.FirstOrDefault(m => m.Id == moduleId);
+            if (module != null)
+                course.Modules.Remove(module);
+        }
 
         private CourseServiceProxy()
         {

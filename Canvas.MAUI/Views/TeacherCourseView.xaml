@@ -1,0 +1,362 @@
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Canvas.MAUI.Views.TeacherCourseView"
+             Title="{Binding Name}">
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Back" Clicked="BackClicked"/>
+    </ContentPage.ToolbarItems>
+
+    <Grid RowDefinitions="Auto,Auto,*">
+
+        <!-- Course Header -->
+        <Border Grid.Row="0"
+                StrokeThickness="0"
+                StrokeShape="RoundRectangle 0"
+                BackgroundColor="#1565C0"
+                Padding="16,12">
+            <VerticalStackLayout Spacing="2">
+                <Label Text="{Binding Code}"
+                       FontSize="11"
+                       FontAttributes="Bold"
+                       TextColor="#90CAF9"
+                       CharacterSpacing="1.5"/>
+                <Label Text="{Binding Name}"
+                       FontSize="18"
+                       FontAttributes="Bold"
+                       TextColor="White"/>
+            </VerticalStackLayout>
+        </Border>
+
+        <!-- Tab Bar -->
+        <Grid Grid.Row="1"
+              ColumnDefinitions="*,*,*,*"
+              BackgroundColor="{AppThemeBinding Light=#F5F5F5, Dark=#1E1E1E}">
+            <Button Grid.Column="0" Text="Home"
+                    x:Name="HomeTabBtn"
+                    Clicked="AnnouncementsTabClicked"
+                    BackgroundColor="#1565C0"
+                    TextColor="White"
+                    FontSize="12" CornerRadius="0"/>
+            <Button Grid.Column="1" Text="Modules"
+                    x:Name="ModulesTabBtn"
+                    Clicked="ModulesTabClicked"
+                    BackgroundColor="Transparent"
+                    TextColor="#888888"
+                    FontSize="12" CornerRadius="0"/>
+            <Button Grid.Column="2" Text="Assignments"
+                    x:Name="AssignmentsTabBtn"
+                    Clicked="AssignmentsTabClicked"
+                    BackgroundColor="Transparent"
+                    TextColor="#888888"
+                    FontSize="12" CornerRadius="0"/>
+            <Button Grid.Column="3" Text="Roster"
+                    x:Name="RosterTabBtn"
+                    Clicked="RosterTabClicked"
+                    BackgroundColor="Transparent"
+                    TextColor="#888888"
+                    FontSize="12" CornerRadius="0"/>
+        </Grid>
+
+        <!-- Tab Content -->
+        <ScrollView Grid.Row="2">
+            <VerticalStackLayout Spacing="12" Margin="16">
+
+                <!-- ── ANNOUNCEMENTS TAB ── -->
+                <VerticalStackLayout IsVisible="{Binding IsAnnouncementsTab}" Spacing="12">
+
+                    <Button Text="+ New Announcement"
+                            Clicked="ToggleAnnouncementFormClicked"
+                            BackgroundColor="#1565C0"
+                            TextColor="White"
+                            CornerRadius="8"
+                            HorizontalOptions="Start"/>
+
+                    <Border IsVisible="{Binding ShowAnnouncementForm}"
+                            StrokeThickness="1"
+                            Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#444444}"
+                            StrokeShape="RoundRectangle 10"
+                            BackgroundColor="{AppThemeBinding Light=White, Dark=#2A2A2A}"
+                            Padding="14">
+                        <VerticalStackLayout Spacing="10">
+                            <Label Text="New Announcement"
+                                   FontSize="14" FontAttributes="Bold"
+                                   TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"/>
+                            <Entry Placeholder="Title"
+                                   Text="{Binding NewAnnouncementTitle}"
+                                   PlaceholderColor="#888888"
+                                   TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"
+                                   BackgroundColor="Transparent"/>
+                            <Editor Placeholder="Body"
+                                    Text="{Binding NewAnnouncementBody}"
+                                    PlaceholderColor="#888888"
+                                    TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"
+                                    BackgroundColor="Transparent"
+                                    HeightRequest="100"/>
+                            <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                                <Button Grid.Column="0" Text="Post"
+                                        Clicked="SubmitAnnouncementClicked"
+                                        BackgroundColor="#1565C0" TextColor="White" CornerRadius="8"/>
+                                <Button Grid.Column="1" Text="Cancel"
+                                        Clicked="ToggleAnnouncementFormClicked"
+                                        BackgroundColor="#888888" TextColor="White" CornerRadius="8"/>
+                            </Grid>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding Announcements}" Spacing="8">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate>
+                                <Border StrokeThickness="1"
+                                        StrokeShape="RoundRectangle 10"
+                                        Padding="14"
+                                        BackgroundColor="{AppThemeBinding Light=White, Dark=#2A2A2A}"
+                                        Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#444444}">
+                                    <VerticalStackLayout Spacing="6">
+                                        <Grid ColumnDefinitions="*,44,44">
+                                            <Label Grid.Column="0"
+                                                   Text="{Binding Title}"
+                                                   FontSize="14" FontAttributes="Bold"
+                                                   TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"
+                                                   VerticalOptions="Center"/>
+                                            <Button Grid.Column="1" Text="✏️"
+                                                    FontSize="12" BackgroundColor="Transparent"
+                                                    Clicked="EditAnnouncementClicked"
+                                                    CommandParameter="{Binding .}"/>
+                                            <Button Grid.Column="2" Text="🗑"
+                                                    FontSize="12" BackgroundColor="Transparent"
+                                                    Clicked="DeleteAnnouncementClicked"
+                                                    CommandParameter="{Binding .}"/>
+                                        </Grid>
+                                        <Label Text="{Binding Body}"
+                                               FontSize="12"
+                                               TextColor="{AppThemeBinding Light=#555555, Dark=#AAAAAA}"/>
+                                        <Label Text="{Binding PostedDate, StringFormat='Posted {0:MMM dd, yyyy}'}"
+                                               FontSize="11" TextColor="#888888"/>
+                                    </VerticalStackLayout>
+                                </Border>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+
+                </VerticalStackLayout>
+
+                <!-- ── MODULES TAB ── -->
+                <VerticalStackLayout IsVisible="{Binding IsModulesTab}" Spacing="12">
+
+                    <Button Text="+ New Module"
+                            Clicked="ToggleModuleFormClicked"
+                            BackgroundColor="#1565C0" TextColor="White"
+                            CornerRadius="8" HorizontalOptions="Start"/>
+
+                    <Border IsVisible="{Binding ShowModuleForm}"
+                            StrokeThickness="1"
+                            Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#444444}"
+                            StrokeShape="RoundRectangle 10"
+                            BackgroundColor="{AppThemeBinding Light=White, Dark=#2A2A2A}"
+                            Padding="14">
+                        <VerticalStackLayout Spacing="10">
+                            <Label Text="New Module"
+                                   FontSize="14" FontAttributes="Bold"
+                                   TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"/>
+                            <Entry Placeholder="Module name"
+                                   Text="{Binding NewModuleName}"
+                                   PlaceholderColor="#888888"
+                                   TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"
+                                   BackgroundColor="Transparent"/>
+                            <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                                <Button Grid.Column="0" Text="Add"
+                                        Clicked="SubmitModuleClicked"
+                                        BackgroundColor="#1565C0" TextColor="White" CornerRadius="8"/>
+                                <Button Grid.Column="1" Text="Cancel"
+                                        Clicked="ToggleModuleFormClicked"
+                                        BackgroundColor="#888888" TextColor="White" CornerRadius="8"/>
+                            </Grid>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Modules List -->
+                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding Modules}" Spacing="8">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate>
+                                <Border StrokeThickness="1"
+                                        StrokeShape="RoundRectangle 10"
+                                        Padding="14"
+                                        BackgroundColor="{AppThemeBinding Light=White, Dark=#2A2A2A}"
+                                        Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#444444}">
+                                    <VerticalStackLayout Spacing="8">
+
+                                        <!-- Module Header -->
+                                        <Grid ColumnDefinitions="*,44,44,44">
+                                            <Label Grid.Column="0"
+                                                   Text="{Binding ModuleName}"
+                                                   FontSize="14" FontAttributes="Bold"
+                                                   TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"
+                                                   VerticalOptions="Center"/>
+                                            <Button Grid.Column="1" Text="+"
+                                                    FontSize="14" BackgroundColor="Transparent"
+                                                    TextColor="#42A5F5"
+                                                    Clicked="AddModuleContentClicked"
+                                                    CommandParameter="{Binding .}"/>
+                                            <Button Grid.Column="2" Text="✏️"
+                                                    FontSize="12" BackgroundColor="Transparent"
+                                                    Clicked="EditModuleClicked"
+                                                    CommandParameter="{Binding .}"/>
+                                            <Button Grid.Column="3" Text="🗑"
+                                                    FontSize="12" BackgroundColor="Transparent"
+                                                    Clicked="DeleteModuleClicked"
+                                                    CommandParameter="{Binding .}"/>
+                                        </Grid>
+
+                                        <!-- Module Content List -->
+                                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding Content}"
+                                                             Spacing="4"
+                                                             IsVisible="{Binding IsExpanded}">
+                                            <BindableLayout.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Grid ColumnDefinitions="*,44,44">
+                                                        <Label Grid.Column="0"
+                                                               Text="{Binding .}"
+                                                               FontSize="12"
+                                                               TextColor="{AppThemeBinding Light=#555555, Dark=#AAAAAA}"
+                                                               VerticalOptions="Center"
+                                                               Margin="8,0"/>
+                                                        <Button Grid.Column="1" Text="✏️"
+                                                                FontSize="11" BackgroundColor="Transparent"
+                                                                Clicked="EditModuleContentClicked"
+                                                                CommandParameter="{Binding .}"/>
+                                                        <Button Grid.Column="2" Text="🗑"
+                                                                FontSize="11" BackgroundColor="Transparent"
+                                                                Clicked="DeleteModuleContentClicked"
+                                                                CommandParameter="{Binding .}"/>
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </BindableLayout.ItemTemplate>
+                                        </VerticalStackLayout>
+
+                                    </VerticalStackLayout>
+                                </Border>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+
+                </VerticalStackLayout>
+
+                <!-- ── ASSIGNMENTS TAB ── -->
+                <VerticalStackLayout IsVisible="{Binding IsAssignmentsTab}" Spacing="12">
+
+                    <Button Text="+ New Assignment"
+                            Clicked="AddAssignmentClicked"
+                            BackgroundColor="#1565C0" TextColor="White"
+                            CornerRadius="8" HorizontalOptions="Start"/>
+
+                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding Assignments}" Spacing="8">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate>
+                                <Border StrokeThickness="1"
+                                        StrokeShape="RoundRectangle 10"
+                                        Padding="14"
+                                        BackgroundColor="{AppThemeBinding Light=White, Dark=#2A2A2A}"
+                                        Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#444444}">
+                                    <Grid ColumnDefinitions="*,44,44">
+                                        <VerticalStackLayout Grid.Column="0" Spacing="4">
+                                            <Label Text="{Binding Name}"
+                                                   FontSize="14" FontAttributes="Bold"
+                                                   TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"/>
+                                            <Label Text="{Binding Description}"
+                                                   FontSize="12"
+                                                   TextColor="{AppThemeBinding Light=#555555, Dark=#AAAAAA}"/>
+                                            <Label Text="{Binding AvailablePoints, StringFormat='Points: {0}'}"
+                                                   FontSize="12" TextColor="#888888"/>
+                                            <Label Text="{Binding DueDate, StringFormat='Due {0:MMM dd}'}"
+                                                   FontSize="12" FontAttributes="Bold" TextColor="#42A5F5"/>
+                                        </VerticalStackLayout>
+                                        <Button Grid.Column="1" Text="✏️"
+                                                FontSize="12" BackgroundColor="Transparent"
+                                                Clicked="EditAssignmentClicked"
+                                                CommandParameter="{Binding .}"
+                                                VerticalOptions="Start"/>
+                                        <Button Grid.Column="2" Text="🗑"
+                                                FontSize="12" BackgroundColor="Transparent"
+                                                Clicked="DeleteAssignmentClicked"
+                                                CommandParameter="{Binding .}"
+                                                VerticalOptions="Start"/>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+
+                </VerticalStackLayout>
+
+                <!-- ── ROSTER TAB ── -->
+                <VerticalStackLayout IsVisible="{Binding IsRosterTab}" Spacing="12">
+
+                    <Button Text="+ Enroll Student"
+                            Clicked="ToggleEnrollFormClicked"
+                            BackgroundColor="#1565C0" TextColor="White"
+                            CornerRadius="8" HorizontalOptions="Start"/>
+
+                    <Border IsVisible="{Binding ShowEnrollForm}"
+                            StrokeThickness="1"
+                            Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#444444}"
+                            StrokeShape="RoundRectangle 10"
+                            BackgroundColor="{AppThemeBinding Light=White, Dark=#2A2A2A}"
+                            Padding="14">
+                        <VerticalStackLayout Spacing="10">
+                            <Label Text="Enroll a Student"
+                                   FontSize="14" FontAttributes="Bold"
+                                   TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"/>
+                            <Entry Placeholder="Enter student code (e.g. cr24)"
+                                   Text="{Binding EnrollStudentCode}"
+                                   PlaceholderColor="#888888"
+                                   TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"
+                                   BackgroundColor="Transparent"/>
+                            <Label Text="{Binding EnrollError}"
+                                   TextColor="#EF5350"
+                                   FontSize="12"
+                                   IsVisible="{Binding HasEnrollError}"/>
+                            <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                                <Button Grid.Column="0" Text="Enroll"
+                                        Clicked="EnrollStudentClicked"
+                                        BackgroundColor="#2E7D32" TextColor="White" CornerRadius="8"/>
+                                <Button Grid.Column="1" Text="Cancel"
+                                        Clicked="ToggleEnrollFormClicked"
+                                        BackgroundColor="#888888" TextColor="White" CornerRadius="8"/>
+                            </Grid>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding Roster}" Spacing="8">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate>
+                                <Border StrokeThickness="1"
+                                        StrokeShape="RoundRectangle 10"
+                                        Padding="14"
+                                        BackgroundColor="{AppThemeBinding Light=White, Dark=#2A2A2A}"
+                                        Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#444444}">
+                                    <Grid ColumnDefinitions="*,44">
+                                        <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                            <Label Text="{Binding Name}"
+                                                   FontSize="14" FontAttributes="Bold"
+                                                   TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"/>
+                                            <Label Text="{Binding Code}"
+                                                   FontSize="12" TextColor="#888888"/>
+                                        </VerticalStackLayout>
+                                        <Button Grid.Column="1" Text="✕"
+                                                FontSize="12" TextColor="#EF5350"
+                                                BackgroundColor="Transparent"
+                                                Clicked="UnenrollStudentClicked"
+                                                CommandParameter="{Binding .}"
+                                                VerticalOptions="Center"/>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+
+                </VerticalStackLayout>
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>
