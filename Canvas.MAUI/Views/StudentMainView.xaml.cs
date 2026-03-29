@@ -14,7 +14,7 @@ namespace Canvas.MAUI.Views
             if (e.CurrentSelection.Count == 0) return;
             var selected = e.CurrentSelection[0] as Course;
             ((CollectionView)sender).SelectedItem = null;
-            await Shell.Current.GoToAsync($"//StudentCourseMenu?courseId={selected.Id}");
+            await Shell.Current.GoToAsync($"StudentCourseMenu?courseId={selected.Id}");
         }
         private async void BackClicked(object sender, EventArgs e)
         {
