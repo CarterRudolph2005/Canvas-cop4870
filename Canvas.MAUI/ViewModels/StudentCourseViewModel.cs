@@ -62,6 +62,12 @@ namespace Canvas.MAUI.ViewModels
                 OnPropertyChanged();
             }
         }
+        private ObservableCollection<Announcement> announcements;
+        public ObservableCollection<Announcement> Announcements
+        {
+            get => announcements;
+            set{ announcements = value; OnPropertyChanged(); }
+        }
         public event PropertyChangedEventHandler PropertyChanged;
         private void OnPropertyChanged([CallerMemberName] string propertyName = null)
         => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
@@ -73,6 +79,7 @@ namespace Canvas.MAUI.ViewModels
 
             Modules = new ObservableCollection<Module>(_course.Modules ?? new List<Module>());
             Assignments = new ObservableCollection<Assignment>(_course.Assignments ?? new List<Assignment>());
+            Announcements = new ObservableCollection<Announcement>(_course.Announcements ?? new List<Announcement>());
             Name = _course.Name ?? String.Empty;
             Code = _course.Code ?? String.Empty;
         }
