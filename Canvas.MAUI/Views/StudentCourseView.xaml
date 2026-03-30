@@ -3,7 +3,7 @@
              x:Class="Canvas.MAUI.Views.StudentCourseView"
              Title="{Binding Name}">
     <ContentPage.ToolbarItems>
-        <ToolbarItem Text="Back" Clicked="BackClicked"/>
+        <ToolbarItem Text="Log Out" Clicked="BackClicked"/>
     </ContentPage.ToolbarItems>
     <ScrollView>
         <VerticalStackLayout Spacing="16" Margin="16">
@@ -25,7 +25,64 @@
                            TextColor="White"/>
                 </VerticalStackLayout>
             </Border>
+            
+            <Border StrokeThickness="0"
+                    StrokeShape="RoundRectangle 8"
+                    BackgroundColor="#8F00FF"
+                    Padding="12">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="ANNOUNCEMENTS"
+                        FontSize="10"
+                        FontAttributes="Bold"
+                        TextColor="White"
+                        CharacterSpacing="1.5"
+                        Margin="0,0,0,5"/>
 
+                    <Label Text="No announcements yet"
+                        TextColor="#E1BEE7"
+                        HorizontalOptions="Center"
+                        IsVisible="False">
+                        <Label.Triggers>
+                            <DataTrigger TargetType="Label" 
+                                        Binding="{Binding Announcements.Count}" 
+                                        Value="0">
+                                <Setter Property="IsVisible" Value="True" />
+                            </DataTrigger>
+                        </Label.Triggers>
+                    </Label>
+                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding Announcements}"
+                                        Spacing="12">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate>
+                                <Border StrokeThickness="0"
+                                        StrokeShape="RoundRectangle 8"
+                                        BackgroundColor="#FFFFFF" 
+                                        Padding="12">
+                                    <VerticalStackLayout Spacing="4">
+                                        
+                                        <Label Text="{Binding PostedDate, StringFormat='{0:MMMM dd, yyyy}'}"
+                                            FontSize="10"
+                                            TextColor="#757575"
+                                            FontAttributes="Italic" />
+
+                                        <Label Text="{Binding Title}"
+                                            FontSize="15"
+                                            FontAttributes="Bold"
+                                            TextColor="#1A1A1A" />
+
+                                        <Label Text="{Binding Body}"
+                                            FontSize="13"
+                                            TextColor="#444444"
+                                            LineBreakMode="WordWrap" />
+                                        
+                                    </VerticalStackLayout>
+                                </Border>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+            
             <!-- Assignments -->
             <Label Text="Assignments"
                    FontSize="16"

@@ -11,22 +11,8 @@ namespace Canvas.MAUI.Views
         }
         private async void BackClicked(object sender, EventArgs e)
         {
-            await Shell.Current.GoToAsync("..");
+            await Shell.Current.GoToAsync("//MainPage");
         }
-        // private void ModuleHeaderTapped(object sender, TappedEventArgs e)
-        // {
-        //     // sender is the Grid, its parent is the VerticalStackLayout inside the Border
-        //     var grid = sender as Grid;
-        //     var parentStack = grid.Parent as VerticalStackLayout;
-
-        //     // content is the second child (index 1) of the parent VerticalStackLayout
-        //     var contentStack = parentStack.Children[1] as VerticalStackLayout;
-        //     var arrowLabel = grid.Children[1] as Label;
-
-        //     // toggle visibility
-        //     contentStack.IsVisible = !contentStack.IsVisible;
-        //     arrowLabel.Text = contentStack.IsVisible ? "▼" : "▶";
-        // }
         private void ModuleHeaderTapped(object sender, TappedEventArgs e)
         {
             var grid = sender as Grid;
