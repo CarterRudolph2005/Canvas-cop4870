@@ -3,7 +3,7 @@
              x:Class="Canvas.MAUI.Views.TeacherMainView"
              Title="My Courses">
     <ContentPage.ToolbarItems>
-        <ToolbarItem Text="Back"
+        <ToolbarItem Text="Log Out"
                      Clicked="BackClicked"/>
     </ContentPage.ToolbarItems>
     <ScrollView>

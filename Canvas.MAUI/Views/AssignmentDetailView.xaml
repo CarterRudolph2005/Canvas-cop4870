@@ -1,0 +1,134 @@
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Canvas.MAUI.Views.AssignmentDetailView"
+             Title="{Binding PageTitle}"
+             NavigationPage.HasBackButton="False">
+
+    <ScrollView>
+        <VerticalStackLayout Spacing="20" Margin="16">
+
+            <!-- Header -->
+            <Border StrokeThickness="0"
+                    StrokeShape="RoundRectangle 12"
+                    BackgroundColor="#1565C0"
+                    Padding="16">
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="{Binding CourseName}"
+                           FontSize="11"
+                           FontAttributes="Bold"
+                           TextColor="#90CAF9"
+                           CharacterSpacing="1.5"/>
+                    <Label Text="{Binding PageTitle}"
+                           FontSize="18"
+                           FontAttributes="Bold"
+                           TextColor="White"/>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Assignment Name -->
+            <VerticalStackLayout Spacing="6">
+                <Label Text="Assignment Name"
+                       FontSize="13"
+                       FontAttributes="Bold"
+                       TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#E0E0E0}"/>
+                <Border StrokeThickness="1"
+                        StrokeShape="RoundRectangle 8"
+                        Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#444444}"
+                        BackgroundColor="{AppThemeBinding Light=White, Dark=#2A2A2A}"
+                        Padding="12,8">
+                    <Entry Placeholder="Enter assignment name"
+                           Text="{Binding AssignmentName}"
+                           PlaceholderColor="#888888"
+                           TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"
+                           BackgroundColor="Transparent"/>
+                </Border>
+            </VerticalStackLayout>
+
+            <!-- Description -->
+            <VerticalStackLayout Spacing="6">
+                <Label Text="Description"
+                       FontSize="13"
+                       FontAttributes="Bold"
+                       TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#E0E0E0}"/>
+                <Border StrokeThickness="1"
+                        StrokeShape="RoundRectangle 8"
+                        Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#444444}"
+                        BackgroundColor="{AppThemeBinding Light=White, Dark=#2A2A2A}"
+                        Padding="12,8">
+                    <Editor Placeholder="Enter assignment description"
+                            Text="{Binding AssignmentDescription}"
+                            PlaceholderColor="#888888"
+                            TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"
+                            BackgroundColor="Transparent"
+                            HeightRequest="120"
+                            AutoSize="TextChanges"/>
+                </Border>
+            </VerticalStackLayout>
+
+            <!-- Available Points -->
+            <VerticalStackLayout Spacing="6">
+                <Label Text="Available Points"
+                       FontSize="13"
+                       FontAttributes="Bold"
+                       TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#E0E0E0}"/>
+                <Border StrokeThickness="1"
+                        StrokeShape="RoundRectangle 8"
+                        Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#444444}"
+                        BackgroundColor="{AppThemeBinding Light=White, Dark=#2A2A2A}"
+                        Padding="12,8">
+                    <Entry Placeholder="e.g. 100"
+                           Text="{Binding NewAvailablePoints}"
+                           Keyboard="Numeric"
+                           PlaceholderColor="#888888"
+                           TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"
+                           BackgroundColor="Transparent"/>
+                </Border>
+            </VerticalStackLayout>
+
+            <!-- Due Date -->
+            <VerticalStackLayout Spacing="6">
+                <Label Text="Due Date"
+                       FontSize="13"
+                       FontAttributes="Bold"
+                       TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#E0E0E0}"/>
+                <Border StrokeThickness="1"
+                        StrokeShape="RoundRectangle 8"
+                        Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#444444}"
+                        BackgroundColor="{AppThemeBinding Light=White, Dark=#2A2A2A}"
+                        Padding="12,4">
+                    <DatePicker Date="{Binding NewDueDate}"
+                                TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"
+                                BackgroundColor="Transparent"
+                                MinimumDate="{Binding TodayDate}"/>
+                </Border>
+            </VerticalStackLayout>
+
+            <!-- Validation Error -->
+            <Label Text="{Binding ValidationError}"
+                   TextColor="#EF5350"
+                   FontSize="12"
+                   IsVisible="{Binding HasValidationError}"/>
+
+            <!-- Save / Cancel Buttons -->
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="12" Margin="0,8,0,32">
+                <Button Grid.Column="0"
+                        Text="Save"
+                        Clicked="SaveClicked"
+                        BackgroundColor="#1565C0"
+                        TextColor="White"
+                        CornerRadius="10"
+                        HeightRequest="50"
+                        FontAttributes="Bold"/>
+                <Button Grid.Column="1"
+                        Text="Cancel"
+                        Clicked="CancelClicked"
+                        BackgroundColor="{AppThemeBinding Light=#E0E0E0, Dark=#444444}"
+                        TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"
+                        CornerRadius="10"
+                        HeightRequest="50"/>
+            </Grid>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

@@ -9,7 +9,7 @@ public partial class App : Application
 		InitializeComponent();
 		Routing.RegisterRoute("StudentCourseMenu", typeof(StudentCourseView));
 		Routing.RegisterRoute("TeacherCourseView", typeof(TeacherCourseView));
-        // Routing.RegisterRoute("AssignmentEditView", typeof(AssignmentEditView));
+        Routing.RegisterRoute("AssignmentDetailView", typeof(AssignmentDetailView));
 	}
 
 	protected override Window CreateWindow(IActivationState? activationState)

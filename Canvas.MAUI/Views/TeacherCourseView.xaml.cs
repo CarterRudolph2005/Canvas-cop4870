@@ -17,7 +17,7 @@ namespace Canvas.MAUI.Views
         }
 
         private async void BackClicked(object sender, EventArgs e)
-            => await Shell.Current.GoToAsync("..");
+            => await Shell.Current.GoToAsync("//MainPage");
 
         // ── Tab switching ──────────────────────────────────────────
         private void UpdateTabStyles(int selectedIndex)
@@ -139,12 +139,12 @@ namespace Canvas.MAUI.Views
 
         // ── Assignments ────────────────────────────────────────────
         private async void AddAssignmentClicked(object sender, EventArgs e)
-            => await Shell.Current.GoToAsync($"AssignmentEditView?courseId={ViewModel.CourseId}");
+            => await Shell.Current.GoToAsync($"AssignmentDetailView?courseId={ViewModel.CourseId}");
 
         private async void EditAssignmentClicked(object sender, EventArgs e)
         {
             var assignment = (sender as Button)?.CommandParameter as Assignment;
-            await Shell.Current.GoToAsync($"AssignmentEditView?courseId={ViewModel.CourseId}&assignmentId={assignment.Id}");
+            await Shell.Current.GoToAsync($"AssignmentDetailView?courseId={ViewModel.CourseId}&assignmentId={assignment.Id}");
         }
 
         private void DeleteAssignmentClicked(object sender, EventArgs e)
@@ -160,10 +160,18 @@ namespace Canvas.MAUI.Views
         private void EnrollStudentClicked(object sender, EventArgs e)
             => ViewModel.EnrollStudent();
 
-        private void UnenrollStudentClicked(object sender, EventArgs e)
+        private async void UnenrollStudentClicked(object sender, EventArgs e)
         {
-            var student = (sender as Button)?.CommandParameter as Student;
-            ViewModel.UnenrollStudent(student);
+            bool isConfirmed = await DisplayAlertAsync("Confirm Action", "Are you sure you want remove this student from the system?", "Yes", "No");
+            if(isConfirmed)
+            {
+                var student = (sender as Button)?.CommandParameter as Student;
+                ViewModel.UnenrollStudent(student);
+            }
+            else
+            {
+                return;
+            }
         }
     }
 }
