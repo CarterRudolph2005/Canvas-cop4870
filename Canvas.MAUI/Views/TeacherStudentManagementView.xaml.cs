@@ -38,23 +38,31 @@ namespace Canvas.MAUI.Views
         
         private async void DeleteStudentClicked(object sender, EventArgs e)
         {
-            var context = (BindingContext as TeacherStudentManagementViewModel);
-            if (context != null)
+            bool isConfirmed = await DisplayAlert("Confirm Action", "Are you sure you want remove this student from the system?", "Yes", "No");
+            if (isConfirmed)
             {
-                var studnet = await context.Delete();
-                if(studnet == null)
+                var context = (BindingContext as TeacherStudentManagementViewModel);
+                if (context != null)
                 {
-                    await DisplayAlertAsync("No Student Found", "There is no student selected to delete", "Okay");
-                }else
-                {
-                    await DisplayAlertAsync("Success", "Student deleted!", "Okay");
+                    var studnet = await context.Delete();
+                    if(studnet == null)
+                    {
+                        await DisplayAlertAsync("No Student Found", "There is no student selected to delete", "Okay");
+                    }else
+                    {
+                        await DisplayAlertAsync("Success", "Student deleted!", "Okay");
+                    }
                 }
+                else
+                {
+                    await DisplayAlertAsync("Error", "Could not load student management context.", "Okay");
+                }
+                context?.SelectedStudent = null;
             }
             else
             {
-                await DisplayAlertAsync("Error", "Could not load student management context.", "Okay");
+                return;
             }
-            context?.SelectedStudent = null;
         }
     }
 }

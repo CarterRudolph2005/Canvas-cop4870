@@ -3,7 +3,7 @@
              x:Class="Canvas.MAUI.Views.TeacherCourseView"
              Title="{Binding Name}">
     <ContentPage.ToolbarItems>
-        <ToolbarItem Text="Back" Clicked="BackClicked"/>
+        <ToolbarItem Text="Log Out" Clicked="BackClicked"/>
     </ContentPage.ToolbarItems>
 
     <Grid RowDefinitions="Auto,Auto,*">

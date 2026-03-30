@@ -214,15 +214,26 @@ namespace Canvas.Library.Services
         }
 
 
-        public bool AddAssignment(int CourseID, Assignment assignment)
+        public bool AddOrUpdateAssignment(int courseId, Assignment assignment)
         {
-            var course = Courses.FirstOrDefault(i => i.Id == CourseID);
-            if (course == null) {return false;}
+            var course = Courses.FirstOrDefault(i => i.Id == courseId);
+            if (course == null) return false;
+
+            course.Assignments ??= new List<Assignment>();
+
             if (assignment.Id == 0)
             {
-                course.Assignments ??= new List<Assignment>();
                 assignment.Id = AssignmentNextKey(course);
                 course.Assignments.Add(assignment);
+            }
+            else
+            {
+                var existing = course.Assignments.FirstOrDefault(a => a.Id == assignment.Id);
+                if (existing == null) return false;
+                existing.Name = assignment.Name;
+                existing.Description = assignment.Description;
+                existing.AvailablePoints = assignment.AvailablePoints;
+                existing.DueDate = assignment.DueDate;
             }
             return true;
         }
@@ -234,36 +245,42 @@ namespace Canvas.Library.Services
             return 1;
         }
 
-        public bool UpdateAssignment(int CourseID, int AssignmentID, Assignment assignmentClone)
-        {
-            var course = Courses.FirstOrDefault(i => i.Id == CourseID);
-            if (course == null) {return false;}
-            var assignment = course.Assignments?.FirstOrDefault(i => i.Id == AssignmentID);
-            if (assignment == null) {return false;}
-            else
-            {
-                assignment.Name = assignmentClone.Name;
-                assignment.Description = assignmentClone.Description;
-                assignment.AvailablePoints = assignmentClone.AvailablePoints;
-                assignment.DueDate = assignmentClone.DueDate;
-                return true;   
-            }
-        }
         public bool DeleteAssignment(int courseId, int assignmentId)
         {
-            var course = Courses
-                .FirstOrDefault(c => c.Id == courseId);
-            if (course != null && course.Assignments != null)
-            {
-                var assignmentToRemove = course.Assignments
-                    .FirstOrDefault(a => a.Id == assignmentId);
-                if (assignmentToRemove != null)
-                {
-                    course.Assignments.Remove(assignmentToRemove);
-                    return true;
-                }
-            }
-            return false;
+            var course = Courses.FirstOrDefault(c => c.Id == courseId);
+            if (course == null || course.Assignments == null) return false;
+
+            var assignmentToRemove = course.Assignments.FirstOrDefault(a => a.Id == assignmentId);
+            if (assignmentToRemove == null) return false;
+
+            // submissions are owned by the assignment so they die with it
+            assignmentToRemove.Submissions?.Clear();
+            course.Assignments.Remove(assignmentToRemove);
+            return true;
+        }
+        public List<Submission> GetStudentSubmissions(int courseId, int studentId)
+        {
+            return Courses.FirstOrDefault(c => c.Id == courseId)
+                ?.Assignments
+                ?.SelectMany(a => a.Submissions)
+                .Where(s => s.StudentId == studentId)
+                .ToList() ?? new List<Submission>();
+        }
+
+        public double CalculateGrade(int courseId, int studentId)
+        {
+            var course = Courses.FirstOrDefault(c => c.Id == courseId);
+            if (course == null) return 0;
+
+            var submissions = GetStudentSubmissions(courseId, studentId);
+            if (!submissions.Any()) return 0;
+
+            var totalEarned = submissions.Sum(s => s.PointsAwarded);
+            var totalAvailable = course.Assignments
+                .Where(a => a.Submissions != null && a.Submissions.Any(s => s.StudentId == studentId))
+                .Sum(a => a.AvailablePoints);
+
+            return totalAvailable > 0 ? (double)totalEarned / totalAvailable * 100 : 0;
         }
 
         public void SubmitAssignment(int CourseID, Submission submission)
