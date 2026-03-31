@@ -15,14 +15,20 @@
                     Padding="16">
                 <VerticalStackLayout Spacing="4">
                     <Label Text="{Binding Code}"
-                           FontSize="12"
-                           FontAttributes="Bold"
-                           TextColor="#90CAF9"
-                           CharacterSpacing="1.5"/>
+                        FontSize="12"
+                        FontAttributes="Bold"
+                        TextColor="#90CAF9"
+                        CharacterSpacing="1.5"/>
                     <Label Text="{Binding Name}"
-                           FontSize="20"
-                           FontAttributes="Bold"
-                           TextColor="White"/>
+                        FontSize="20"
+                        FontAttributes="Bold"
+                        TextColor="White"/>
+                    <Label Text="{Binding GradePercentage, StringFormat='{0}%'}"
+                        FontSize="48"
+                        FontAttributes="Bold"
+                        TextColor="White"
+                        HorizontalOptions="Center"
+                        Margin="0,8,0,0"/>
                 </VerticalStackLayout>
             </Border>
             
