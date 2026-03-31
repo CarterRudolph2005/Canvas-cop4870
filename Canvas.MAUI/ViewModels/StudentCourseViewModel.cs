@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Text;
 
@@ -18,10 +19,15 @@ namespace Canvas.MAUI.ViewModels
         {
             Modules = new ObservableCollection<Module>();
             Assignments = new ObservableCollection<Assignment>();
+            // GradePercentage = 0;
         }
         private int courseId;
         public void ApplyQueryAttributes(IDictionary<string, object> query)
         {
+            if(query.TryGetValue("studentId", out var sId) && int.TryParse(sId?.ToString(), out int _studentId))
+            {
+                studentId = _studentId;
+            }
             if (query.TryGetValue("courseId", out var value) && int.TryParse(value?.ToString(), out int id))
             {
                 courseId = id;
@@ -36,12 +42,27 @@ namespace Canvas.MAUI.ViewModels
             set { name = value; OnPropertyChanged(); }
         }
 
+        private int studentId;
+        public int StudentId
+        {
+            get => studentId;
+            set{ studentId = value; OnPropertyChanged(); }
+        }
+
         private string code;
         public string Code
         {
             get => code;
             set { code = value; OnPropertyChanged(); }
         }
+
+        private double gradePercentage;
+        public double GradePercentage
+        {
+            get => gradePercentage;
+            set{ gradePercentage = value; OnPropertyChanged(); }
+        }
+
         private ObservableCollection<Module> modules;
         public ObservableCollection<Module> Modules
         {
@@ -80,6 +101,8 @@ namespace Canvas.MAUI.ViewModels
             Modules = new ObservableCollection<Module>(_course.Modules ?? new List<Module>());
             Assignments = new ObservableCollection<Assignment>(_course.Assignments ?? new List<Assignment>());
             Announcements = new ObservableCollection<Announcement>(_course.Announcements ?? new List<Announcement>());
+            GradePercentage = CourseServiceProxy.Current.CalculateGrade(courseId, StudentId);
+
             Name = _course.Name ?? String.Empty;
             Code = _course.Code ?? String.Empty;
         }

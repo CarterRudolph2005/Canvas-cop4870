@@ -271,14 +271,21 @@ namespace Canvas.Library.Services
         {
             var course = Courses.FirstOrDefault(c => c.Id == courseId);
             if (course == null) return 0;
+            if (course.Assignments == null || !course.Assignments.Any()) return 0;
 
-            var submissions = GetStudentSubmissions(courseId, studentId);
-            if (!submissions.Any()) return 0;
+            var submittedAssignments = course.Assignments
+                .Where(a => a.Submissions != null && 
+                            a.Submissions.Any(s => s.StudentId == studentId))
+                .ToList();
 
-            var totalEarned = submissions.Sum(s => s.PointsAwarded);
-            var totalAvailable = course.Assignments
-                .Where(a => a.Submissions != null && a.Submissions.Any(s => s.StudentId == studentId))
-                .Sum(a => a.AvailablePoints);
+            if (!submittedAssignments.Any()) return 0;
+
+            var totalAvailable = submittedAssignments.Sum(a => a.AvailablePoints);
+            
+            var totalEarned = submittedAssignments
+                .SelectMany(a => a.Submissions)
+                .Where(s => s.StudentId == studentId)
+                .Sum(s => s.PointsAwarded ?? 0);
 
             return totalAvailable > 0 ? (double)totalEarned / totalAvailable * 100 : 0;
         }

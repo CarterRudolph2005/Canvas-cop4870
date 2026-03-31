@@ -19,6 +19,11 @@ namespace Canvas.MAUI.ViewModels
             Courses = new ObservableCollection<Course>();
         }
         private int studentId;
+        public int StudentId
+        {
+            get => studentId;
+            set { studentId = value; OnPropertyChanged(); }
+        }
         public void ApplyQueryAttributes(IDictionary<string, object> query)
         {
             if (query.TryGetValue("studentId", out var value) && int.TryParse(value?.ToString(), out int id))
