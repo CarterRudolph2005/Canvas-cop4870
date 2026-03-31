@@ -30,13 +30,13 @@ namespace Canvas.MAUI.Views
 
         private async void ExitClicked(object sender, EventArgs e)
         {
-            await Shell.Current.GoToAsync("//TeacherHome/TeacherStudentManagement");
+            await Shell.Current.GoToAsync("//TeacherStudentManagement");
         }
 
         private async void SaveAndExitClicked(object sender, EventArgs e)
         {
             StudentServiceProxy.Current.AddOrUpdate(BindingContext as Student);
-            await Shell.Current.GoToAsync("//TeacherHome/TeacherStudentManagement");
+            await Shell.Current.GoToAsync("//TeacherStudentManagement");
         }
     }
 }
