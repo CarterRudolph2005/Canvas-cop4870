@@ -8,22 +8,18 @@
 
         <VerticalStackLayout Padding="24" Spacing="16">
 
-            <!-- Name -->
             <Label Text="Name" FontAttributes="Bold"/>
             <Entry Text="{Binding Name}" Placeholder="Enter student name"/>
 
-            <!-- Code -->
             <Label Text="Code" FontAttributes="Bold"/>
             <Entry Text="{Binding Code}" Placeholder="Enter student code"/>
 
-            <!-- Classification -->
             <Label Text="Classification" FontAttributes="Bold"/>
             <Picker 
                 Title="Select Classification"
                 ItemsSource="{Binding Source={x:Reference ThisPage}, Path=ClassificationOptions}"
                 SelectedItem="{Binding Classification}" />
 
-            <!-- Buttons -->
             <HorizontalStackLayout Spacing="12" Margin="0,24,0,0">
                 <Button 
                     Text="Save" 
