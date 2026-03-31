@@ -18,6 +18,11 @@ namespace Canvas.MAUI.ViewModels
         }
 
         private int teacherId;
+        public int TeacherId
+        {
+            get => teacherId;
+            set{ teacherId = value; OnPropertyChanged(); }
+        }
 
         public void ApplyQueryAttributes(IDictionary<string, object> query)
         {

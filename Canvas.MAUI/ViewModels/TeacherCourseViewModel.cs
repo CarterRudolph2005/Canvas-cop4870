@@ -29,6 +29,10 @@ namespace Canvas.MAUI.ViewModels
 
         public void ApplyQueryAttributes(IDictionary<string, object> query)
         {
+            if (query.TryGetValue("teacherId", out var tId) && int.TryParse(tId?.ToString(), out int _teacherId))
+            {
+                teacherId = _teacherId;
+            }
             if (query.TryGetValue("courseId", out var value) && int.TryParse(value?.ToString(), out int id))
             {
                 _courseId = id;
@@ -38,6 +42,12 @@ namespace Canvas.MAUI.ViewModels
 
         // ── Properties ─────────────────────────────────────────────
 
+        private int teacherId;
+        public int TeacherId
+        {
+            get => teacherId;
+            set{ teacherId = value; OnPropertyChanged(); }
+        }
         private string _name;
         public string Name
         {

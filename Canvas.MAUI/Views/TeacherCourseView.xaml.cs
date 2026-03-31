@@ -1,4 +1,5 @@
 using Canvas.Library.Model;
+using Canvas.Library.Services;
 using Canvas.MAUI.Models;
 using Canvas.MAUI.ViewModels;
 
@@ -151,6 +152,44 @@ namespace Canvas.MAUI.Views
         {
             var assignment = (sender as Button)?.CommandParameter as Assignment;
             ViewModel.DeleteAssignment(assignment);
+        }
+        private async void CopyAssignmentClicked(object sender, EventArgs e)
+        {
+            var assignment = (sender as Button)?.CommandParameter as Assignment;
+            if (assignment == null) return;
+
+            var vm = BindingContext as TeacherCourseViewModel;
+            if (vm == null) return;
+
+            // Get all other courses this teacher owns, excluding current
+             var otherCourses = CourseServiceProxy.Current.Courses
+                .Where(c => c.Id != vm.CourseId && 
+                            c.Instructors != null && 
+                            c.Instructors.Any(i => i.Id == vm.TeacherId))
+                .ToList();
+
+            if (!otherCourses.Any())
+            {
+                await DisplayAlert("No Other Courses", "You have no other courses to copy to.", "OK");
+                return;
+            }
+
+            var courseNames = otherCourses.Select(c => c.Name).ToArray();
+
+            var chosen = await DisplayActionSheet(
+                $"Copy \"{assignment.Name}\" to...",
+                "Cancel",
+                null,
+                courseNames);
+
+            if (chosen == null || chosen == "Cancel") return;
+
+            var target = otherCourses.FirstOrDefault(c => c.Name == chosen);
+            if (target == null) return;
+
+            CourseServiceProxy.Current.CopyAssignmentToCourse(assignment.Id, vm.CourseId, target.Id);
+
+            await DisplayAlert("Done", $"Copied to {target.Name}.", "OK");
         }
 
         // ── Roster ─────────────────────────────────────────────────

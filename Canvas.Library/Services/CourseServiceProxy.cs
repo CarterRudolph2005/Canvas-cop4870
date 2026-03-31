@@ -348,6 +348,27 @@ namespace Canvas.Library.Services
                 course.Modules.Remove(module);
         }
 
+        public void CopyAssignmentToCourse(int assignmentId, int sourceCourseId, int targetCourseId)
+        {
+            var source = Courses.FirstOrDefault(c => c.Id == sourceCourseId);
+            if (source == null) return;
+
+            var assignment = source.Assignments?.FirstOrDefault(a => a.Id == assignmentId);
+            if (assignment == null) return;
+
+            var copy = new Assignment
+            {
+                Id = 0, // signals AddOrUpdate to treat it as new
+                Name = assignment.Name,
+                Description = assignment.Description,
+                AvailablePoints = assignment.AvailablePoints,
+                DueDate = assignment.DueDate,
+                Submissions = new List<Submission>()
+            };
+
+            AddOrUpdateAssignment(targetCourseId, copy);
+        }
+
         private CourseServiceProxy()
         {
             courses = new List<Course>
