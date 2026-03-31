@@ -21,7 +21,6 @@ namespace Canvas.MAUI.ViewModels
             Assignments = new ObservableCollection<Assignment>();
             // GradePercentage = 0;
         }
-        private int courseId;
         public void ApplyQueryAttributes(IDictionary<string, object> query)
         {
             if(query.TryGetValue("studentId", out var sId) && int.TryParse(sId?.ToString(), out int _studentId))
@@ -40,6 +39,13 @@ namespace Canvas.MAUI.ViewModels
         {
             get => name;
             set { name = value; OnPropertyChanged(); }
+        }
+
+        private int courseId;
+        public int CourseId
+        {
+            get => courseId;
+            set{ courseId = value; OnPropertyChanged(); }
         }
 
         private int studentId;

@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:Canvas.MAUI.ViewModels"
+             x:Class="Canvas.MAUI.Views.AssignmentSubmissionView"
+             BackgroundColor="#0D1B2A">
+
+
+    <Grid RowDefinitions="Auto,*,Auto">
+
+        <!-- Top Bar -->
+        <Border Grid.Row="0"
+                BackgroundColor="#1565C0"
+                Padding="16"
+                StrokeThickness="0">
+            <VerticalStackLayout VerticalOptions="Center">
+                <Label Text="{Binding AssignmentName}"
+                        FontSize="18"
+                        FontAttributes="Bold"
+                        TextColor="White"/>
+                <Label Text="{Binding AvailablePoints, StringFormat='{0} pts'}"
+                        FontSize="12"
+                        TextColor="#90CAF9"/>
+            </VerticalStackLayout>
+        </Border>
+
+        <!-- Scrollable Content -->
+        <ScrollView Grid.Row="1" Padding="16">
+            <VerticalStackLayout Spacing="16">
+
+                <!-- Description Card -->
+                <Border StrokeThickness="0"
+                        StrokeShape="RoundRectangle 12"
+                        BackgroundColor="#1E2D3D"
+                        Padding="16">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="DESCRIPTION"
+                               FontSize="12"
+                               FontAttributes="Bold"
+                               TextColor="#90CAF9"
+                               CharacterSpacing="1.5"/>
+                        <Label Text="{Binding Description}"
+                               FontSize="15"
+                               TextColor="White"
+                               LineBreakMode="WordWrap"/>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Submission Text Box -->
+                <Border StrokeThickness="0"
+                        StrokeShape="RoundRectangle 12"
+                        BackgroundColor="#1E2D3D"
+                        Padding="16">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="YOUR SUBMISSION"
+                               FontSize="12"
+                               FontAttributes="Bold"
+                               TextColor="#90CAF9"
+                               CharacterSpacing="1.5"/>
+                        <Editor Text="{Binding SubmissionContent}"
+                                Placeholder="Type your submission here..."
+                                PlaceholderColor="#4A6080"
+                                TextColor="White"
+                                BackgroundColor="Transparent"
+                                IsReadOnly="{Binding IsSubmitted}"
+                                MinimumHeightRequest="200"
+                                AutoSize="TextChanges"/>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Points Card -->
+                <Border StrokeThickness="0"
+                        StrokeShape="RoundRectangle 12"
+                        BackgroundColor="#1E2D3D"
+                        Padding="16"
+                        IsVisible="{Binding IsSubmitted}">
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="POINTS AWARDED"
+                               FontSize="12"
+                               FontAttributes="Bold"
+                               TextColor="#90CAF9"
+                               CharacterSpacing="1.5"/>
+                        <Label Text="{Binding PointsDisplay}"
+                               FontSize="32"
+                               FontAttributes="Bold"
+                               TextColor="White"/>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Submitted Banner -->
+                <Border StrokeThickness="0"
+                        StrokeShape="RoundRectangle 12"
+                        BackgroundColor="#1B5E20"
+                        Padding="12"
+                        IsVisible="{Binding IsSubmitted}">
+                    <Label Text="{Binding SubmittedAt, StringFormat='✓ Submitted {0:MMM dd, h:mm tt}'}"
+                           TextColor="#A5D6A7"
+                           FontAttributes="Bold"
+                           HorizontalOptions="Center"/>
+                </Border>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- Submit Button -->
+        <Border Grid.Row="2"
+                BackgroundColor="#0D1B2A"
+                Padding="16"
+                StrokeThickness="0">
+            <Button Text="Submit Assignment"
+                    Command="{Binding SubmitCommand}"
+                    BackgroundColor="#1565C0"
+                    TextColor="White"
+                    FontAttributes="Bold"
+                    FontSize="16"
+                    CornerRadius="12"
+                    HeightRequest="52"/>
+        </Border>
+
+    </Grid>
+</ContentPage>

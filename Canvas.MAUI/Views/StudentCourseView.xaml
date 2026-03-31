@@ -95,9 +95,10 @@
                    FontAttributes="Bold"
                    TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#E0E0E0}"/>
 
-            <VerticalStackLayout BindableLayout.ItemsSource="{Binding Assignments}"
-                                 Spacing="8">
-                <BindableLayout.ItemTemplate>
+            <CollectionView ItemsSource="{Binding Assignments}"
+                            SelectionMode="Single"
+                            SelectionChanged="AssignmentTapped">
+                <CollectionView.ItemTemplate>
                     <DataTemplate>
                         <Border StrokeThickness="1"
                                 StrokeShape="RoundRectangle 10"
@@ -108,27 +109,27 @@
                             <Grid ColumnDefinitions="*,Auto">
                                 <VerticalStackLayout Grid.Column="0" Spacing="4">
                                     <Label Text="{Binding Name}"
-                                           FontSize="14"
-                                           FontAttributes="Bold"
-                                           TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"/>
+                                        FontSize="14"
+                                        FontAttributes="Bold"
+                                        TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"/>
                                     <Label Text="{Binding Description}"
-                                           FontSize="12"
-                                           TextColor="{AppThemeBinding Light=#555555, Dark=#AAAAAA}"/>
+                                        FontSize="12"
+                                        TextColor="{AppThemeBinding Light=#555555, Dark=#AAAAAA}"/>
                                     <Label Text="{Binding AvailablePoints, StringFormat='Points: {0}'}"
-                                           FontSize="12"
-                                           TextColor="{AppThemeBinding Light=#555555, Dark=#AAAAAA}"/>
+                                        FontSize="12"
+                                        TextColor="{AppThemeBinding Light=#555555, Dark=#AAAAAA}"/>
                                 </VerticalStackLayout>
                                 <Label Grid.Column="1"
-                                       Text="{Binding DueDate, StringFormat='Due {0:MMM dd}'}"
-                                       FontSize="12"
-                                       FontAttributes="Bold"
-                                       TextColor="#42A5F5"
-                                       VerticalOptions="Start"/>
+                                    Text="{Binding DueDate, StringFormat='Due {0:MMM dd}'}"
+                                    FontSize="12"
+                                    FontAttributes="Bold"
+                                    TextColor="#42A5F5"
+                                    VerticalOptions="Start"/>
                             </Grid>
                         </Border>
                     </DataTemplate>
-                </BindableLayout.ItemTemplate>
-            </VerticalStackLayout>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
 
             <!-- Modules -->
             <Label Text="Modules"
