@@ -39,6 +39,16 @@ namespace Canvas.MAUI.Views
             contentStack.IsVisible = !contentStack.IsVisible;
             arrowLabel.Text = contentStack.IsVisible ? "▼" : "▶";
         }
+
+        private async void AssignmentTapped(object sender, SelectionChangedEventArgs e)
+        {
+            if (e.CurrentSelection.Count == 0) return;
+            var selected = e.CurrentSelection[0] as Assignment;
+            ((CollectionView)sender).SelectedItem = null;
+
+            var vm = BindingContext as StudentCourseViewModel;
+            await Shell.Current.GoToAsync($"AssignmentSubmissionView?courseId={vm.CourseId}&assignmentId={selected.Id}&studentId={vm.StudentId}");
+        }
     }
     
 }
