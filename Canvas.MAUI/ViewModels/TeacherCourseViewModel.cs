@@ -33,6 +33,10 @@ namespace Canvas.MAUI.ViewModels
             {
                 teacherId = _teacherId;
             }
+            if (query.TryGetValue("sectionNumber", out var sNum) && int.TryParse(tId?.ToString(), out int _sectionNumber))
+            {
+                sectionNumber = _sectionNumber;
+            }
             if (query.TryGetValue("courseId", out var value) && int.TryParse(value?.ToString(), out int id))
             {
                 _courseId = id;
@@ -42,6 +46,12 @@ namespace Canvas.MAUI.ViewModels
 
         // ── Properties ─────────────────────────────────────────────
 
+        private int sectionNumber;
+        public int SectionNumber
+        {
+            get => sectionNumber;
+            set{ sectionNumber = value; OnPropertyChanged(); }
+        }
         private int teacherId;
         public int TeacherId
         {

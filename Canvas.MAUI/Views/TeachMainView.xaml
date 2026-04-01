@@ -35,7 +35,7 @@
                                      BackgroundColor="#1565C0"
                                      HeightRequest="48"/>
                             <Label Grid.Row="0"
-                                   Text="{Binding Code}"
+                                   Text="{Binding FullCourseHeader}"
                                    FontSize="12"
                                    FontAttributes="Bold"
                                    TextColor="White"

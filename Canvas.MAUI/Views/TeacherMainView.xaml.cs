@@ -22,10 +22,12 @@ namespace Canvas.MAUI.Views
 
         private async void CourseTapped(object sender, SelectionChangedEventArgs e)
         {
+            var vm = BindingContext as TeacherMainViewModel;
             if (e.CurrentSelection.Count == 0) return;
             var selected = e.CurrentSelection[0] as Course;
             ((CollectionView)sender).SelectedItem = null;
-            await Shell.Current.GoToAsync($"TeacherCourseView?courseId={selected.Id}&teacherId={(BindingContext as TeacherMainViewModel).TeacherId}");
+            await Shell.Current.GoToAsync
+            ($"TeacherCourseView?courseId={selected.Id}&teacherId={vm.TeacherId}&sectionNumber={selected.SectionNumber}");
         }
     }
 }
