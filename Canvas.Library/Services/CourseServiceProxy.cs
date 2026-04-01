@@ -435,6 +435,7 @@ namespace Canvas.Library.Services
                     Code = "COP4530",
                     Name = "Data Structures II",
                     Description = "Advanced data structures and algorithmic analysis.",
+                    SectionNumber = 1,
                     Instructors = new List<Instructor>
                     {
                         InstructorServiceProxy.Current.Instructors.FirstOrDefault(i => i.Id == 1)
@@ -478,6 +479,7 @@ namespace Canvas.Library.Services
                     Code = "COP3330",
                     Name = "Object Oriented Programming",
                     Description = "Principles of OOP including inheritance, polymorphism, and design patterns.",
+                    SectionNumber = 1,
                     Instructors = new List<Instructor>
                     {
                         InstructorServiceProxy.Current.Instructors.FirstOrDefault(i => i.Id == 2)
@@ -523,6 +525,7 @@ namespace Canvas.Library.Services
                     Code = "CDA3101",
                     Name = "Computer Organization",
                     Description = "Study of computer hardware organization, assembly language, and memory systems.",
+                    SectionNumber = 1,
                     Instructors = new List<Instructor>
                     {
                         InstructorServiceProxy.Current.Instructors.FirstOrDefault(i => i.Id == 3)
@@ -568,6 +571,7 @@ namespace Canvas.Library.Services
                     Code = "COP4020",
                     Name = "Programming Languages",
                     Description = "Survey of programming language concepts, paradigms, and implementation.",
+                    SectionNumber = 1,
                     Instructors = new List<Instructor>
                     {
                         InstructorServiceProxy.Current.Instructors.FirstOrDefault(i => i.Id == 1)
@@ -611,6 +615,7 @@ namespace Canvas.Library.Services
                     Code = "CNT4007",
                     Name = "Computer Networks",
                     Description = "Fundamentals of computer networking including protocols, routing, and security.",
+                    SectionNumber = 1,
                     Instructors = new List<Instructor>
                     {
                         InstructorServiceProxy.Current.Instructors.FirstOrDefault(i => i.Id == 2)
@@ -649,7 +654,53 @@ namespace Canvas.Library.Services
                         StudentServiceProxy.Current.Students.FirstOrDefault(i => i.Id == 9),
                         StudentServiceProxy.Current.Students.FirstOrDefault(i => i.Id == 10),
                     }
+
                 },
+                new Course
+                {
+                    Id = 6,
+                    Code = "CNT4007",
+                    Name = "Computer Networks",
+                    Description = "Fundamentals of computer networking including protocols, routing, and security.",
+                    SectionNumber = 2,
+                    Instructors = new List<Instructor>
+                    {
+                        InstructorServiceProxy.Current.Instructors.FirstOrDefault(i => i.Id == 2)
+                    },
+                    Assignments = new List<Assignment>
+                    {
+                        new Assignment { Id = 24, Name = "OSI Model Report",              Description = "Describe each layer of the OSI model.",           AvailablePoints = 50,  DueDate = new DateTime(2026, 3, 14) },
+                        new Assignment { Id = 25, Name = "Socket Programming Lab",        Description = "Build a TCP client-server application.",          AvailablePoints = 100, DueDate = new DateTime(2026, 3, 29) },
+                        new Assignment { Id = 26, Name = "Routing Algorithm Analysis",    Description = "Compare Dijkstra and Bellman-Ford routing.",      AvailablePoints = 75,  DueDate = new DateTime(2026, 4, 11) },
+                        new Assignment { Id = 27, Name = "Wireshark Lab",                 Description = "Capture and analyze network packets.",            AvailablePoints = 60,  DueDate = new DateTime(2026, 4, 20) },
+                        new Assignment { Id = 28, Name = "Network Security Quiz",         Description = "Quiz on encryption and firewall concepts.",       AvailablePoints = 40,  DueDate = new DateTime(2026, 4, 27) },
+                        new Assignment { Id = 29, Name = "HTTP Protocol Deep Dive",       Description = "Analyze HTTP request/response cycles.",           AvailablePoints = 55,  DueDate = new DateTime(2026, 3, 21) },
+                        new Assignment { Id = 30, Name = "Final Network Design Project",  Description = "Design a scalable enterprise network.",           AvailablePoints = 200, DueDate = new DateTime(2026, 5, 6)  },
+                    },
+                    Modules = new List<Module>
+                    {
+                        new Module { Id = 41, ModuleName = "Unit 1: Network Fundamentals",       Content = new List<string> { "Network Types Video", "LAN vs WAN PDF", "Networking Quiz" } },
+                        new Module { Id = 42, ModuleName = "Unit 2: OSI Model",                  Content = new List<string> { "OSI Layers Video", "Layer Functions PDF", "OSI Examples" } },
+                        new Module { Id = 43, ModuleName = "Unit 3: TCP/IP",                     Content = new List<string> { "TCP vs UDP Video", "IP Addressing PDF", "TCP Lab" } },
+                        new Module { Id = 44, ModuleName = "Unit 4: Application Layer",          Content = new List<string> { "HTTP Overview Video", "DNS PDF", "Application Layer Lab" } },
+                        new Module { Id = 45, ModuleName = "Unit 5: Transport Layer",            Content = new List<string> { "Flow Control Video", "Congestion Control PDF", "Transport Lab" } },
+                        new Module { Id = 46, ModuleName = "Unit 6: Network Layer",              Content = new List<string> { "IP Routing Video", "Subnetting PDF", "Routing Lab" } },
+                        new Module { Id = 47, ModuleName = "Unit 7: Data Link Layer",            Content = new List<string> { "MAC Addresses Video", "Ethernet PDF", "Switch Lab" } },
+                        new Module { Id = 48, ModuleName = "Unit 8: Wireless Networks",          Content = new List<string> { "WiFi Standards Video", "802.11 PDF", "Wireless Security" } },
+                        new Module { Id = 49, ModuleName = "Unit 9: Network Security",           Content = new List<string> { "Encryption Video", "Firewalls PDF", "VPN Overview" } },
+                        new Module { Id = 50, ModuleName = "Unit 10: Final Review",              Content = new List<string> { "Network Concepts Summary", "Final Project Guidelines", "Practice Exams" } },
+                    },
+                    Roster = new List<Student>
+                    {
+                        StudentServiceProxy.Current.Students.FirstOrDefault(i => i.Id == 1),
+                        StudentServiceProxy.Current.Students.FirstOrDefault(i => i.Id == 3),
+                        StudentServiceProxy.Current.Students.FirstOrDefault(i => i.Id == 4),
+                        StudentServiceProxy.Current.Students.FirstOrDefault(i => i.Id == 6),
+                        StudentServiceProxy.Current.Students.FirstOrDefault(i => i.Id == 8),
+                        StudentServiceProxy.Current.Students.FirstOrDefault(i => i.Id == 9),
+                        StudentServiceProxy.Current.Students.FirstOrDefault(i => i.Id == 10),
+                    }
+                }
             };
         }
     }
