@@ -26,6 +26,7 @@ namespace Canvas.Library.Model
         public List<Instructor>? Instructors { get; set; }
         public List<Assignment>? Assignments{get; set;} = new List<Assignment>();
         public int SectionNumber {get; set;}
+        public Semester? Semester {get; set;}
         public string FullCourseHeader => $"{Code} {SectionNumber:D4}";
         //what printing a course will look like
         public override string ToString()
