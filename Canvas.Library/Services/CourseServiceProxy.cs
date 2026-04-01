@@ -9,7 +9,7 @@ using Canvas.Library.Model;
 // using System.Net;
 // using System.Net.ServerSentEvents;
 // using System.Reflection;
-// using System.Text;
+using System.Text;
 
 namespace Canvas.Library.Services
 {
@@ -367,6 +367,62 @@ namespace Canvas.Library.Services
             };
 
             AddOrUpdateAssignment(targetCourseId, copy);
+        }
+        //**************** Import and Export Fuctions *********************** (REVIEW)
+        public string ExportRoster(int courseId)
+        {
+            var course = Courses.FirstOrDefault(c => c.Id == courseId);
+            if (course == null) return string.Empty;
+
+            var sb = new StringBuilder();
+            sb.AppendLine("StudentCode");
+
+            foreach (var student in course.Roster ?? new List<Student>())
+                sb.AppendLine(student.Code);
+
+            return sb.ToString();
+        }
+
+        public (int added, int skipped, int notFound) ImportRoster(int courseId, string csvContent)
+        {
+            var course = Courses.FirstOrDefault(c => c.Id == courseId);
+            if (course == null) return (0, 0, 0);
+
+            if (course.Roster == null)
+                course.Roster = new List<Student>();
+
+            int added = 0, skipped = 0, notFound = 0;
+
+            var lines = csvContent
+                .Split('\n', StringSplitOptions.RemoveEmptyEntries)
+                .Select(l => l.Trim())
+                .Where(l => !string.IsNullOrWhiteSpace(l))
+                .Skip(1) // skip header
+                .ToList();
+
+            foreach (var code in lines)
+            {
+                // find student in system by code
+                var student = StudentServiceProxy.Current.Students.FirstOrDefault(s => s.Code == code);
+
+                if (student == null)
+                {
+                    notFound++;
+                    continue;
+                }
+
+                // idempotent — skip if already enrolled
+                if (course.Roster.Any(s => s.Code == code))
+                {
+                    skipped++;
+                    continue;
+                }
+
+                course.Roster.Add(student);
+                added++;
+            }
+
+            return (added, skipped, notFound);
         }
 
         private CourseServiceProxy()
