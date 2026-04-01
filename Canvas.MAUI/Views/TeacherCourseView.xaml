@@ -297,10 +297,23 @@
                 <!-- ── ROSTER TAB ── -->
                 <VerticalStackLayout IsVisible="{Binding IsRosterTab}" Spacing="12">
 
-                    <Button Text="+ Enroll Student"
-                            Clicked="ToggleEnrollFormClicked"
-                            BackgroundColor="#1565C0" TextColor="White"
-                            CornerRadius="8" HorizontalOptions="Start"/>
+                    <Grid ColumnDefinitions="Auto,Auto,Auto" ColumnSpacing="8">
+                        <Button Grid.Column="0"
+                                Text="+ Enroll Student"
+                                Clicked="ToggleEnrollFormClicked"
+                                BackgroundColor="#1565C0" TextColor="White"
+                                CornerRadius="8"/>
+                        <Button Grid.Column="1"
+                                Text="⬆ Import CSV"
+                                Clicked="ImportRosterClicked"
+                                BackgroundColor="#2E7D32" TextColor="White"
+                                CornerRadius="8"/>
+                        <Button Grid.Column="2"
+                                Text="⬇ Export CSV"
+                                Clicked="ExportRosterClicked"
+                                BackgroundColor="#00695C" TextColor="White"
+                                CornerRadius="8"/>
+                    </Grid>
 
                     <Border IsVisible="{Binding ShowEnrollForm}"
                             StrokeThickness="1"
@@ -310,17 +323,17 @@
                             Padding="14">
                         <VerticalStackLayout Spacing="10">
                             <Label Text="Enroll a Student"
-                                   FontSize="14" FontAttributes="Bold"
-                                   TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"/>
+                                FontSize="14" FontAttributes="Bold"
+                                TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"/>
                             <Entry Placeholder="Enter student code (e.g. cr24)"
-                                   Text="{Binding EnrollStudentCode}"
-                                   PlaceholderColor="#888888"
-                                   TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"
-                                   BackgroundColor="Transparent"/>
+                                Text="{Binding EnrollStudentCode}"
+                                PlaceholderColor="#888888"
+                                TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"
+                                BackgroundColor="Transparent"/>
                             <Label Text="{Binding EnrollError}"
-                                   TextColor="#EF5350"
-                                   FontSize="12"
-                                   IsVisible="{Binding HasEnrollError}"/>
+                                TextColor="#EF5350"
+                                FontSize="12"
+                                IsVisible="{Binding HasEnrollError}"/>
                             <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
                                 <Button Grid.Column="0" Text="Enroll"
                                         Clicked="EnrollStudentClicked"

@@ -2,6 +2,10 @@ using Canvas.Library.Model;
 using Canvas.Library.Services;
 using Canvas.MAUI.Models;
 using Canvas.MAUI.ViewModels;
+using CommunityToolkit.Maui.Storage; // For FileSaver
+using System.Text;                   // For Encoding
+using System.IO;                     // For MemoryStream
+using System.Threading;              // For CancellationToken
 
 namespace Canvas.MAUI.Views
 {
@@ -212,5 +216,74 @@ namespace Canvas.MAUI.Views
                 return;
             }
         }
+        private async void ExportRosterClicked(object sender, EventArgs e)
+        {
+            var vm = BindingContext as TeacherCourseViewModel;
+            if (vm == null) return;
+
+            var csv = CourseServiceProxy.Current.ExportRoster(vm.CourseId);
+            if (string.IsNullOrEmpty(csv))
+            {
+                await DisplayAlert("Empty Roster", "There are no students to export.", "OK");
+                return;
+            }
+
+            try
+            {
+                var fileName = $"{vm.Code}_roster.csv";
+                using var stream = new MemoryStream(Encoding.UTF8.GetBytes(csv));
+                
+                var fileSaver = FileSaver.Default;
+                var result = await fileSaver.SaveAsync(fileName, stream, CancellationToken.None);
+
+                if (result.IsSuccessful)
+                    await DisplayAlert("Exported", $"Saved to {result.FilePath}", "OK");
+                else
+                    await DisplayAlert("Cancelled", "File was not saved.", "OK");
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Export Failed", ex.Message, "OK");
+            }
+        }
+        private async void ImportRosterClicked(object sender, EventArgs e)
+        {
+            try
+            {
+                var vm = BindingContext as TeacherCourseViewModel;
+                PickOptions options = new PickOptions
+                {
+                    PickerTitle = "Please select a roster CSV",
+                };
+                
+                var result = await FilePicker.Default.PickAsync(options);
+
+                if(result == null) {return;}
+
+                if(result.FileName.EndsWith(".csv", StringComparison.OrdinalIgnoreCase))
+                {
+                    string csvContent;
+                    using (var stream = await result.OpenReadAsync())
+                    using (var reader = new StreamReader(stream))
+                    {
+                        csvContent = await reader.ReadToEndAsync();
+                    }
+
+                    var (added, skipped, notFound) = CourseServiceProxy.Current.ImportRoster(vm.CourseId, csvContent);
+
+                    vm.LoadCourse();
+
+                    var summary = $"✓ {added} added\n⟳ {skipped} already enrolled";
+                    if (notFound > 0)
+                        summary += $"\n✕ {notFound} code(s) not found in system";
+
+                    await DisplayAlertAsync("Import Complete", summary, "OK");
+                }
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlertAsync("Failure", $"There was an error: {ex.Message}", "okay :(");
+            }
+        }      
     }
 }
