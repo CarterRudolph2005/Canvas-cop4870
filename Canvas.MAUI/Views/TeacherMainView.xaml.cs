@@ -29,5 +29,14 @@ namespace Canvas.MAUI.Views
             await Shell.Current.GoToAsync
             ($"TeacherCourseView?courseId={selected.Id}&teacherId={vm.TeacherId}&sectionNumber={selected.SectionNumber}");
         }
+        private void ToggleFilterClicked(object sender, EventArgs e)
+        {
+            (BindingContext as TeacherMainViewModel)?.ToggleFilter();
+        }
+
+        private void ClearFiltersClicked(object sender, EventArgs e)
+        {
+            (BindingContext as TeacherMainViewModel)?.ClearFilters();
+        }
     }
 }
