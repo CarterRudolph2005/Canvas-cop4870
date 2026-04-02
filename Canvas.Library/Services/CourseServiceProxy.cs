@@ -436,6 +436,7 @@ namespace Canvas.Library.Services
                     Name = "Data Structures II",
                     Description = "Advanced data structures and algorithmic analysis.",
                     SectionNumber = 1,
+                    SemesterTaught = new Semester(2026, SemesterType.Fall),
                     Instructors = new List<Instructor>
                     {
                         InstructorServiceProxy.Current.Instructors.FirstOrDefault(i => i.Id == 1)
@@ -480,6 +481,7 @@ namespace Canvas.Library.Services
                     Name = "Object Oriented Programming",
                     Description = "Principles of OOP including inheritance, polymorphism, and design patterns.",
                     SectionNumber = 1,
+                    SemesterTaught = new Semester(2026, SemesterType.Spring),
                     Instructors = new List<Instructor>
                     {
                         InstructorServiceProxy.Current.Instructors.FirstOrDefault(i => i.Id == 2)
@@ -526,6 +528,7 @@ namespace Canvas.Library.Services
                     Name = "Computer Organization",
                     Description = "Study of computer hardware organization, assembly language, and memory systems.",
                     SectionNumber = 1,
+                    SemesterTaught = new Semester(2025, SemesterType.SummerA),
                     Instructors = new List<Instructor>
                     {
                         InstructorServiceProxy.Current.Instructors.FirstOrDefault(i => i.Id == 3)
@@ -572,6 +575,7 @@ namespace Canvas.Library.Services
                     Name = "Programming Languages",
                     Description = "Survey of programming language concepts, paradigms, and implementation.",
                     SectionNumber = 1,
+                    SemesterTaught = new Semester(2026, SemesterType.SummerB),
                     Instructors = new List<Instructor>
                     {
                         InstructorServiceProxy.Current.Instructors.FirstOrDefault(i => i.Id == 1)
@@ -616,6 +620,7 @@ namespace Canvas.Library.Services
                     Name = "Computer Networks",
                     Description = "Fundamentals of computer networking including protocols, routing, and security.",
                     SectionNumber = 1,
+                    SemesterTaught = new Semester(2025, SemesterType.Fall),
                     Instructors = new List<Instructor>
                     {
                         InstructorServiceProxy.Current.Instructors.FirstOrDefault(i => i.Id == 2)
@@ -663,6 +668,7 @@ namespace Canvas.Library.Services
                     Name = "Computer Networks",
                     Description = "Fundamentals of computer networking including protocols, routing, and security.",
                     SectionNumber = 2,
+                    SemesterTaught = new Semester(2024, SemesterType.Fall),
                     Instructors = new List<Instructor>
                     {
                         InstructorServiceProxy.Current.Instructors.FirstOrDefault(i => i.Id == 2)

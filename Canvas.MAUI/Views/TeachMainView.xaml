@@ -3,68 +3,180 @@
              x:Class="Canvas.MAUI.Views.TeacherMainView"
              Title="My Courses">
     <ContentPage.ToolbarItems>
-        <ToolbarItem Text="Log Out"
-                     Clicked="BackClicked"/>
+        <ToolbarItem Text="Log Out" Clicked="BackClicked"/>
     </ContentPage.ToolbarItems>
-    <ScrollView>
-        <CollectionView ItemsSource="{Binding Courses}"
-                        Margin="16"
-                        SelectionMode="Single"
-                        SelectionChanged="CourseTapped">
-            <CollectionView.ItemsLayout>
-                <GridItemsLayout Orientation="Vertical"
-                                 Span="2"
-                                 HorizontalItemSpacing="12"
-                                 VerticalItemSpacing="12"/>
-            </CollectionView.ItemsLayout>
-            <CollectionView.ItemTemplate>
-                <DataTemplate>
-                    <Border StrokeThickness="0"
-                            StrokeShape="RoundRectangle 16"
-                            BackgroundColor="#42A5F5"
-                            Padding="0">
-                        <Border.Shadow>
-                            <Shadow Brush="Black"
-                                    Offset="0,4"
-                                    Radius="8"
-                                    Opacity="0.15"/>
-                        </Border.Shadow>
-                        <Grid RowDefinitions="Auto,*">
-                            <!-- Header band with course code -->
-                            <BoxView Grid.Row="0"
-                                     BackgroundColor="#1565C0"
-                                     HeightRequest="48"/>
-                            <Label Grid.Row="0"
-                                   Text="{Binding FullCourseHeader}"
-                                   FontSize="12"
-                                   FontAttributes="Bold"
-                                   TextColor="White"
-                                   CharacterSpacing="1.5"
-                                   VerticalOptions="Center"
-                                   Margin="14,0"/>
-                            <!-- Course Name -->
-                            <Label Grid.Row="1"
-                                   Text="{Binding Name}"
-                                   FontSize="15"
-                                   FontAttributes="Bold"
-                                   TextColor="White"
-                                   LineBreakMode="WordWrap"
-                                   Margin="14,12"/>
-                        </Grid>
+
+    <Grid RowDefinitions="Auto,Auto,*">
+
+        <!-- Action Buttons -->
+        <Grid Grid.Row="0"
+              ColumnDefinitions="Auto,Auto,*"
+              ColumnSpacing="8"
+              Padding="16,12">
+            <Button Grid.Column="0"
+                    Text="⚙ Filter"
+                    Clicked="ToggleFilterClicked"
+                    BackgroundColor="#1565C0"
+                    TextColor="White"
+                    CornerRadius="8"
+                    HorizontalOptions="Start"/>
+        </Grid>
+
+        <!-- Filter Panel -->
+        <Border Grid.Row="1"
+                IsVisible="{Binding ShowFilterCoursesForm}"
+                StrokeThickness="1"
+                Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#444444}"
+                StrokeShape="RoundRectangle 0"
+                BackgroundColor="{AppThemeBinding Light=White, Dark=#2A2A2A}"
+                Padding="16">
+            <VerticalStackLayout Spacing="12">
+
+                <Label Text="FILTER &amp; SORT"
+                       FontSize="11"
+                       FontAttributes="Bold"
+                       TextColor="#90CAF9"
+                       CharacterSpacing="1.5"/>
+
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+
+                    <!-- Year Picker -->
+                    <VerticalStackLayout Grid.Column="0" Spacing="4">
+                        <Label Text="Year"
+                               FontSize="12"
+                               TextColor="{AppThemeBinding Light=#555555, Dark=#AAAAAA}"/>
+                        <Border StrokeThickness="1"
+                                Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#444444}"
+                                StrokeShape="RoundRectangle 8"
+                                BackgroundColor="Transparent"
+                                Padding="4,0">
+                            <Picker ItemsSource="{Binding AvailableYears}"
+                                    SelectedItem="{Binding SelectedYear}"
+                                    TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"
+                                    BackgroundColor="Transparent"
+                                    TitleColor="#888888"
+                                    Title="All Years"/>
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <!-- Semester Type Picker -->
+                    <VerticalStackLayout Grid.Column="1" Spacing="4">
+                        <Label Text="Semester"
+                               FontSize="12"
+                               TextColor="{AppThemeBinding Light=#555555, Dark=#AAAAAA}"/>
+                        <Border StrokeThickness="1"
+                                Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#444444}"
+                                StrokeShape="RoundRectangle 8"
+                                BackgroundColor="Transparent"
+                                Padding="4,0">
+                            <Picker ItemsSource="{Binding AvailableSemesters}"
+                                    SelectedItem="{Binding SelectedSemester}"
+                                    TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"
+                                    BackgroundColor="Transparent"
+                                    TitleColor="#888888"
+                                    Title="All Semesters"/>
+                        </Border>
+                    </VerticalStackLayout>
+
+                </Grid>
+
+                <!-- Sort -->
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="Sort By"
+                           FontSize="12"
+                           TextColor="{AppThemeBinding Light=#555555, Dark=#AAAAAA}"/>
+                    <Border StrokeThickness="1"
+                            Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#444444}"
+                            StrokeShape="RoundRectangle 8"
+                            BackgroundColor="Transparent"
+                            Padding="4,0">
+                        <Picker ItemsSource="{Binding SortOptions}"
+                                SelectedItem="{Binding SelectedSortOption}"
+                                TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"
+                                BackgroundColor="Transparent"/>
                     </Border>
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
-            <CollectionView.EmptyView>
-                <VerticalStackLayout HorizontalOptions="Center"
-                                     VerticalOptions="Center"
-                                     Spacing="8"
-                                     Margin="0,60">
-                    <Label Text="No courses found"
-                           FontSize="16"
-                           TextColor="#AAAAAA"
-                           HorizontalOptions="Center"/>
                 </VerticalStackLayout>
-            </CollectionView.EmptyView>
-        </CollectionView>
-    </ScrollView>
+
+                <!-- Clear Filters -->
+                <Button Text="Clear Filters"
+                        Clicked="ClearFiltersClicked"
+                        BackgroundColor="Transparent"
+                        TextColor="#EF5350"
+                        FontSize="13"
+                        HorizontalOptions="End"/>
+
+            </VerticalStackLayout>
+        </Border>
+
+        <!-- Course Grid -->
+        <ScrollView Grid.Row="2">
+            <CollectionView ItemsSource="{Binding FilteredCourses}"
+                            Margin="16"
+                            SelectionMode="Single"
+                            SelectionChanged="CourseTapped">
+                <CollectionView.ItemsLayout>
+                    <GridItemsLayout Orientation="Vertical"
+                                     Span="2"
+                                     HorizontalItemSpacing="12"
+                                     VerticalItemSpacing="12"/>
+                </CollectionView.ItemsLayout>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Border StrokeThickness="0"
+                                StrokeShape="RoundRectangle 16"
+                                BackgroundColor="#42A5F5"
+                                Padding="0">
+                            <Border.Shadow>
+                                <Shadow Brush="Black"
+                                        Offset="0,4"
+                                        Radius="8"
+                                        Opacity="0.15"/>
+                            </Border.Shadow>
+                            <Grid RowDefinitions="Auto,*">
+                                <BoxView Grid.Row="0"
+                                         BackgroundColor="#1565C0"
+                                         HeightRequest="48"/>
+                                <Label Grid.Row="0"
+                                       Text="{Binding FullCourseHeader}"
+                                       FontSize="12"
+                                       FontAttributes="Bold"
+                                       TextColor="White"
+                                       CharacterSpacing="1.5"
+                                       VerticalOptions="Center"
+                                       Margin="14,0"/>
+                                <Label Grid.Row="0"
+                                       Text="{Binding SemesterTaught}"
+                                       FontSize="10"
+                                       FontAttributes="Bold"
+                                       TextColor="White"
+                                       CharacterSpacing="1.5"
+                                       VerticalOptions="Center"
+                                       HorizontalOptions="End"
+                                       Margin="14,0"/>
+                                <Label Grid.Row="1"
+                                       Text="{Binding Name}"
+                                       FontSize="15"
+                                       FontAttributes="Bold"
+                                       TextColor="White"
+                                       LineBreakMode="WordWrap"
+                                       Margin="14,12"/>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+                <CollectionView.EmptyView>
+                    <VerticalStackLayout HorizontalOptions="Center"
+                                         VerticalOptions="Center"
+                                         Spacing="8"
+                                         Margin="0,60">
+                        <Label Text="No courses found"
+                               FontSize="16"
+                               TextColor="#AAAAAA"
+                               HorizontalOptions="Center"/>
+                    </VerticalStackLayout>
+                </CollectionView.EmptyView>
+            </CollectionView>
+        </ScrollView>
+
+    </Grid>
 </ContentPage>
