@@ -424,7 +424,6 @@ namespace Canvas.Library.Services
 
             return (added, skipped, notFound);
         }
-
         private CourseServiceProxy()
         {
             courses = new List<Course>

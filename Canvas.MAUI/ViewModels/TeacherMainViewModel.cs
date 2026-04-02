@@ -158,5 +158,82 @@ namespace Canvas.MAUI.ViewModels
             SelectedSortOption = SortOptions[0];
             ApplyFilters();
         }
+// Form visibility
+        private bool showAddCourseForm;
+        public bool ShowAddCourseForm
+        {
+            get => showAddCourseForm;
+            set { showAddCourseForm = value; OnPropertyChanged(); }
+        }
+
+        // New course fields
+        private string newCourseName;
+        public string NewCourseName
+        {
+            get => newCourseName;
+            set { newCourseName = value; OnPropertyChanged(); }
+        }
+
+        private string newCourseCode;
+        public string NewCourseCode
+        {
+            get => newCourseCode;
+            set { newCourseCode = value; OnPropertyChanged(); }
+        }
+
+        private int newCourseSelectedYear;
+        public int NewCourseSelectedYear
+        {
+            get => newCourseSelectedYear;
+            set { newCourseSelectedYear = value; OnPropertyChanged(); }
+        }
+
+        private SemesterType newCourseSelectedSemester;
+        public SemesterType NewCourseSelectedSemester
+        {
+            get => newCourseSelectedSemester;
+            set { newCourseSelectedSemester = value; OnPropertyChanged(); }
+        }
+
+        // Picker sources
+        public List<int> NewCourseYears { get; } = Enumerable
+            .Range(2026, 10)
+            .ToList();
+
+        public List<SemesterType> NewCourseSemesters { get; } = Enum
+            .GetValues(typeof(SemesterType))
+            .Cast<SemesterType>()
+            .ToList();
+
+        public void ToggleAddCourseForm()
+        {
+            ShowAddCourseForm = !ShowAddCourseForm;
+            // reset fields when closing
+            if (!ShowAddCourseForm)
+            {
+                NewCourseName = string.Empty;
+                NewCourseCode = string.Empty;
+                NewCourseSelectedYear = NewCourseYears[0];
+                NewCourseSelectedSemester = NewCourseSemesters[0];
+            }
+        }
+
+        public void AddCourse()
+        {
+            if (string.IsNullOrWhiteSpace(NewCourseName) || 
+                string.IsNullOrWhiteSpace(NewCourseCode)) return;
+
+            var course = new Course
+            {
+                Name = NewCourseName,
+                Code = NewCourseCode,
+                SemesterTaught = new Semester(NewCourseSelectedYear, NewCourseSelectedSemester),
+                Instructors = new List<Instructor> { InstructorServiceProxy.Current.GetById(TeacherId) }
+            };
+
+            CourseServiceProxy.Current.AddOrUpdate(course);
+            LoadCourses();
+            ToggleAddCourseForm();
+        }
     }
 }
