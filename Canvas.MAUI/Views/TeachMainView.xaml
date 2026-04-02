@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Canvas.MAUI.Views.TeacherMainView"
@@ -6,7 +7,7 @@
         <ToolbarItem Text="Log Out" Clicked="BackClicked"/>
     </ContentPage.ToolbarItems>
 
-    <Grid RowDefinitions="Auto,Auto,*">
+    <Grid RowDefinitions="Auto,Auto,Auto,*">
 
         <!-- Action Buttons -->
         <Grid Grid.Row="0"
@@ -14,6 +15,13 @@
               ColumnSpacing="8"
               Padding="16,12">
             <Button Grid.Column="0"
+                    Text="+ Add Course"
+                    Clicked="ToggleAddCourseClicked"
+                    BackgroundColor="#1565C0"
+                    TextColor="White"
+                    CornerRadius="8"
+                    HorizontalOptions="Start"/>
+            <Button Grid.Column="1"
                     Text="⚙ Filter"
                     Clicked="ToggleFilterClicked"
                     BackgroundColor="#1565C0"
@@ -22,8 +30,82 @@
                     HorizontalOptions="Start"/>
         </Grid>
 
-        <!-- Filter Panel -->
+        <!-- Add Course Form -->
         <Border Grid.Row="1"
+                IsVisible="{Binding ShowAddCourseForm}"
+                StrokeThickness="1"
+                Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#444444}"
+                StrokeShape="RoundRectangle 10"
+                BackgroundColor="{AppThemeBinding Light=White, Dark=#2A2A2A}"
+                Padding="14"
+                Margin="16,0">
+            <VerticalStackLayout Spacing="10">
+                <Label Text="New Course"
+                       FontSize="14"
+                       FontAttributes="Bold"
+                       TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"/>
+                <Entry Placeholder="Course Name"
+                       Text="{Binding NewCourseName}"
+                       PlaceholderColor="#888888"
+                       TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"
+                       BackgroundColor="Transparent"/>
+                <Entry Placeholder="Course Code (e.g. COP4020)"
+                       Text="{Binding NewCourseCode}"
+                       PlaceholderColor="#888888"
+                       TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"
+                       BackgroundColor="Transparent"/>
+
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                    <VerticalStackLayout Grid.Column="0" Spacing="4">
+                        <Label Text="Year"
+                               FontSize="12"
+                               TextColor="{AppThemeBinding Light=#555555, Dark=#AAAAAA}"/>
+                        <Border StrokeThickness="1"
+                                Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#444444}"
+                                StrokeShape="RoundRectangle 8"
+                                Padding="4,0">
+                            <Picker ItemsSource="{Binding NewCourseYears}"
+                                    SelectedItem="{Binding NewCourseSelectedYear}"
+                                    TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"
+                                    BackgroundColor="Transparent"/>
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Grid.Column="1" Spacing="4">
+                        <Label Text="Semester"
+                               FontSize="12"
+                               TextColor="{AppThemeBinding Light=#555555, Dark=#AAAAAA}"/>
+                        <Border StrokeThickness="1"
+                                Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#444444}"
+                                StrokeShape="RoundRectangle 8"
+                                Padding="4,0">
+                            <Picker ItemsSource="{Binding NewCourseSemesters}"
+                                    SelectedItem="{Binding NewCourseSelectedSemester}"
+                                    TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"
+                                    BackgroundColor="Transparent"/>
+                        </Border>
+                    </VerticalStackLayout>
+                </Grid>
+
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                    <Button Grid.Column="0"
+                            Text="Add"
+                            Clicked="AddCourseClicked"
+                            BackgroundColor="#1565C0"
+                            TextColor="White"
+                            CornerRadius="8"/>
+                    <Button Grid.Column="1"
+                            Text="Cancel"
+                            Clicked="ToggleAddCourseClicked"
+                            BackgroundColor="#888888"
+                            TextColor="White"
+                            CornerRadius="8"/>
+                </Grid>
+            </VerticalStackLayout>
+        </Border>
+
+        <!-- Filter Panel -->
+        <Border Grid.Row="2"
                 IsVisible="{Binding ShowFilterCoursesForm}"
                 StrokeThickness="1"
                 Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#444444}"
@@ -39,8 +121,6 @@
                        CharacterSpacing="1.5"/>
 
                 <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
-
-                    <!-- Year Picker -->
                     <VerticalStackLayout Grid.Column="0" Spacing="4">
                         <Label Text="Year"
                                FontSize="12"
@@ -59,7 +139,6 @@
                         </Border>
                     </VerticalStackLayout>
 
-                    <!-- Semester Type Picker -->
                     <VerticalStackLayout Grid.Column="1" Spacing="4">
                         <Label Text="Semester"
                                FontSize="12"
@@ -77,10 +156,8 @@
                                     Title="All Semesters"/>
                         </Border>
                     </VerticalStackLayout>
-
                 </Grid>
 
-                <!-- Sort -->
                 <VerticalStackLayout Spacing="4">
                     <Label Text="Sort By"
                            FontSize="12"
@@ -97,7 +174,6 @@
                     </Border>
                 </VerticalStackLayout>
 
-                <!-- Clear Filters -->
                 <Button Text="Clear Filters"
                         Clicked="ClearFiltersClicked"
                         BackgroundColor="Transparent"
@@ -109,7 +185,7 @@
         </Border>
 
         <!-- Course Grid -->
-        <ScrollView Grid.Row="2">
+        <ScrollView Grid.Row="3">
             <CollectionView ItemsSource="{Binding FilteredCourses}"
                             Margin="16"
                             SelectionMode="Single"

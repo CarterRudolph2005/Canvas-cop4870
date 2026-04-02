@@ -1,24 +1,29 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="Canvas.MAUI.MainPage">
+             x:Class="Canvas.MAUI.MainPage"
+             BackgroundColor="Purple">
 
     <VerticalStackLayout Spacing="25" Padding="30" VerticalOptions="Center">
 
         <Label Text="Welcome to Canvas"
-            FontSize="32"
+            FontSize="64"
             HorizontalOptions="Center"
-            TextColor="#FF660080" />
+            TextColor="#FFFF" />
 
         <Button Text="I am a Teacher"
                 Clicked="OnTeacherClicked"
                 HeightRequest="60"
-                BackgroundColor="#FF008053" />
+                WidthRequest="600"
+                BackgroundColor="#1565C0"
+                FontSize="32"/>
 
         <Button Text="I am a Student"
                 Clicked="OnStudentClicked"
                 HeightRequest="60"
-                BackgroundColor="#FFCE12C5" />
+                WidthRequest="600"
+                BackgroundColor="#1565C0"
+                FontSize="32"/>
 
     </VerticalStackLayout>
 

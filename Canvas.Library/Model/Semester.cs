@@ -11,6 +11,7 @@ namespace Canvas.Library.Model
     public class Semester
     {
         public SemesterType Session {get; set;}
+        public Semester() { }
         public int Year {get; set;}
         public Semester(int y, SemesterType s)
         {

@@ -38,5 +38,15 @@ namespace Canvas.MAUI.Views
         {
             (BindingContext as TeacherMainViewModel)?.ClearFilters();
         }
+        private void ToggleAddCourseClicked(object sender, EventArgs e)
+        {
+            (BindingContext as TeacherMainViewModel)?.ToggleAddCourseForm();
+        }
+
+        private void AddCourseClicked(object sender, EventArgs e)
+        {
+            (BindingContext as TeacherMainViewModel)?.AddCourse();
+        }
     }
+
 }
