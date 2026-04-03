@@ -7,7 +7,7 @@ User Model
 
 namespace Canvas.Library.Model
 {
-    public class User
+    public abstract class User
     {
         //bc of incoming proxy services, I don't need all the fancy getter and setter stuff
 

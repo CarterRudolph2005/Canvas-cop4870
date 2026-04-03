@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Net.Mime;
 using System.Runtime.CompilerServices;
 
 namespace Canvas.MAUI.Models
@@ -13,6 +14,7 @@ namespace Canvas.MAUI.Models
         public int Id { get; set; }
         public string ModuleName { get; set; }
         public List<string> Content { get; set; }
+        public List<ContentType> ModuleContents {get; set;}
 
         private bool _isExpanded;
         public bool IsExpanded
