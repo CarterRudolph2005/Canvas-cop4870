@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:Canvas.MAUI.ViewModels"
+             x:Class="Canvas.MAUI.Views.ModuleContentCreationView"
+             BackgroundColor="#0D1B2A">
+
+    <Grid RowDefinitions="Auto,*,Auto">
+
+        <!-- Header -->
+        <Border Grid.Row="0"
+                BackgroundColor="#1565C0"
+                Padding="16"
+                StrokeThickness="0">
+            <Grid ColumnDefinitions="Auto,*">
+                <Button Grid.Column="0"
+                        Text="←"
+                        FontSize="20"
+                        TextColor="White"
+                        BackgroundColor="Transparent"
+                        Clicked="BackClicked"
+                        VerticalOptions="Center"/>
+                <Label Grid.Column="1"
+                       Text="Add Module Content"
+                       FontSize="18"
+                       FontAttributes="Bold"
+                       TextColor="White"
+                       VerticalOptions="Center"/>
+            </Grid>
+        </Border>
+
+        <!-- Form -->
+        <ScrollView Grid.Row="1" Padding="16">
+            <VerticalStackLayout Spacing="16">
+
+                <!-- Content Type Picker -->
+                <Border StrokeThickness="0"
+                        StrokeShape="RoundRectangle 12"
+                        BackgroundColor="#1E2D3D"
+                        Padding="16">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="CONTENT TYPE"
+                               FontSize="11"
+                               FontAttributes="Bold"
+                               TextColor="#90CAF9"
+                               CharacterSpacing="1.5"/>
+                        <Border StrokeThickness="1"
+                                Stroke="#2A3F55"
+                                StrokeShape="RoundRectangle 8"
+                                Padding="4,0">
+                            <Picker ItemsSource="{Binding ContentTypes}"
+                                    SelectedItem="{Binding SelectedContentType}"
+                                    TextColor="White"
+                                    BackgroundColor="Transparent"/>
+                        </Border>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Shared: Display Name -->
+                <Border StrokeThickness="0"
+                        StrokeShape="RoundRectangle 12"
+                        BackgroundColor="#1E2D3D"
+                        Padding="16">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="DISPLAY NAME"
+                               FontSize="11"
+                               FontAttributes="Bold"
+                               TextColor="#90CAF9"
+                               CharacterSpacing="1.5"/>
+                        <Entry Placeholder="Name shown in module"
+                               Text="{Binding ContentName}"
+                               PlaceholderColor="#4A6080"
+                               TextColor="White"
+                               BackgroundColor="Transparent"/>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- PAGE fields -->
+                <Border StrokeThickness="0"
+                        StrokeShape="RoundRectangle 12"
+                        BackgroundColor="#1E2D3D"
+                        Padding="16"
+                        IsVisible="{Binding IsPage}">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="PAGE BODY"
+                               FontSize="11"
+                               FontAttributes="Bold"
+                               TextColor="#90CAF9"
+                               CharacterSpacing="1.5"/>
+                        <Editor Placeholder="Page content..."
+                                Text="{Binding PageBody}"
+                                PlaceholderColor="#4A6080"
+                                TextColor="White"
+                                BackgroundColor="Transparent"
+                                MinimumHeightRequest="150"
+                                AutoSize="TextChanges"/>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- FILE fields -->
+                <Border StrokeThickness="0"
+                        StrokeShape="RoundRectangle 12"
+                        BackgroundColor="#1E2D3D"
+                        Padding="16"
+                        IsVisible="{Binding IsFile}">
+                    <VerticalStackLayout Spacing="12">
+                        <Label Text="FILE"
+                               FontSize="11"
+                               FontAttributes="Bold"
+                               TextColor="#90CAF9"
+                               CharacterSpacing="1.5"/>
+                        <Button Text="📁 Pick File"
+                                Clicked="PickFileClicked"
+                                BackgroundColor="#1565C0"
+                                TextColor="White"
+                                CornerRadius="8"
+                                HorizontalOptions="Start"/>
+                        <Label Text="{Binding FilePath}"
+                               FontSize="12"
+                               TextColor="#90CAF9"/>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- ASSIGNMENT fields -->
+                <Border StrokeThickness="0"
+                        StrokeShape="RoundRectangle 12"
+                        BackgroundColor="#1E2D3D"
+                        Padding="16"
+                        IsVisible="{Binding IsAssignment}">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="ASSIGNMENT"
+                               FontSize="11"
+                               FontAttributes="Bold"
+                               TextColor="#90CAF9"
+                               CharacterSpacing="1.5"/>
+                        <Entry Placeholder="Assignment name"
+                               Text="{Binding AssignmentName}"
+                               PlaceholderColor="#4A6080"
+                               TextColor="White"
+                               BackgroundColor="Transparent"/>
+                        <Editor Placeholder="Description"
+                                Text="{Binding AssignmentDescription}"
+                                PlaceholderColor="#4A6080"
+                                TextColor="White"
+                                BackgroundColor="Transparent"
+                                MinimumHeightRequest="80"
+                                AutoSize="TextChanges"/>
+                        <Entry Placeholder="Available points"
+                               Text="{Binding AssignmentPoints}"
+                               PlaceholderColor="#4A6080"
+                               TextColor="White"
+                               BackgroundColor="Transparent"
+                               Keyboard="Numeric"/>
+                        <Label Text="Due Date"
+                               FontSize="12"
+                               TextColor="#90CAF9"/>
+                        <DatePicker Date="{Binding AssignmentDueDate}"
+                                    TextColor="White"
+                                    BackgroundColor="Transparent"/>
+                    </VerticalStackLayout>
+                </Border>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- Save Button -->
+    <Border Grid.Row="2"
+            BackgroundColor="#0D1B2A"
+            Padding="16"
+            StrokeThickness="0">
+        <Button Text="Save"
+                Clicked="SaveClicked"
+                BackgroundColor="#1565C0"
+                TextColor="White"
+                FontAttributes="Bold"
+                FontSize="16"
+                CornerRadius="12"
+                HeightRequest="52"/>
+    </Border>
+
+    </Grid>
+</ContentPage>

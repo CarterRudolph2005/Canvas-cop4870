@@ -1,5 +1,6 @@
 using Canvas.Library.Model;
 using Canvas.Library.Services;
+using Canvas.MAUI.Models;
 
 //from class github
 using System;
@@ -17,7 +18,7 @@ namespace Canvas.MAUI.ViewModels
     {
         public StudentCourseViewModel()
         {
-            Modules = new ObservableCollection<Module>();
+            Modules = new ObservableCollection<ModuleViewModel>();
             Assignments = new ObservableCollection<Assignment>();
             // GradePercentage = 0;
         }
@@ -69,8 +70,8 @@ namespace Canvas.MAUI.ViewModels
             set{ gradePercentage = value; OnPropertyChanged(); }
         }
 
-        private ObservableCollection<Module> modules;
-        public ObservableCollection<Module> Modules
+        private ObservableCollection<ModuleViewModel> modules;
+        public ObservableCollection<ModuleViewModel> Modules
         {
             get => modules;
             set
@@ -99,19 +100,53 @@ namespace Canvas.MAUI.ViewModels
         private void OnPropertyChanged([CallerMemberName] string propertyName = null)
         => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
-        public void LoadMenu()
+public void LoadMenu()
+{
+    var _course = CourseServiceProxy.Current.Courses.FirstOrDefault(i => i.Id == courseId);
+    if (_course == null) return;
+
+    Name = _course.Name ?? string.Empty;
+    Code = _course.Code ?? string.Empty;
+    Announcements = new ObservableCollection<Announcement>(_course.Announcements ?? new List<Announcement>());
+    Assignments = new ObservableCollection<Assignment>(_course.Assignments ?? new List<Assignment>());
+
+    // 1. Initialize the collection
+    Modules = new ObservableCollection<ModuleViewModel>();
+
+    // 2. Single loop to populate and configure
+    if (_course.Modules != null)
+    {
+        foreach (var m in _course.Modules)
         {
-            var _course = CourseServiceProxy.Current.Courses.FirstOrDefault(i => i.Id == courseId);
-            if (_course == null) return;
+            // Create the ViewModel
+            var moduleVM = new ModuleViewModel
+            {
+                Id = m.Id,
+                ModuleName = m.ModuleName,
+                ModuleContents = m.ModuleContents?.ToList() ?? new List<ModuleContent>()
+            };
 
-            Modules = new ObservableCollection<Module>(_course.Modules ?? new List<Module>());
-            Assignments = new ObservableCollection<Assignment>(_course.Assignments ?? new List<Assignment>());
-            Announcements = new ObservableCollection<Announcement>(_course.Announcements ?? new List<Announcement>());
-            GradePercentage = CourseServiceProxy.Current.CalculateGrade(courseId, StudentId);
+            // Apply logic to the contents immediately
+            foreach (var content in moduleVM.ModuleContents)
+            {
+                if (content is AssignmentContent ac)
+                {
+                    var assignment = _course.Assignments?.FirstOrDefault(a => a.Id == ac.AssignmentId);
+                    if (assignment != null)
+                    {
+                        ac.Name = assignment.Name;
+                    }
+                }
+            }
 
-            Name = _course.Name ?? String.Empty;
-            Code = _course.Code ?? String.Empty;
+            // Finalize the module
+            moduleVM.RefreshContents();
+            
+            // Add it to the main collection
+            Modules.Add(moduleVM);
         }
+    }
+}
 
     }
 }

@@ -21,6 +21,12 @@ namespace Canvas.MAUI.Views
             UpdateTabStyles(0);
         }
 
+        private void OnNavigatedTo(object sender, NavigatedToEventArgs e)
+        {
+            base.OnNavigatedTo(e);
+            (BindingContext as TeacherCourseViewModel)?.LoadCourse();
+        }   
+
         private async void BackClicked(object sender, EventArgs e)
             => await Shell.Current.GoToAsync("//MainPage");
 
@@ -92,13 +98,13 @@ namespace Canvas.MAUI.Views
             ViewModel.DeleteModule(module);
         }
 
-        private async void AddModuleContentClicked(object sender, EventArgs e)
-        {
-            var module = (sender as Button)?.CommandParameter as ModuleViewModel;
-            var content = await DisplayPromptAsync("Add Content", "Enter content item:");
-            if (!string.IsNullOrWhiteSpace(content))
-                ViewModel.AddModuleContent(module.Id, content);
-        }
+        // private async void AddModuleContentClicked(object sender, EventArgs e)
+        // {
+        //     var module = (sender as Button)?.CommandParameter as ModuleViewModel;
+        //     var content = await DisplayPromptAsync("Add Content", "Enter content item:");
+        //     if (!string.IsNullOrWhiteSpace(content))
+        //         ViewModel.AddModuleContent(module.Id, content);
+        // }
         private async void EditModuleClicked(object sender, EventArgs e)
         {
             var module = (sender as Button)?.CommandParameter as ModuleViewModel;
@@ -141,6 +147,97 @@ namespace Canvas.MAUI.Views
                     ViewModel.DeleteModuleContent(module.Id, index);
             }
         }
+        private async void ModuleContentTapped(object sender, TappedEventArgs e)
+        {
+            var content = e.Parameter as ModuleContent;
+            if (content == null) return;
+
+            var vm = BindingContext as StudentCourseViewModel; // or TeacherCourseViewModel
+            
+            switch (content)
+            {
+                case AssignmentContent a:
+                    await Shell.Current.GoToAsync(
+                        $"AssignmentSubmissionView?courseId={vm.CourseId}&assignmentId={a.AssignmentId}&studentId={vm.StudentId}");
+                    break;
+
+                case FileContent f:
+                    var confirm = await DisplayAlert(f.Name, $"Download {f.Name}?", "Download", "Cancel");
+                    if (!confirm) break;
+                    
+                    try
+                    {
+                        var stream = await FileSystem.OpenAppPackageFileAsync(f.FilePath);
+                        var result = await FileSaver.Default.SaveAsync(f.FilePath, stream, CancellationToken.None);
+                        if (result.IsSuccessful)
+                            await DisplayAlert("Downloaded", $"Saved to {result.FilePath}", "OK");
+                    }
+                    catch (Exception ex)
+                    {
+                        await DisplayAlert("Download Failed", ex.Message, "OK");
+                    }
+                    break;
+
+                case PageContent p:
+                default:
+                    await Shell.Current.GoToAsync(
+                        $"ContentPageView?contentId={content.Id}&courseId={vm.CourseId}");
+                    break;
+            }
+        }
+
+        private void ModuleHeaderTapped(object sender, TappedEventArgs e)
+        {
+            var module = e.Parameter as ModuleViewModel;
+            if (module == null) return;
+            module.IsExpanded = !module.IsExpanded;
+        }
+
+        // private async void AddModuleContentClicked(object sender, EventArgs e)
+        // {
+        //     var module = (sender as Button)?.CommandParameter as ModuleViewModel;
+        //     if (module == null) return;
+
+        //     var vm = BindingContext as TeacherCourseViewModel;
+
+        //     try
+        //     {
+        //         await Shell.Current.GoToAsync(
+        //             $"ModuleContentCreationView?courseId={vm.CourseId}&moduleId={module.Id}");
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         await DisplayAlert("Navigation Error", ex.Message, "OK");
+        //     }
+
+        //     // await Shell.Current.GoToAsync(
+        //         // $"ModuleContentCreationView?courseId={vm.CourseId}&moduleId={module.Id}");
+        // }
+private async void AddModuleContentClicked(object sender, EventArgs e)
+{
+    var button = sender as Button;
+    var module = button?.CommandParameter as ModuleViewModel
+              ?? button?.BindingContext as ModuleViewModel;
+
+    if (module == null) return;
+
+    var vm = BindingContext as TeacherCourseViewModel;
+    if (vm == null) return;
+
+    try
+    {
+        await Shell.Current.GoToAsync(
+            $"ModuleContentCreationView?courseId={vm.CourseId}&moduleId={module.Id}");
+    }
+    catch (Exception ex)
+    {
+        await DisplayAlert("Navigation Error", ex.Message, "OK");
+    }
+}
+        // public void CopyModuleClicked(object sender, EventArgs e)
+        // {   
+                
+        // }       
 
         // ── Assignments ────────────────────────────────────────────
         private async void AddAssignmentClicked(object sender, EventArgs e)
@@ -284,6 +381,7 @@ namespace Canvas.MAUI.Views
             {
                 await DisplayAlertAsync("Failure", $"There was an error: {ex.Message}", "okay :(");
             }
-        }      
+        } 
+  
     }
 }

@@ -165,20 +165,33 @@ namespace Canvas.MAUI.ViewModels
 
             Name = course.Name ?? string.Empty;
             Code = course.Code ?? string.Empty;
-
             Announcements = new ObservableCollection<Announcement>(course.Announcements ?? new List<Announcement>());
             Assignments = new ObservableCollection<Assignment>(course.Assignments ?? new List<Assignment>());
             Roster = new ObservableCollection<Student>(course.Roster ?? new List<Student>());
 
             Modules = new ObservableCollection<ModuleViewModel>(
-                (course.Modules ?? new List<Module>()).Select(m => new ModuleViewModel
+                course.Modules?.Select(m => new ModuleViewModel
                 {
                     Id = m.Id,
                     ModuleName = m.ModuleName,
-                    Content = m.Content ?? new List<string>(),
-                    IsExpanded = true
-                })
+                    Content = m.Content,
+                    ModuleContents = m.ModuleContents ?? new List<ModuleContent>()
+                }) ?? Enumerable.Empty<ModuleViewModel>()
             );
+
+            // Resolve AssignmentContent names from actual assignments
+            foreach (var module in Modules)
+            {
+                foreach (var content in module.ModuleContents)
+                {
+                    if (content is AssignmentContent ac)
+                    {
+                        var assignment = course.Assignments?.FirstOrDefault(a => a.Id == ac.AssignmentId);
+                        if (assignment != null)
+                            ac.Name = assignment.Name;
+                    }
+                }
+            }
 
             OnPropertyChanged(nameof(Announcements));
             OnPropertyChanged(nameof(Modules));
