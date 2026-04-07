@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Canvas.MAUI.Views.GradeSubmissionView"
+             Title="{Binding AssignmentName}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="16">
+
+            <Label Text="Grade Submissions"
+                   FontSize="20"
+                   FontAttributes="Bold"
+                   TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"/>
+
+            <Border StrokeThickness="1"
+                    StrokeShape="RoundRectangle 10"
+                    Padding="14"
+                    BackgroundColor="{AppThemeBinding Light=White, Dark=#2A2A2A}"
+                    Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#444444}">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Select Student"
+                           FontSize="13"
+                           FontAttributes="Bold"
+                           TextColor="{AppThemeBinding Light=#555555, Dark=#AAAAAA}"/>
+                    <Picker x:Name="StudentPicker"
+                            Title="Select a student..."
+                            SelectedIndexChanged="StudentPickerChanged"
+                            TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"
+                            BackgroundColor="{AppThemeBinding Light=#F5F5F5, Dark=#333333}"/>
+                </VerticalStackLayout>
+            </Border>
+
+            <Border StrokeThickness="1"
+                    StrokeShape="RoundRectangle 10"
+                    Padding="14"
+                    BackgroundColor="{AppThemeBinding Light=White, Dark=#2A2A2A}"
+                    Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#444444}">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Submission"
+                           FontSize="13"
+                           FontAttributes="Bold"
+                           TextColor="{AppThemeBinding Light=#555555, Dark=#AAAAAA}"/>
+                    <Editor x:Name="SubmissionText"
+                            IsReadOnly="True"
+                            MinimumHeightRequest="120"
+                            Text="No student selected."
+                            TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"
+                            BackgroundColor="{AppThemeBinding Light=#F5F5F5, Dark=#333333}"/>
+                </VerticalStackLayout>
+            </Border>
+
+            <Border StrokeThickness="1"
+                    StrokeShape="RoundRectangle 10"
+                    Padding="14"
+                    BackgroundColor="{AppThemeBinding Light=White, Dark=#2A2A2A}"
+                    Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#444444}">
+                <VerticalStackLayout Spacing="8">
+                    <Label x:Name="PointsLabel"
+                           FontSize="13"
+                           FontAttributes="Bold"
+                           TextColor="{AppThemeBinding Light=#555555, Dark=#AAAAAA}"/>
+                    <Entry x:Name="GradeEntry"
+                           Keyboard="Numeric"
+                           Placeholder="Enter points awarded"
+                           TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"
+                           BackgroundColor="{AppThemeBinding Light=#F5F5F5, Dark=#333333}"/>
+                </VerticalStackLayout>
+            </Border>
+
+            <Button Text="Submit Grade"
+                    Clicked="SubmitGradeClicked"
+                    BackgroundColor="#1565C0"
+                    TextColor="White"
+                    CornerRadius="8"/>
+
+            <Button Text="Back"
+                    Clicked="BackClicked"
+                    BackgroundColor="Transparent"
+                    TextColor="#42A5F5"
+                    CornerRadius="8"/>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

@@ -272,6 +272,20 @@ namespace Canvas.MAUI.Views
             await DisplayAlert("Done", $"Copied to {target.Name}.", "OK");
         }
 
+        private async void GradeAssignmentClicked(object sender, TappedEventArgs e)
+        {
+            var assignment = e.Parameter as Assignment;
+            if (assignment == null) return;
+
+            if (assignment.Submissions == null || !assignment.Submissions.Any())
+            {
+                await DisplayAlert("No Submissions", "No students have submitted this assignment yet.", "OK");
+                return;
+            }
+
+            await Shell.Current.GoToAsync($"GradeSubmissionView?courseId={ViewModel.CourseId}&assignmentId={assignment.Id}");
+        }
+
         // ── Roster ─────────────────────────────────────────────────
         private void ToggleEnrollFormClicked(object sender, EventArgs e)
             => ViewModel.ToggleEnrollForm();
