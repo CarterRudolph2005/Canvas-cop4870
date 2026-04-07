@@ -165,10 +165,22 @@ namespace Canvas.MAUI.ViewModels
 
             Name = course.Name ?? string.Empty;
             Code = course.Code ?? string.Empty;
-            Announcements = new ObservableCollection<Announcement>(course.Announcements ?? new List<Announcement>());
-            Assignments = new ObservableCollection<Assignment>(course.Assignments ?? new List<Assignment>());
-            Roster = new ObservableCollection<Student>(course.Roster ?? new List<Student>());
+            // Announcements = new ObservableCollection<Announcement>(course.Announcements ?? new List<Announcement>());
+            // Assignments = new ObservableCollection<Assignment>(course.Assignments ?? new List<Assignment>());
+            // Roster = new ObservableCollection<Student>(course.Roster ?? new List<Student>());
 
+Assignments.Clear();
+foreach (var a in course.Assignments ?? new List<Assignment>())
+    Assignments.Add(a);
+Announcements.Clear();
+foreach (var a in course.Announcements ?? new List<Announcement>())
+    Announcements.Add(a);
+
+Roster.Clear();
+foreach (var s in course.Roster ?? new List<Student>())
+    Roster.Add(s);
+
+            RefreshModules();
             Modules = new ObservableCollection<ModuleViewModel>(
                 course.Modules?.Select(m => new ModuleViewModel
                 {
@@ -279,10 +291,16 @@ namespace Canvas.MAUI.ViewModels
             RefreshModules();
         }
 
-        public void DeleteModuleContent(int moduleId, int contentIndex)
+        public void DeleteModuleContent(int moduleId, ModuleContent content)
         {
-            CourseServiceProxy.Current.DeleteModuleContent(_courseId, moduleId, contentIndex);
-            RefreshModules();
+            // Handle assignment cleanup first if needed
+            if (content is AssignmentContent a)
+            {
+                CourseServiceProxy.Current.DeleteAssignment(CourseId, a.AssignmentId);
+            }
+
+            // Then always delete the module content entry
+            CourseServiceProxy.Current.DeleteModuleContents(CourseId, moduleId, content.Id);
         }
         public void UpdateModuleName(int moduleId, string newName)
         {
@@ -305,6 +323,24 @@ namespace Canvas.MAUI.ViewModels
         {
             CourseServiceProxy.Current.DeleteAssignment(_courseId, assignment.Id);
             Assignments.Remove(assignment);
+            DeleteAssignmentFromModuleContents(assignment.Id);
+        }
+
+        private void DeleteAssignmentFromModuleContents(int assignmentId)
+        {
+            var course = CourseServiceProxy.Current.Courses?.FirstOrDefault(c => c.Id == _courseId);
+            if (course == null) return;
+
+            foreach (var module in course.Modules ?? [])
+            {
+                var match = module.ModuleContents?
+                    .FirstOrDefault(c => c is AssignmentContent a && a.AssignmentId == assignmentId);
+
+                if (match != null)
+                {
+                    CourseServiceProxy.Current.DeleteModuleContents(_courseId, module.Id, match.Id);
+                }
+            }
         }
 
         public void RefreshAssignments()

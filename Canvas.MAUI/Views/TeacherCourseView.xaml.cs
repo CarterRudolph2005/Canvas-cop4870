@@ -23,8 +23,9 @@ namespace Canvas.MAUI.Views
 
         private void OnNavigatedTo(object sender, NavigatedToEventArgs e)
         {
+            DisplayAlert("Alert", "OnNav ran", "ok");
             base.OnNavigatedTo(e);
-            (BindingContext as TeacherCourseViewModel)?.LoadCourse();
+            ViewModel.LoadCourse();
         }   
 
         private async void BackClicked(object sender, EventArgs e)
@@ -135,17 +136,17 @@ namespace Canvas.MAUI.Views
         private void DeleteModuleContentClicked(object sender, EventArgs e)
         {
             var btn = sender as Button;
-            var content = btn?.CommandParameter as string;
-            var rowGrid = btn?.Parent as Grid;
-            var contentStack = rowGrid?.Parent as VerticalStackLayout;
+            var content = btn?.CommandParameter as ModuleContent;
+
+            var grid = btn?.Parent as Grid;           // Grid (ColumnDefs Auto,*,44)
+            var border = grid?.Parent as Border;      // Border (the content row border)
+            var contentStack = border?.Parent as VerticalStackLayout;  // VerticalStackLayout (ModuleContents)
             var module = contentStack?.BindingContext as ModuleViewModel;
 
-            if (module != null && content != null)
-            {
-                var index = module.Content.IndexOf(content);
-                if (index >= 0)
-                    ViewModel.DeleteModuleContent(module.Id, index);
-            }
+            if (module == null || content == null) return;
+
+            ViewModel.DeleteModuleContent(module.Id, content);
+            ViewModel.LoadCourse();
         }
         private async void ModuleContentTapped(object sender, TappedEventArgs e)
         {
@@ -213,28 +214,28 @@ namespace Canvas.MAUI.Views
         //     // await Shell.Current.GoToAsync(
         //         // $"ModuleContentCreationView?courseId={vm.CourseId}&moduleId={module.Id}");
         // }
-private async void AddModuleContentClicked(object sender, EventArgs e)
-{
-    var button = sender as Button;
-    var module = button?.CommandParameter as ModuleViewModel
-              ?? button?.BindingContext as ModuleViewModel;
+        private async void AddModuleContentClicked(object sender, EventArgs e)
+        {
+            var button = sender as Button;
+            var module = button?.CommandParameter as ModuleViewModel
+                    ?? button?.BindingContext as ModuleViewModel;
 
-    if (module == null) return;
+            if (module == null) return;
 
-    var vm = BindingContext as TeacherCourseViewModel;
-    if (vm == null) return;
+            var vm = BindingContext as TeacherCourseViewModel;
+            if (vm == null) return;
 
-    try
-    {
-        await Shell.Current.GoToAsync(
-            $"ModuleContentCreationView?courseId={vm.CourseId}&moduleId={module.Id}");
-    }
-    catch (Exception ex)
-    {
-        await DisplayAlert("Navigation Error", ex.Message, "OK");
-    }
-}
-        // public void CopyModuleClicked(object sender, EventArgs e)
+            try
+            {
+                await Shell.Current.GoToAsync(
+                    $"ModuleContentCreationView?courseId={vm.CourseId}&moduleId={module.Id}");
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Navigation Error", ex.Message, "OK");
+            }
+        }
+                // public void CopyModuleClicked(object sender, EventArgs e)
         // {   
                 
         // }       
@@ -253,6 +254,7 @@ private async void AddModuleContentClicked(object sender, EventArgs e)
         {
             var assignment = (sender as Button)?.CommandParameter as Assignment;
             ViewModel.DeleteAssignment(assignment);
+            ViewModel.LoadCourse();
         }
         private async void CopyAssignmentClicked(object sender, EventArgs e)
         {
