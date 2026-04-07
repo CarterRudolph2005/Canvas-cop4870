@@ -129,6 +129,25 @@ namespace Canvas.Library.Services
             module.Content.Add(newContent);
             return true;
         }
+        public bool AddModuleContents(int courseId, int moduleId, ModuleContent content)
+        {
+            var course = Courses.FirstOrDefault(c => c.Id == courseId);
+            if (course == null) return false;
+
+            var module = course.Modules?.FirstOrDefault(m => m.Id == moduleId);
+            if (module == null) return false;
+
+            if (module.ModuleContents == null)
+                module.ModuleContents = new List<ModuleContent>();
+
+            var allContents = course.Modules
+                .SelectMany(m => m.ModuleContents ?? new List<ModuleContent>())
+                .ToList();
+            content.Id = allContents.Any() ? allContents.Max(c => c.Id) + 1 : 1;
+
+            module.ModuleContents.Add(content);
+            return true;
+        }
 
         public void UpdateModuleContent(int CourseId, int ModuleId, int ContentIndex, string newContent)
         {
@@ -156,6 +175,15 @@ namespace Canvas.Library.Services
             {
                 module.Content.RemoveAt(ContentIndex);
             }
+        }
+        public void DeleteModuleContents(int CourseId, int ModuleId, int ContentId)
+        {
+            var course = Courses?.FirstOrDefault(c => c.Id == CourseId);
+            if (course == null) return;
+            var module = course.Modules?.FirstOrDefault(m => m.Id == ModuleId);
+            if (module == null || module.Content == null) return;
+            var content = module.ModuleContents.FirstOrDefault(i => i.Id == ContentId);
+            module.ModuleContents.Remove(content);
         }
 
         public void UnenrollStudent(int CourseID, int StudnetID)
@@ -214,10 +242,10 @@ namespace Canvas.Library.Services
         }
 
 
-        public bool AddOrUpdateAssignment(int courseId, Assignment assignment)
+        public Assignment AddOrUpdateAssignment(int courseId, Assignment assignment)
         {
             var course = Courses.FirstOrDefault(i => i.Id == courseId);
-            if (course == null) return false;
+            if (course == null) return null;
 
             course.Assignments ??= new List<Assignment>();
 
@@ -229,13 +257,13 @@ namespace Canvas.Library.Services
             else
             {
                 var existing = course.Assignments.FirstOrDefault(a => a.Id == assignment.Id);
-                if (existing == null) return false;
+                if (existing == null) return null;
                 existing.Name = assignment.Name;
                 existing.Description = assignment.Description;
                 existing.AvailablePoints = assignment.AvailablePoints;
                 existing.DueDate = assignment.DueDate;
             }
-            return true;
+            return assignment;
         }
         private int AssignmentNextKey(Course course) 
         {
@@ -256,6 +284,12 @@ namespace Canvas.Library.Services
             // submissions are owned by the assignment so they die with it
             assignmentToRemove.Submissions?.Clear();
             course.Assignments.Remove(assignmentToRemove);
+
+            if (course.Modules == null) return true;
+            foreach (var module in course.Modules)
+            {
+                module.ModuleContents?.RemoveAll(c => c is AssignmentContent ac && ac.AssignmentId == assignmentId);
+            }
             return true;
         }
         public List<Submission> GetStudentSubmissions(int courseId, int studentId)
@@ -424,6 +458,11 @@ namespace Canvas.Library.Services
 
             return (added, skipped, notFound);
         }
+        public Assignment GetAssignmentById(int courseId, int assignmentId)
+        {
+            var course = Courses.FirstOrDefault(c => c.Id == courseId);
+            return course?.Assignments?.FirstOrDefault(a => a.Id == assignmentId);
+        }
         private CourseServiceProxy()
         {
             courses = new List<Course>
@@ -457,7 +496,7 @@ namespace Canvas.Library.Services
                             ModuleContents = new List<ModuleContent>
                             {
                                 new PageContent    { Id = 1, Name = "Singly Linked Lists Video",   Body = "This page covers singly linked list fundamentals including traversal, insertion, and deletion." },
-                                new FileContent    { Id = 2, Name = "Doubly Linked Lists PDF",      FilePath = "/resources/doubly_linked.pdf", MimeType = "application/pdf" },
+                                new FileContent    { Id = 2, Name = "Doubly Linked Lists PDF",      FilePath = "doubly_linked.pdf", MimeType = "application/pdf" },
                                 new PageContent    { Id = 3, Name = "Big O Notation Cheat Sheet",   Body = "O(1) - Constant\nO(log n) - Logarithmic\nO(n) - Linear\nO(n log n) - Linearithmic\nO(n²) - Quadratic" },
                             }
                         },
@@ -480,7 +519,7 @@ namespace Canvas.Library.Services
                             {
                                 new PageContent    { Id = 7,  Name = "Hash Functions Video",      Body = "A hash function maps keys to indices in a hash table. Good hash functions distribute keys uniformly." },
                                 new FileContent    { Id = 8,  Name = "Collision Resolution PDF",  FilePath = "/resources/collision_resolution.pdf", MimeType = "application/pdf" },
-                                new AssignmentContent { Id = 9,  Name = "Practice Problems",      AssignmentId = 4 },
+                                new AssignmentContent { Id = 9, AssignmentId = 1 },
                             }
                         },
                         new Module
@@ -491,7 +530,7 @@ namespace Canvas.Library.Services
                             {
                                 new PageContent { Id = 10, Name = "Min/Max Heap Video",          Body = "A min-heap ensures the parent node is always smaller than its children. A max-heap is the reverse." },
                                 new PageContent { Id = 11, Name = "Priority Queue Use Cases",    Body = "Priority queues are used in Dijkstra's algorithm, A* search, CPU scheduling, and Huffman coding." },
-                                new AssignmentContent { Id = 12, Name = "Heap Implementation Guide", AssignmentId = 5 },
+                                new AssignmentContent { Id = 12, AssignmentId = 2 },
                             }
                         },
                         new Module
@@ -513,7 +552,7 @@ namespace Canvas.Library.Services
                             {
                                 new PageContent { Id = 16, Name = "BFS Video",                 Body = "Breadth-First Search explores all neighbors at the current depth before moving to the next level." },
                                 new FileContent { Id = 17, Name = "DFS PDF",                   FilePath = "/resources/dfs.pdf", MimeType = "application/pdf" },
-                                new AssignmentContent { Id = 18, Name = "Shortest Path Problems", AssignmentId = 3 },
+                                new AssignmentContent { Id = 18, AssignmentId = 3 },
                             }
                         },
                         new Module
@@ -524,7 +563,7 @@ namespace Canvas.Library.Services
                             {
                                 new PageContent { Id = 19, Name = "Memoization Video",         Body = "Memoization stores results of expensive function calls and returns the cached result when the same inputs occur again." },
                                 new FileContent { Id = 20, Name = "Tabulation PDF",            FilePath = "/resources/tabulation.pdf", MimeType = "application/pdf" },
-                                new AssignmentContent { Id = 21, Name = "Classic DP Problems", AssignmentId = 2 },
+                                new AssignmentContent { Id = 21, AssignmentId = 4 },
                             }
                         },
                         new Module
@@ -556,7 +595,7 @@ namespace Canvas.Library.Services
                             ModuleContents = new List<ModuleContent>
                             {
                                 new FileContent { Id = 28, Name = "Final Exam Study Guide",   FilePath = "/resources/cop4530_study_guide.pdf", MimeType = "application/pdf" },
-                                new AssignmentContent { Id = 29, Name = "Past Exam Problems", AssignmentId = 1 },
+                                new AssignmentContent { Id = 29, AssignmentId = 5 },
                                 new FileContent { Id = 30, Name = "Review Slides",            FilePath = "/resources/cop4530_review.pdf", MimeType = "application/pdf" },
                             }
                         },
@@ -604,7 +643,7 @@ namespace Canvas.Library.Services
                             {
                                 new PageContent { Id = 31, Name = "Classes and Objects Video", Body = "A class is a blueprint for creating objects. Objects are instances of classes with state and behavior." },
                                 new FileContent { Id = 32, Name = "Encapsulation PDF",         FilePath = "/resources/encapsulation.pdf", MimeType = "application/pdf" },
-                                new AssignmentContent { Id = 33, Name = "OOP Quiz",            AssignmentId = 6 },
+                                new AssignmentContent { Id = 33, Name = "This shouldn't be there", AssignmentId = 6 },
                             }
                         },
                         new Module
@@ -615,7 +654,7 @@ namespace Canvas.Library.Services
                             {
                                 new PageContent { Id = 34, Name = "Inheritance Video",              Body = "Inheritance allows a class to acquire properties and methods of another class, promoting code reuse." },
                                 new FileContent { Id = 35, Name = "Base and Derived Classes PDF",   FilePath = "/resources/inheritance.pdf", MimeType = "application/pdf" },
-                                new AssignmentContent { Id = 36, Name = "Practice Exercises",       AssignmentId = 11 },
+                                new AssignmentContent { Id = 36, AssignmentId = 7 },
                             }
                         },
                         new Module
@@ -626,7 +665,7 @@ namespace Canvas.Library.Services
                             {
                                 new PageContent { Id = 37, Name = "Runtime Polymorphism Video",  Body = "Runtime polymorphism allows a base class reference to call overridden methods in derived classes." },
                                 new FileContent { Id = 38, Name = "Method Overriding PDF",        FilePath = "/resources/method_overriding.pdf", MimeType = "application/pdf" },
-                                new AssignmentContent { Id = 39, Name = "Polymorphism Examples",  AssignmentId = 8 },
+                                new AssignmentContent { Id = 39, AssignmentId = 8 },
                             }
                         },
                         new Module
@@ -637,7 +676,7 @@ namespace Canvas.Library.Services
                             {
                                 new PageContent { Id = 40, Name = "Abstract vs Interface Video", Body = "Abstract classes can have implementation; interfaces define contracts. Use abstract classes for shared behavior." },
                                 new FileContent { Id = 41, Name = "When to Use Each PDF",        FilePath = "/resources/abstract_vs_interface.pdf", MimeType = "application/pdf" },
-                                new AssignmentContent { Id = 42, Name = "Lab Instructions",      AssignmentId = 11 },
+                                new AssignmentContent { Id = 42, AssignmentId = 9 },
                             }
                         },
                         new Module
@@ -648,7 +687,7 @@ namespace Canvas.Library.Services
                             {
                                 new PageContent { Id = 43, Name = "Interface Design Video",              Body = "Interfaces define a contract that implementing classes must fulfill. They support multiple inheritance." },
                                 new PageContent { Id = 44, Name = "Multiple Interface Implementation",   Body = "A class can implement multiple interfaces in C#, enabling flexible and decoupled designs." },
-                                new AssignmentContent { Id = 45, Name = "Practice Problems",             AssignmentId = 9 },
+                                new AssignmentContent { Id = 45, AssignmentId = 10 },
                             }
                         },
                         new Module
@@ -670,7 +709,7 @@ namespace Canvas.Library.Services
                             {
                                 new PageContent { Id = 49, Name = "Creational Patterns Video",  Body = "Creational patterns deal with object creation: Singleton, Factory, Abstract Factory, Builder, Prototype." },
                                 new FileContent { Id = 50, Name = "Structural Patterns PDF",    FilePath = "/resources/structural_patterns.pdf", MimeType = "application/pdf" },
-                                new AssignmentContent { Id = 51, Name = "Pattern Catalog",      AssignmentId = 7 },
+                                new AssignmentContent { Id = 51, AssignmentId = 11 },
                             }
                         },
                         new Module
@@ -681,7 +720,7 @@ namespace Canvas.Library.Services
                             {
                                 new PageContent { Id = 52, Name = "Singleton Pattern Video",    Body = "The Singleton pattern ensures a class has only one instance and provides a global access point to it." },
                                 new FileContent { Id = 53, Name = "Factory Method PDF",         FilePath = "/resources/factory_method.pdf", MimeType = "application/pdf" },
-                                new AssignmentContent { Id = 54, Name = "Implementation Lab",   AssignmentId = 10 },
+                                new AssignmentContent { Id = 54, AssignmentId = 10 },
                             }
                         },
                         new Module
@@ -692,7 +731,7 @@ namespace Canvas.Library.Services
                             {
                                 new PageContent { Id = 55, Name = "Observer Overview Video",    Body = "The Observer pattern defines a one-to-many dependency so when one object changes state, dependents are notified." },
                                 new FileContent { Id = 56, Name = "Event-Driven Design PDF",    FilePath = "/resources/observer.pdf", MimeType = "application/pdf" },
-                                new AssignmentContent { Id = 57, Name = "Observer Lab",         AssignmentId = 10 },
+                                new AssignmentContent { Id = 57, AssignmentId = 10 },
                             }
                         },
                         new Module
@@ -702,7 +741,7 @@ namespace Canvas.Library.Services
                             ModuleContents = new List<ModuleContent>
                             {
                                 new FileContent { Id = 58, Name = "OOP Review Slides",          FilePath = "/resources/oop_review.pdf", MimeType = "application/pdf" },
-                                new AssignmentContent { Id = 59, Name = "Final Project Guidelines", AssignmentId = 10 },
+                                new AssignmentContent { Id = 59, AssignmentId = 10 },
                                 new FileContent { Id = 60, Name = "Past Exam Questions",         FilePath = "/resources/oop_past_exams.pdf", MimeType = "application/pdf" },
                             }
                         },
@@ -752,7 +791,7 @@ namespace Canvas.Library.Services
                             {
                                 new PageContent { Id = 61, Name = "Binary Numbers Video",       Body = "Binary uses base-2 with digits 0 and 1. Each position represents a power of 2." },
                                 new FileContent { Id = 62, Name = "Two's Complement PDF",       FilePath = "/resources/twos_complement.pdf", MimeType = "application/pdf" },
-                                new AssignmentContent { Id = 63, Name = "Practice Problems",    AssignmentId = 16 },
+                                new AssignmentContent { Id = 63, AssignmentId = 12 },
                             }
                         },
                         new Module
@@ -763,7 +802,7 @@ namespace Canvas.Library.Services
                             {
                                 new PageContent { Id = 64, Name = "AND/OR/NOT Video",           Body = "Logic gates are the building blocks of digital circuits. AND outputs 1 only if both inputs are 1." },
                                 new FileContent { Id = 65, Name = "Circuit Diagrams PDF",       FilePath = "/resources/circuit_diagrams.pdf", MimeType = "application/pdf" },
-                                new AssignmentContent { Id = 66, Name = "Gate Lab",             AssignmentId = 15 },
+                                new AssignmentContent { Id = 66, AssignmentId = 13 },
                             }
                         },
                         new Module
@@ -774,7 +813,7 @@ namespace Canvas.Library.Services
                             {
                                 new FileContent { Id = 67, Name = "MIPS Instruction Set PDF",  FilePath = "/resources/mips_isa.pdf", MimeType = "application/pdf" },
                                 new PageContent { Id = 68, Name = "Assembly Video Tutorial",    Body = "MIPS assembly uses 32 registers. $t0-$t9 are temporary, $s0-$s7 are saved, $a0-$a3 are arguments." },
-                                new AssignmentContent { Id = 69, Name = "MIPS Simulator Guide", AssignmentId = 12 },
+                                new AssignmentContent { Id = 69, AssignmentId = 14 },
                             }
                         },
                         new Module
@@ -785,7 +824,7 @@ namespace Canvas.Library.Services
                             {
                                 new PageContent { Id = 70, Name = "ALU Overview Video",         Body = "An ALU performs arithmetic and logic operations. It takes two operands and an operation code as input." },
                                 new FileContent { Id = 71, Name = "Adder Circuits PDF",         FilePath = "/resources/adder_circuits.pdf", MimeType = "application/pdf" },
-                                new AssignmentContent { Id = 72, Name = "Design Lab Instructions", AssignmentId = 15 },
+                                new AssignmentContent { Id = 72, AssignmentId = 16 },
                             }
                         },
                         new Module
@@ -807,7 +846,7 @@ namespace Canvas.Library.Services
                             {
                                 new PageContent { Id = 76, Name = "Pipeline Stages Video",      Body = "MIPS pipeline: IF (Instruction Fetch), ID (Decode), EX (Execute), MEM (Memory), WB (Write Back)." },
                                 new FileContent { Id = 77, Name = "Hazard Detection PDF",       FilePath = "/resources/hazard_detection.pdf", MimeType = "application/pdf" },
-                                new AssignmentContent { Id = 78, Name = "Pipeline Simulation",  AssignmentId = 14 },
+                                new AssignmentContent { Id = 78, AssignmentId = 17 },
                             }
                         },
                         new Module
@@ -818,7 +857,7 @@ namespace Canvas.Library.Services
                             {
                                 new PageContent { Id = 79, Name = "Cache Basics Video",         Body = "Cache memory stores frequently accessed data closer to the CPU to reduce latency." },
                                 new FileContent { Id = 80, Name = "Direct Mapped Cache PDF",    FilePath = "/resources/cache.pdf", MimeType = "application/pdf" },
-                                new AssignmentContent { Id = 81, Name = "Cache Lab",            AssignmentId = 13 },
+                                new AssignmentContent { Id = 81, AssignmentId = 18 },
                             }
                         },
                         new Module
@@ -897,7 +936,7 @@ namespace Canvas.Library.Services
                             {
                                 new PageContent { Id = 91, Name = "Paradigms Overview Video",       Body = "Programming paradigms include imperative, declarative, functional, object-oriented, and logic programming." },
                                 new FileContent { Id = 92, Name = "Imperative vs Declarative PDF",  FilePath = "/resources/paradigms.pdf", MimeType = "application/pdf" },
-                                new AssignmentContent { Id = 93, Name = "Paradigm Quiz",            AssignmentId = 20 },
+                                new AssignmentContent { Id = 93, AssignmentId = 19 },
                             }
                         },
                         new Module
@@ -908,7 +947,7 @@ namespace Canvas.Library.Services
                             {
                                 new PageContent { Id = 94, Name = "BNF Grammar Video",          Body = "Backus-Naur Form defines the syntax of a language using production rules with terminals and non-terminals." },
                                 new FileContent { Id = 95, Name = "Parse Trees PDF",            FilePath = "/resources/parse_trees.pdf", MimeType = "application/pdf" },
-                                new AssignmentContent { Id = 96, Name = "Grammar Exercises",    AssignmentId = 20 },
+                                new AssignmentContent { Id = 96, AssignmentId = 20 },
                             }
                         },
                         new Module
@@ -919,7 +958,7 @@ namespace Canvas.Library.Services
                             {
                                 new PageContent { Id = 97, Name = "Tokenization Video",         Body = "Lexical analysis converts source code into tokens — the smallest meaningful units like keywords and identifiers." },
                                 new FileContent { Id = 98, Name = "Regular Expressions PDF",    FilePath = "/resources/regex.pdf", MimeType = "application/pdf" },
-                                new AssignmentContent { Id = 99, Name = "Lexer Lab",            AssignmentId = 22 },
+                                new AssignmentContent { Id = 99, AssignmentId = 21 },
                             }
                         },
                         new Module
@@ -930,7 +969,7 @@ namespace Canvas.Library.Services
                             {
                                 new PageContent { Id = 100, Name = "Top-Down Parsing Video",    Body = "Top-down parsers start from the root of the parse tree and work down to the leaves using the grammar rules." },
                                 new FileContent { Id = 101, Name = "LL vs LR Parsers PDF",      FilePath = "/resources/ll_lr_parsers.pdf", MimeType = "application/pdf" },
-                                new AssignmentContent { Id = 102, Name = "Parser Lab",          AssignmentId = 22 },
+                                new AssignmentContent { Id = 102, AssignmentId = 22 },
                             }
                         },
                         new Module
@@ -941,7 +980,7 @@ namespace Canvas.Library.Services
                             {
                                 new PageContent { Id = 103, Name = "Static vs Dynamic Video",   Body = "Static typing checks types at compile time. Dynamic typing checks at runtime. Both have tradeoffs." },
                                 new FileContent { Id = 104, Name = "Type Inference PDF",        FilePath = "/resources/type_inference.pdf", MimeType = "application/pdf" },
-                                new AssignmentContent { Id = 105, Name = "Type Checking Examples", AssignmentId = 21 },
+                                new AssignmentContent { Id = 105, AssignmentId = 23 },
                             }
                         },
                         new Module
@@ -952,7 +991,7 @@ namespace Canvas.Library.Services
                             {
                                 new PageContent { Id = 106, Name = "Lambda Calculus Video",     Body = "Lambda calculus is the theoretical foundation of functional programming using anonymous functions and substitution." },
                                 new FileContent { Id = 107, Name = "Haskell Intro PDF",         FilePath = "/resources/haskell_intro.pdf", MimeType = "application/pdf" },
-                                new AssignmentContent { Id = 108, Name = "Functional Lab",      AssignmentId = 19 },
+                                new AssignmentContent { Id = 108, AssignmentId = 19 },
                             }
                         },
                         new Module
@@ -963,7 +1002,7 @@ namespace Canvas.Library.Services
                             {
                                 new PageContent { Id = 109, Name = "Prolog Basics Video",       Body = "Prolog is a logic programming language. Programs consist of facts and rules. Queries find solutions via unification." },
                                 new FileContent { Id = 110, Name = "Unification PDF",           FilePath = "/resources/unification.pdf", MimeType = "application/pdf" },
-                                new AssignmentContent { Id = 111, Name = "Prolog Lab",          AssignmentId = 23 },
+                                new AssignmentContent { Id = 111, AssignmentId = 23 },
                             }
                         },
                         new Module
@@ -974,7 +1013,7 @@ namespace Canvas.Library.Services
                             {
                                 new PageContent { Id = 112, Name = "Garbage Collection Video",  Body = "Garbage collection automatically reclaims memory no longer in use. Common algorithms: mark-and-sweep, reference counting." },
                                 new FileContent { Id = 113, Name = "Manual vs Automatic PDF",   FilePath = "/resources/memory_management.pdf", MimeType = "application/pdf" },
-                                new AssignmentContent { Id = 114, Name = "Memory Lab",          AssignmentId = 22 },
+                                new AssignmentContent { Id = 114, AssignmentId = 22 },
                             }
                         },
                         new Module
@@ -995,8 +1034,8 @@ namespace Canvas.Library.Services
                             ModuleContents = new List<ModuleContent>
                             {
                                 new FileContent { Id = 118, Name = "Language Concepts Summary", FilePath = "/resources/cop4020_summary.pdf", MimeType = "application/pdf" },
-                                new AssignmentContent { Id = 119, Name = "Final Project Guide", AssignmentId = 22 },
-                                new FileContent { Id = 120, Name = "Past Exam Questions",       FilePath = "/resources/cop4020_past_exams.pdf", MimeType = "application/pdf" },
+                                new AssignmentContent { Id = 119, AssignmentId = 22 },
+                                new FileContent { Id = 120, Name = "Past Exam Questions",      FilePath = "/resources/cop4020_past_exams.pdf", MimeType = "application/pdf" },
                             }
                         },
                     },
@@ -1044,7 +1083,7 @@ namespace Canvas.Library.Services
                             {
                                 new PageContent { Id = 121, Name = "Network Types Video",       Body = "Networks are classified by size: PAN, LAN, MAN, WAN. Each serves different geographic and functional scopes." },
                                 new FileContent { Id = 122, Name = "LAN vs WAN PDF",            FilePath = "/resources/lan_wan.pdf", MimeType = "application/pdf" },
-                                new AssignmentContent { Id = 123, Name = "Networking Quiz",     AssignmentId = 24 },
+                                new AssignmentContent { Id = 123, AssignmentId = 24 },
                             }
                         },
                         new Module
@@ -1055,7 +1094,7 @@ namespace Canvas.Library.Services
                             {
                                 new PageContent { Id = 124, Name = "OSI Layers Video",          Body = "The OSI model has 7 layers: Physical, Data Link, Network, Transport, Session, Presentation, Application." },
                                 new FileContent { Id = 125, Name = "Layer Functions PDF",       FilePath = "/resources/osi_layers.pdf", MimeType = "application/pdf" },
-                                new AssignmentContent { Id = 126, Name = "OSI Examples",        AssignmentId = 24 },
+                                new AssignmentContent { Id = 126, AssignmentId = 25 },
                             }
                         },
                         new Module
@@ -1066,7 +1105,7 @@ namespace Canvas.Library.Services
                             {
                                 new PageContent { Id = 127, Name = "TCP vs UDP Video",          Body = "TCP is connection-oriented and reliable. UDP is connectionless and faster but offers no delivery guarantee." },
                                 new FileContent { Id = 128, Name = "IP Addressing PDF",         FilePath = "/resources/ip_addressing.pdf", MimeType = "application/pdf" },
-                                new AssignmentContent { Id = 129, Name = "TCP Lab",             AssignmentId = 25 },
+                                new AssignmentContent { Id = 129, AssignmentId = 26 },
                             }
                         },
                         new Module
@@ -1077,7 +1116,7 @@ namespace Canvas.Library.Services
                             {
                                 new PageContent { Id = 130, Name = "HTTP Overview Video",       Body = "HTTP is the foundation of data communication on the web. It follows a request-response model over TCP." },
                                 new FileContent { Id = 131, Name = "DNS PDF",                   FilePath = "/resources/dns.pdf", MimeType = "application/pdf" },
-                                new AssignmentContent { Id = 132, Name = "Application Layer Lab", AssignmentId = 29 },
+                                new AssignmentContent { Id = 132, AssignmentId = 27 },
                             }
                         },
                         new Module
@@ -1088,7 +1127,7 @@ namespace Canvas.Library.Services
                             {
                                 new PageContent { Id = 133, Name = "Flow Control Video",        Body = "Flow control prevents a fast sender from overwhelming a slow receiver using sliding window protocols." },
                                 new FileContent { Id = 134, Name = "Congestion Control PDF",    FilePath = "/resources/congestion_control.pdf", MimeType = "application/pdf" },
-                                new AssignmentContent { Id = 135, Name = "Transport Lab",       AssignmentId = 25 },
+                                new AssignmentContent { Id = 135, AssignmentId = 28 },
                             }
                         },
                         new Module
@@ -1099,7 +1138,7 @@ namespace Canvas.Library.Services
                             {
                                 new PageContent { Id = 136, Name = "IP Routing Video",          Body = "Routers forward packets based on IP addresses using routing tables built by protocols like OSPF and BGP." },
                                 new FileContent { Id = 137, Name = "Subnetting PDF",            FilePath = "/resources/subnetting.pdf", MimeType = "application/pdf" },
-                                new AssignmentContent { Id = 138, Name = "Routing Lab",         AssignmentId = 26 },
+                                new AssignmentContent { Id = 138, AssignmentId = 29 },
                             }
                         },
                         new Module
@@ -1110,7 +1149,7 @@ namespace Canvas.Library.Services
                             {
                                 new PageContent { Id = 139, Name = "MAC Addresses Video",       Body = "MAC addresses are 48-bit hardware identifiers assigned to network interfaces for communication on a local network." },
                                 new FileContent { Id = 140, Name = "Ethernet PDF",              FilePath = "/resources/ethernet.pdf", MimeType = "application/pdf" },
-                                new AssignmentContent { Id = 141, Name = "Switch Lab",          AssignmentId = 27 },
+                                new AssignmentContent { Id = 141, AssignmentId = 27 },
                             }
                         },
                         new Module
@@ -1132,7 +1171,7 @@ namespace Canvas.Library.Services
                             {
                                 new PageContent { Id = 145, Name = "Encryption Video",          Body = "TLS encrypts data in transit. AES is used for symmetric encryption. RSA is used for key exchange." },
                                 new FileContent { Id = 146, Name = "Firewalls PDF",             FilePath = "/resources/firewalls.pdf", MimeType = "application/pdf" },
-                                new AssignmentContent { Id = 147, Name = "VPN Overview",        AssignmentId = 28 },
+                                new AssignmentContent { Id = 147, AssignmentId = 30 },
                             }
                         },
                         new Module
@@ -1142,7 +1181,7 @@ namespace Canvas.Library.Services
                             ModuleContents = new List<ModuleContent>
                             {
                                 new FileContent { Id = 148, Name = "Network Concepts Summary",  FilePath = "/resources/cnt4007_summary.pdf", MimeType = "application/pdf" },
-                                new AssignmentContent { Id = 149, Name = "Final Project Guidelines", AssignmentId = 30 },
+                                new AssignmentContent { Id = 149, AssignmentId = 30 },
                                 new FileContent { Id = 150, Name = "Practice Exams",            FilePath = "/resources/cnt4007_past_exams.pdf", MimeType = "application/pdf" },
                             }
                         },
@@ -1192,7 +1231,7 @@ namespace Canvas.Library.Services
                             {
                                 new PageContent { Id = 151, Name = "Network Types Video",       Body = "Networks are classified by size: PAN, LAN, MAN, WAN. Each serves different geographic and functional scopes." },
                                 new FileContent { Id = 152, Name = "LAN vs WAN PDF",            FilePath = "/resources/lan_wan.pdf", MimeType = "application/pdf" },
-                                new AssignmentContent { Id = 153, Name = "Networking Quiz",     AssignmentId = 24 },
+                                new AssignmentContent { Id = 153, AssignmentId = 24 },
                             }
                         },
                         new Module
@@ -1203,7 +1242,7 @@ namespace Canvas.Library.Services
                             {
                                 new PageContent { Id = 154, Name = "OSI Layers Video",          Body = "The OSI model has 7 layers: Physical, Data Link, Network, Transport, Session, Presentation, Application." },
                                 new FileContent { Id = 155, Name = "Layer Functions PDF",       FilePath = "/resources/osi_layers.pdf", MimeType = "application/pdf" },
-                                new AssignmentContent { Id = 156, Name = "OSI Examples",        AssignmentId = 24 },
+                                new AssignmentContent { Id = 156, AssignmentId = 25 },
                             }
                         },
                         new Module { Id = 53, ModuleName = "Unit 3: TCP/IP",           Content = new List<string> { "TCP vs UDP Video", "IP Addressing PDF", "TCP Lab" },                      ModuleContents = new List<ModuleContent> { new PageContent { Id = 157, Name = "TCP vs UDP Video", Body = "TCP is reliable and connection-oriented. UDP is fast but unreliable." }, new FileContent { Id = 158, Name = "IP Addressing PDF", FilePath = "/resources/ip_addressing.pdf", MimeType = "application/pdf" }, new AssignmentContent { Id = 159, Name = "TCP Lab", AssignmentId = 25 } } },

@@ -129,6 +129,7 @@ namespace Canvas.MAUI.ViewModels
         {
             var assignmentToSave = new Assignment
             {
+                Id = AssignmentId,
                 Name = AssignmentName,
                 Description = AssignmentDescription,
                 AvailablePoints = NewAvailablePoints,

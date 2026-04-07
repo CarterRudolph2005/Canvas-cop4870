@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:Canvas.MAUI.ViewModels"
+             x:Class="Canvas.MAUI.Views.ContentPageView"
+             BackgroundColor="#0D1B2A">
+
+    <Grid RowDefinitions="Auto,*">
+
+        <!-- Header -->
+        <Border Grid.Row="0"
+                BackgroundColor="#1565C0"
+                Padding="16"
+                StrokeThickness="0">
+            <Grid ColumnDefinitions="Auto,*">
+                <Button Grid.Column="0"
+                        Text="←"
+                        FontSize="20"
+                        TextColor="White"
+                        BackgroundColor="Transparent"
+                        Clicked="BackClicked"
+                        VerticalOptions="Center"/>
+                <Label Grid.Column="1"
+                       Text="{Binding Title}"
+                       FontSize="18"
+                       FontAttributes="Bold"
+                       TextColor="White"
+                       VerticalOptions="Center"/>
+            </Grid>
+        </Border>
+
+        <!-- Content -->
+        <ScrollView Grid.Row="1" Padding="16">
+            <Border StrokeThickness="0"
+                    StrokeShape="RoundRectangle 12"
+                    BackgroundColor="#1E2D3D"
+                    Padding="16">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="CONTENT"
+                           FontSize="11"
+                           FontAttributes="Bold"
+                           TextColor="#90CAF9"
+                           CharacterSpacing="1.5"/>
+                    <Label Text="{Binding Body}"
+                           FontSize="15"
+                           TextColor="White"
+                           LineBreakMode="WordWrap"/>
+                </VerticalStackLayout>
+            </Border>
+        </ScrollView>
+
+    </Grid>
+</ContentPage>

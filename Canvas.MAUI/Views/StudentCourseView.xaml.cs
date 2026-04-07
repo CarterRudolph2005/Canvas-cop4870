@@ -1,5 +1,8 @@
 using Canvas.Library.Model;
+using Canvas.MAUI.Models;
 using Canvas.MAUI.ViewModels;
+using CommunityToolkit.Maui.Storage;
+
 namespace Canvas.MAUI.Views
 {
     public partial class StudentCourseView : ContentPage
@@ -9,46 +12,66 @@ namespace Canvas.MAUI.Views
             InitializeComponent();
             BindingContext = new StudentCourseViewModel();
         }
-        private async void BackClicked(object sender, EventArgs e)
+
+        private async void BackClicked(object? sender, EventArgs e)
         {
             await Shell.Current.GoToAsync("//MainPage");
         }
-        private void ModuleHeaderTapped(object sender, TappedEventArgs e)
-        {
-            var grid = sender as Grid;
-            var parentStack = grid.Parent as VerticalStackLayout;
-            var contentStack = parentStack.Children[1] as VerticalStackLayout;
-            var arrowLabel = grid.Children[1] as Label;
 
-            // populate content on first expand
-            if (contentStack.Children.Count == 0)
-            {
-                var module = grid.BindingContext as Module;
-                foreach (var item in module.Content ?? new List<string>())
-                {
-                    contentStack.Children.Add(new Label
-                    {
-                        Text = item,
-                        FontSize = 12,
-                        TextColor = Color.FromArgb("#888888"),
-                        Margin = new Thickness(8, 2)
-                    });
-                }
-            }
-
-            contentStack.IsVisible = !contentStack.IsVisible;
-            arrowLabel.Text = contentStack.IsVisible ? "▼" : "▶";
-        }
-
-        private async void AssignmentTapped(object sender, SelectionChangedEventArgs e)
+        private async void AssignmentTapped(object? sender, SelectionChangedEventArgs e)
         {
             if (e.CurrentSelection.Count == 0) return;
             var selected = e.CurrentSelection[0] as Assignment;
             ((CollectionView)sender).SelectedItem = null;
 
             var vm = BindingContext as StudentCourseViewModel;
-            await Shell.Current.GoToAsync($"AssignmentSubmissionView?courseId={vm.CourseId}&assignmentId={selected.Id}&studentId={vm.StudentId}");
+            await Shell.Current.GoToAsync(
+                $"AssignmentSubmissionView?courseId={vm.CourseId}&assignmentId={selected.Id}&studentId={vm.StudentId}");
+        }
+
+        private void ModuleHeaderTapped(object? sender, TappedEventArgs e)
+        {
+            var module = e.Parameter as ModuleViewModel;
+            if (module == null) return;
+            module.IsExpanded = !module.IsExpanded;
+        }
+
+        private async void ModuleContentTapped(object? sender, TappedEventArgs e)
+        {
+            var content = e.Parameter as ModuleContent;
+            if (content == null) return;
+
+            var vm = BindingContext as StudentCourseViewModel;
+
+            switch (content)
+            {
+                case AssignmentContent a:
+                    await Shell.Current.GoToAsync(
+                        $"AssignmentSubmissionView?courseId={vm.CourseId}&assignmentId={a.AssignmentId}&studentId={vm.StudentId}");
+                    break;
+
+                case FileContent f:
+                    var confirm = await DisplayAlert(f.Name, $"Download {f.Name}?", "Download", "Cancel");
+                    if (!confirm) break;
+                    try
+                    {
+                        var stream = await FileSystem.OpenAppPackageFileAsync(f.FilePath);
+                        var result = await FileSaver.Default.SaveAsync(f.FilePath, stream, CancellationToken.None);
+                        if (result.IsSuccessful)
+                            await DisplayAlert("Downloaded", $"Saved to {result.FilePath}", "OK");
+                    }
+                    catch (Exception ex)
+                    {
+                        await DisplayAlert("Download Failed", ex.Message, "OK");
+                    }
+                    break;
+
+                case PageContent:
+                default:
+                    await Shell.Current.GoToAsync(
+                        $"ContentPageView?courseId={vm.CourseId}&contentId={content.Id}");
+                    break;
+            }
         }
     }
-    
 }
