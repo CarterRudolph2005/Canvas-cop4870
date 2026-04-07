@@ -165,20 +165,16 @@ namespace Canvas.MAUI.ViewModels
 
             Name = course.Name ?? string.Empty;
             Code = course.Code ?? string.Empty;
-            // Announcements = new ObservableCollection<Announcement>(course.Announcements ?? new List<Announcement>());
-            // Assignments = new ObservableCollection<Assignment>(course.Assignments ?? new List<Assignment>());
-            // Roster = new ObservableCollection<Student>(course.Roster ?? new List<Student>());
 
-Assignments.Clear();
-foreach (var a in course.Assignments ?? new List<Assignment>())
-    Assignments.Add(a);
-Announcements.Clear();
-foreach (var a in course.Announcements ?? new List<Announcement>())
-    Announcements.Add(a);
-
-Roster.Clear();
-foreach (var s in course.Roster ?? new List<Student>())
-    Roster.Add(s);
+            Assignments.Clear();
+            foreach (var a in course.Assignments ?? new List<Assignment>())
+                Assignments.Add(a);
+            Announcements.Clear();
+            foreach (var a in course.Announcements ?? new List<Announcement>())
+                Announcements.Add(a);
+            Roster.Clear();
+            foreach (var s in course.Roster ?? new List<Student>())
+                Roster.Add(s);
 
             RefreshModules();
             Modules = new ObservableCollection<ModuleViewModel>(

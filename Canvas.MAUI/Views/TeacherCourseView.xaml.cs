@@ -23,7 +23,6 @@ namespace Canvas.MAUI.Views
 
         private void OnNavigatedTo(object sender, NavigatedToEventArgs e)
         {
-            DisplayAlert("Alert", "OnNav ran", "ok");
             base.OnNavigatedTo(e);
             ViewModel.LoadCourse();
         }   
@@ -153,14 +152,12 @@ namespace Canvas.MAUI.Views
             var content = e.Parameter as ModuleContent;
             if (content == null) return;
 
-            var vm = BindingContext as StudentCourseViewModel; // or TeacherCourseViewModel
+            var vm = BindingContext as TeacherCourseViewModel; // or TeacherCourseViewModel
             
             switch (content)
             {
                 case AssignmentContent a:
-                    await Shell.Current.GoToAsync(
-                        $"AssignmentSubmissionView?courseId={vm.CourseId}&assignmentId={a.AssignmentId}&studentId={vm.StudentId}");
-                    break;
+                    return;
 
                 case FileContent f:
                     var confirm = await DisplayAlert(f.Name, $"Download {f.Name}?", "Download", "Cancel");
@@ -194,26 +191,6 @@ namespace Canvas.MAUI.Views
             module.IsExpanded = !module.IsExpanded;
         }
 
-        // private async void AddModuleContentClicked(object sender, EventArgs e)
-        // {
-        //     var module = (sender as Button)?.CommandParameter as ModuleViewModel;
-        //     if (module == null) return;
-
-        //     var vm = BindingContext as TeacherCourseViewModel;
-
-        //     try
-        //     {
-        //         await Shell.Current.GoToAsync(
-        //             $"ModuleContentCreationView?courseId={vm.CourseId}&moduleId={module.Id}");
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         await DisplayAlert("Navigation Error", ex.Message, "OK");
-        //     }
-
-        //     // await Shell.Current.GoToAsync(
-        //         // $"ModuleContentCreationView?courseId={vm.CourseId}&moduleId={module.Id}");
-        // }
         private async void AddModuleContentClicked(object sender, EventArgs e)
         {
             var button = sender as Button;
