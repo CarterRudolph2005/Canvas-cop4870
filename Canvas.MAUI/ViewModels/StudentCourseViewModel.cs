@@ -20,7 +20,6 @@ namespace Canvas.MAUI.ViewModels
         {
             Modules = new ObservableCollection<ModuleViewModel>();
             Assignments = new ObservableCollection<Assignment>();
-            // GradePercentage = 0;
         }
         public void ApplyQueryAttributes(IDictionary<string, object> query)
         {
@@ -100,53 +99,53 @@ namespace Canvas.MAUI.ViewModels
         private void OnPropertyChanged([CallerMemberName] string propertyName = null)
         => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
-public void LoadMenu()
-{
-    var _course = CourseServiceProxy.Current.Courses.FirstOrDefault(i => i.Id == courseId);
-    if (_course == null) return;
-
-    Name = _course.Name ?? string.Empty;
-    Code = _course.Code ?? string.Empty;
-    Announcements = new ObservableCollection<Announcement>(_course.Announcements ?? new List<Announcement>());
-    Assignments = new ObservableCollection<Assignment>(_course.Assignments ?? new List<Assignment>());
-
-    // 1. Initialize the collection
-    Modules = new ObservableCollection<ModuleViewModel>();
-
-    // 2. Single loop to populate and configure
-    if (_course.Modules != null)
-    {
-        foreach (var m in _course.Modules)
+        public void LoadMenu()
         {
-            // Create the ViewModel
-            var moduleVM = new ModuleViewModel
-            {
-                Id = m.Id,
-                ModuleName = m.ModuleName,
-                ModuleContents = m.ModuleContents?.ToList() ?? new List<ModuleContent>()
-            };
+            var _course = CourseServiceProxy.Current.Courses.FirstOrDefault(i => i.Id == courseId);
+            if (_course == null) return;
 
-            // Apply logic to the contents immediately
-            foreach (var content in moduleVM.ModuleContents)
+            Name = _course.Name ?? string.Empty;
+            Code = _course.Code ?? string.Empty;
+            Announcements = new ObservableCollection<Announcement>(_course.Announcements ?? new List<Announcement>());
+            Assignments = new ObservableCollection<Assignment>(_course.Assignments ?? new List<Assignment>());
+            GradePercentage = CourseServiceProxy.Current.CalculateGrade(CourseId, StudentId);
+            // 1. Initialize the collection
+            Modules = new ObservableCollection<ModuleViewModel>();
+
+            // 2. Single loop to populate and configure
+            if (_course.Modules != null)
             {
-                if (content is AssignmentContent ac)
+                foreach (var m in _course.Modules)
                 {
-                    var assignment = _course.Assignments?.FirstOrDefault(a => a.Id == ac.AssignmentId);
-                    if (assignment != null)
+                    // Create the ViewModel
+                    var moduleVM = new ModuleViewModel
                     {
-                        ac.Name = assignment.Name;
+                        Id = m.Id,
+                        ModuleName = m.ModuleName,
+                        ModuleContents = m.ModuleContents?.ToList() ?? new List<ModuleContent>()
+                    };
+
+                    // Apply logic to the contents immediately
+                    foreach (var content in moduleVM.ModuleContents)
+                    {
+                        if (content is AssignmentContent ac)
+                        {
+                            var assignment = _course.Assignments?.FirstOrDefault(a => a.Id == ac.AssignmentId);
+                            if (assignment != null)
+                            {
+                                ac.Name = assignment.Name;
+                            }
+                        }
                     }
+
+                    // Finalize the module
+                    moduleVM.RefreshContents();
+                    
+                    // Add it to the main collection
+                    Modules.Add(moduleVM);
                 }
             }
-
-            // Finalize the module
-            moduleVM.RefreshContents();
-            
-            // Add it to the main collection
-            Modules.Add(moduleVM);
         }
-    }
-}
 
     }
 }
