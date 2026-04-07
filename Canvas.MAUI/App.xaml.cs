@@ -13,6 +13,7 @@ public partial class App : Application
 		Routing.RegisterRoute("AssignmentSubmissionView", typeof(AssignmentSubmissionView));
 		Routing.RegisterRoute("ContentPageView", typeof(ContentPageView));
 		Routing.RegisterRoute("ModuleContentCreationView", typeof(ModuleContentCreationView));
+		Routing.RegisterRoute("GradeSubmissionView", typeof(GradeSubmissionView));
 	}
 
 	protected override Window CreateWindow(IActivationState? activationState)
