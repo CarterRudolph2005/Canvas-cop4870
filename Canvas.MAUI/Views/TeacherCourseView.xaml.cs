@@ -375,6 +375,57 @@ namespace Canvas.MAUI.Views
                 await DisplayAlertAsync("Failure", $"There was an error: {ex.Message}", "okay :(");
             }
         } 
-  
+
+        private async void AddGroupClicked(object sender, EventArgs e)
+        {
+            await Shell.Current.GoToAsync(nameof(AssignmentGroupView), new Dictionary<string, object>
+            {
+                { "courseId", ViewModel.CourseId }
+            });
+        }
+
+        private async void EditGroupClicked(object sender, EventArgs e)
+        {
+            var display = (TeacherCourseViewModel.AssignmentGroupDisplay)((Button)sender).CommandParameter;
+            await Shell.Current.GoToAsync(nameof(AssignmentGroupView), new Dictionary<string, object>
+            {
+                { "courseId", ViewModel.CourseId },
+                { "groupId", display.Id }
+            });
+        }
+
+        private async void DeleteGroupClicked(object sender, EventArgs e)
+        {
+            var display = (TeacherCourseViewModel.AssignmentGroupDisplay)((Button)sender).CommandParameter;
+            bool confirm = await DisplayAlert(
+                "Delete Group",
+                $"Delete \"{display.Name}\"? Assignments in this group will become ungrouped.",
+                "Delete", "Cancel");
+
+            if (confirm)
+                ViewModel.DeleteGroup(display.Id);
+        }
+
+        private async void AddAssignmentToGroupClicked(object sender, EventArgs e)
+        {
+            var display = (TeacherCourseViewModel.AssignmentGroupDisplay)((Button)sender).CommandParameter;
+
+            var ungrouped = ViewModel.UngroupedAssignments.ToList();
+            if (!ungrouped.Any())
+            {
+                await DisplayAlert("No Assignments", "There are no ungrouped assignments to add.", "OK");
+                return;
+            }
+
+            var options = ungrouped.Select(a => a.Name).ToArray();
+            var chosen = await DisplayActionSheet(
+                $"Add to \"{display.Name}\"", "Cancel", null, options);
+
+            if (chosen == null || chosen == "Cancel") return;
+
+            var assignment = ungrouped.FirstOrDefault(a => a.Name == chosen);
+            if (assignment != null)
+                ViewModel.AddAssignmentToGroup(display.Id, assignment.Id);
+        }
     }
 }

@@ -329,11 +329,137 @@
 
                 <!-- ── ASSIGNMENTS TAB ── -->
                 <VerticalStackLayout IsVisible="{Binding IsAssignmentsTab}" Spacing="12">
-                    <Button Text="+ New Assignment"
-                            Clicked="AddAssignmentClicked"
-                            BackgroundColor="#1565C0" TextColor="White"
-                            CornerRadius="8" HorizontalOptions="Start"/>
-                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding Assignments}" Spacing="8">
+
+                    <!-- Action Buttons -->
+                    <HorizontalStackLayout Spacing="10">
+                        <Button Text="+ New Assignment"
+                                Clicked="AddAssignmentClicked"
+                                BackgroundColor="#1565C0" TextColor="White"
+                                CornerRadius="8"/>
+                        <Button Text="+ New Group"
+                                Clicked="AddGroupClicked"
+                                BackgroundColor="#6A1B9A" TextColor="White"
+                                CornerRadius="8"/>
+                    </HorizontalStackLayout>
+
+                    <!-- Assignment Groups -->
+                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding AssignmentGroups}" Spacing="12">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate>
+                                <Border StrokeThickness="2"
+                                        StrokeShape="RoundRectangle 10"
+                                        Padding="14"
+                                        BackgroundColor="{AppThemeBinding Light=#F3E5F5, Dark=#2A1A2E}"
+                                        Stroke="#6A1B9A">
+                                    <VerticalStackLayout Spacing="8">
+
+                                        <!-- Group Header -->
+                                        <Grid ColumnDefinitions="*,Auto,44,44">
+                                            <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                                <Label Text="{Binding Name}"
+                                                    FontSize="15" FontAttributes="Bold"
+                                                    TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"/>
+                                                <Label Text="{Binding TotalPoints, StringFormat='Group Total: {0} pts'}"
+                                                    FontSize="12" TextColor="#888888"/>
+                                            </VerticalStackLayout>
+                                            <Button Grid.Column="1" Text="+ Add Assignment"
+                                                    FontSize="11"
+                                                    BackgroundColor="#6A1B9A" TextColor="White"
+                                                    CornerRadius="6" Padding="8,4"
+                                                    Clicked="AddAssignmentToGroupClicked"
+                                                    CommandParameter="{Binding .}"
+                                                    VerticalOptions="Center"/>
+                                            <Button Grid.Column="2" Text="✏️"
+                                                    FontSize="12" BackgroundColor="Transparent"
+                                                    Clicked="EditGroupClicked"
+                                                    CommandParameter="{Binding .}"
+                                                    VerticalOptions="Start"/>
+                                            <Button Grid.Column="3" Text="🗑"
+                                                    FontSize="12" BackgroundColor="Transparent"
+                                                    Clicked="DeleteGroupClicked"
+                                                    CommandParameter="{Binding .}"
+                                                    VerticalOptions="Start"/>
+                                        </Grid>
+
+                                        <!-- Assignments nested inside group -->
+                                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding GroupAssignments}" Spacing="6" Margin="8,0,0,0">
+                                            <BindableLayout.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border StrokeThickness="1"
+                                                            StrokeShape="RoundRectangle 10"
+                                                            Padding="14"
+                                                            BackgroundColor="{AppThemeBinding Light=White, Dark=#2A2A2A}"
+                                                            Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#444444}">
+                                                        <Grid ColumnDefinitions="*,Auto,44,44,44">
+                                                            <VerticalStackLayout Grid.Column="0" Spacing="4">
+                                                                <Label Text="{Binding Name}"
+                                                                    FontSize="14" FontAttributes="Bold"
+                                                                    TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"/>
+                                                                <Label Text="{Binding Description}"
+                                                                    FontSize="12"
+                                                                    TextColor="{AppThemeBinding Light=#555555, Dark=#AAAAAA}"/>
+                                                                <Label Text="{Binding AvailablePoints, StringFormat='Points: {0}'}"
+                                                                    FontSize="12" TextColor="#888888"/>
+                                                                <Label Text="{Binding DueDate, StringFormat='Due {0:MMM dd}'}"
+                                                                    FontSize="12" FontAttributes="Bold" TextColor="#42A5F5"/>
+                                                            </VerticalStackLayout>
+
+                                                            <!-- Grade Button -->
+                                                            <Border Grid.Column="1"
+                                                                    BackgroundColor="#2E7D32"
+                                                                    StrokeShape="RoundRectangle 6"
+                                                                    StrokeThickness="0"
+                                                                    Padding="10,6"
+                                                                    VerticalOptions="Center"
+                                                                    Margin="0,0,8,0">
+                                                                <Border.GestureRecognizers>
+                                                                    <TapGestureRecognizer Tapped="GradeAssignmentClicked"
+                                                                                        CommandParameter="{Binding .}"/>
+                                                                </Border.GestureRecognizers>
+                                                                <Label Text="Grade" FontSize="12" FontAttributes="Bold"
+                                                                    TextColor="White"
+                                                                    VerticalOptions="Center" HorizontalOptions="Center"/>
+                                                            </Border>
+
+                                                            <Button Grid.Column="2" Text="⎘"
+                                                                    FontSize="14" BackgroundColor="Transparent"
+                                                                    TextColor="#42A5F5"
+                                                                    Clicked="CopyAssignmentClicked"
+                                                                    CommandParameter="{Binding .}"
+                                                                    VerticalOptions="Start"/>
+                                                            <Button Grid.Column="3" Text="✏️"
+                                                                    FontSize="12" BackgroundColor="Transparent"
+                                                                    Clicked="EditAssignmentClicked"
+                                                                    CommandParameter="{Binding .}"
+                                                                    VerticalOptions="Start"/>
+                                                            <Button Grid.Column="4" Text="🗑"
+                                                                    FontSize="12" BackgroundColor="Transparent"
+                                                                    Clicked="DeleteAssignmentClicked"
+                                                                    CommandParameter="{Binding .}"
+                                                                    VerticalOptions="Start"/>
+                                                        </Grid>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </BindableLayout.ItemTemplate>
+                                        </VerticalStackLayout>
+
+                                        <!-- Empty group hint -->
+                                        <Label Text="No assignments in this group yet."
+                                            FontSize="12" TextColor="#888888"
+                                            Margin="8,0,0,0"
+                                            IsVisible="{Binding IsEmpty}"/>
+                                    </VerticalStackLayout>
+                                </Border>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+
+                    <!-- Ungrouped Assignments -->
+                    <Label Text="Ungrouped Assignments"
+                        FontSize="13" FontAttributes="Bold"
+                        TextColor="#888888"
+                        IsVisible="{Binding HasUngroupedAssignments}"/>
+                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding UngroupedAssignments}" Spacing="8">
                         <BindableLayout.ItemTemplate>
                             <DataTemplate>
                                 <Border StrokeThickness="1"
@@ -355,7 +481,6 @@
                                                 FontSize="12" FontAttributes="Bold" TextColor="#42A5F5"/>
                                         </VerticalStackLayout>
 
-                                        <!-- Grade Button -->
                                         <Border Grid.Column="1"
                                                 BackgroundColor="#2E7D32"
                                                 StrokeShape="RoundRectangle 6"
@@ -367,12 +492,9 @@
                                                 <TapGestureRecognizer Tapped="GradeAssignmentClicked"
                                                                     CommandParameter="{Binding .}"/>
                                             </Border.GestureRecognizers>
-                                            <Label Text="Grade"
-                                                FontSize="12"
-                                                FontAttributes="Bold"
+                                            <Label Text="Grade" FontSize="12" FontAttributes="Bold"
                                                 TextColor="White"
-                                                VerticalOptions="Center"
-                                                HorizontalOptions="Center"/>
+                                                VerticalOptions="Center" HorizontalOptions="Center"/>
                                         </Border>
 
                                         <Button Grid.Column="2" Text="⎘"
@@ -396,6 +518,7 @@
                             </DataTemplate>
                         </BindableLayout.ItemTemplate>
                     </VerticalStackLayout>
+
                 </VerticalStackLayout>
 
                 <!-- ── ROSTER TAB ── -->

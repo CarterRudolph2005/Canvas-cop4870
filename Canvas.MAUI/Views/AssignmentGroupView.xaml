@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Canvas.MAUI.ViewModels"
+             x:Class="Canvas.MAUI.Views.AssignmentGroupView"
+             x:DataType="vm:AssignmentGroupViewModel"
+             Title="{Binding Title}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="24" Spacing="20">
+
+            <!-- Header -->
+            <Label Text="{Binding Title}"
+                   FontSize="22" FontAttributes="Bold"
+                   TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"/>
+
+            <!-- Name -->
+            <VerticalStackLayout Spacing="6">
+                <Label Text="Group Name"
+                       FontSize="13" FontAttributes="Bold"
+                       TextColor="{AppThemeBinding Light=#555555, Dark=#AAAAAA}"/>
+                <Border StrokeShape="RoundRectangle 8"
+                        StrokeThickness="1"
+                        Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#444444}"
+                        BackgroundColor="{AppThemeBinding Light=White, Dark=#2A2A2A}"
+                        Padding="12,0">
+                    <Entry Text="{Binding Name}"
+                           Placeholder="e.g. Homework, Midterms"
+                           PlaceholderColor="#AAAAAA"
+                           FontSize="14"/>
+                </Border>
+            </VerticalStackLayout>
+
+            <!-- Total Points -->
+            <VerticalStackLayout Spacing="6">
+                <Label Text="Total Points"
+                       FontSize="13" FontAttributes="Bold"
+                       TextColor="{AppThemeBinding Light=#555555, Dark=#AAAAAA}"/>
+                <Border StrokeShape="RoundRectangle 8"
+                        StrokeThickness="1"
+                        Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#444444}"
+                        BackgroundColor="{AppThemeBinding Light=White, Dark=#2A2A2A}"
+                        Padding="12,0">
+                    <Entry Text="{Binding TotalPointsText}"
+                           Placeholder="e.g. 100"
+                           PlaceholderColor="#AAAAAA"
+                           Keyboard="Numeric"
+                           FontSize="14"/>
+                </Border>
+                <Label Text="This value determines how much the group contributes to the final grade."
+                       FontSize="12"
+                       TextColor="#888888"/>
+            </VerticalStackLayout>
+
+            <!-- Validation Error -->
+            <Border IsVisible="{Binding HasValidationError}"
+                    BackgroundColor="#FFEBEE"
+                    StrokeShape="RoundRectangle 8"
+                    StrokeThickness="0"
+                    Padding="12">
+                <Label Text="{Binding ValidationError}"
+                       FontSize="13"
+                       TextColor="#C62828"/>
+            </Border>
+
+            <!-- Buttons -->
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="12" Margin="0,8,0,0">
+                <Button Grid.Column="0"
+                        Text="Cancel"
+                        Clicked="CancelClicked"
+                        BackgroundColor="{AppThemeBinding Light=#F5F5F5, Dark=#333333}"
+                        TextColor="{AppThemeBinding Light=#333333, Dark=#FFFFFF}"
+                        CornerRadius="8"
+                        FontSize="15"/>
+                <Button Grid.Column="1"
+                        Text="Save Group"
+                        Clicked="SaveClicked"
+                        IsEnabled="{Binding CanSave}"
+                        BackgroundColor="#6A1B9A"
+                        TextColor="White"
+                        CornerRadius="8"
+                        FontSize="15"/>
+            </Grid>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

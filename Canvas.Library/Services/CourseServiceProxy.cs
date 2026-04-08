@@ -1,4 +1,4 @@
-using System.Dynamic;
+// using System.Dynamic;
 using Canvas.Library.Model;
 // using Microsoft.VisualBasic;
 // using System;
@@ -262,6 +262,7 @@ namespace Canvas.Library.Services
                 existing.Description = assignment.Description;
                 existing.AvailablePoints = assignment.AvailablePoints;
                 existing.DueDate = assignment.DueDate;
+                existing.GroupId = assignment.GroupId;
             }
             return assignment;
         }
@@ -281,17 +282,20 @@ namespace Canvas.Library.Services
             var assignmentToRemove = course.Assignments.FirstOrDefault(a => a.Id == assignmentId);
             if (assignmentToRemove == null) return false;
 
-            // submissions are owned by the assignment so they die with it
+            // fix: clean up group membership before deleting
+            if (assignmentToRemove.GroupId != 0)
+                RemoveAssignmentFromGroup(courseId, assignmentToRemove.GroupId, assignmentToRemove.Id);
+
             assignmentToRemove.Submissions?.Clear();
             course.Assignments.Remove(assignmentToRemove);
 
             if (course.Modules == null) return true;
             foreach (var module in course.Modules)
-            {
                 module.ModuleContents?.RemoveAll(c => c is AssignmentContent ac && ac.AssignmentId == assignmentId);
-            }
+
             return true;
         }
+
         public List<Submission> GetStudentSubmissions(int courseId, int studentId)
         {
             return Courses.FirstOrDefault(c => c.Id == courseId)
@@ -307,21 +311,48 @@ namespace Canvas.Library.Services
             if (course == null) return 0;
             if (course.Assignments == null || !course.Assignments.Any()) return 0;
 
-            var submittedAssignments = course.Assignments
-                .Where(a => a.Submissions != null && 
+            double totalEarned = 0;
+            double totalAvailable = 0;
+
+            foreach (var group in course.AssignmentGroups ?? new List<AssignmentGroup>())
+            {
+                var groupAssignments = course.Assignments
+                    .Where(a => group.AssignmentIds.Contains(a.Id))
+                    .ToList();
+
+                var submittedInGroup = groupAssignments
+                    .Where(a => a.Submissions != null &&
+                                a.Submissions.Any(s => s.StudentId == studentId))
+                    .ToList();
+
+                if (!submittedInGroup.Any()) continue;
+
+                var groupAvailable = submittedInGroup.Sum(a => a.AvailablePoints);
+                var groupEarned = submittedInGroup
+                    .SelectMany(a => a.Submissions)
+                    .Where(s => s.StudentId == studentId)
+                    .Sum(s => s.PointsAwarded ?? 0);
+
+                if (groupAvailable > 0)
+                {
+                    totalEarned += (double)groupEarned / groupAvailable * group.TotalPoints;
+                    totalAvailable += group.TotalPoints;
+                }
+            }
+
+            var ungrouped = course.Assignments
+                .Where(a => a.GroupId == 0 &&
+                            a.Submissions != null &&
                             a.Submissions.Any(s => s.StudentId == studentId))
                 .ToList();
 
-            if (!submittedAssignments.Any()) return 0;
-
-            var totalAvailable = submittedAssignments.Sum(a => a.AvailablePoints);
-            
-            var totalEarned = submittedAssignments
+            totalAvailable += ungrouped.Sum(a => a.AvailablePoints);
+            totalEarned += ungrouped
                 .SelectMany(a => a.Submissions)
                 .Where(s => s.StudentId == studentId)
                 .Sum(s => s.PointsAwarded ?? 0);
 
-            return totalAvailable > 0 ? (double)totalEarned / totalAvailable * 100 : 0;
+            return totalAvailable > 0 ? totalEarned / totalAvailable * 100 : 0;
         }
 
         public void SubmitAssignment(int CourseID, Submission submission)
@@ -397,7 +428,8 @@ namespace Canvas.Library.Services
                 Description = assignment.Description,
                 AvailablePoints = assignment.AvailablePoints,
                 DueDate = assignment.DueDate,
-                Submissions = new List<Submission>()
+                Submissions = new List<Submission>(),
+                GroupId = 0
             };
 
             AddOrUpdateAssignment(targetCourseId, copy);
@@ -462,6 +494,102 @@ namespace Canvas.Library.Services
         {
             var course = Courses.FirstOrDefault(c => c.Id == courseId);
             return course?.Assignments?.FirstOrDefault(a => a.Id == assignmentId);
+        }
+
+        // ── ASSIGNMENT GROUP FUNCTIONS ──
+
+        public AssignmentGroup AddOrUpdateAssignmentGroup(int courseId, AssignmentGroup group)
+        {
+            var course = Courses.FirstOrDefault(c => c.Id == courseId);
+            if (course == null) return null;
+
+            course.AssignmentGroups ??= new List<AssignmentGroup>();
+
+            if (group.Id == 0)
+            {
+                group.Id = AssignmentGroupNextKey(course);
+                group.CourseId = courseId;
+                course.AssignmentGroups.Add(group);
+            }
+            else
+            {
+                var existing = course.AssignmentGroups.FirstOrDefault(g => g.Id == group.Id);
+                if (existing == null) return null;
+                existing.Name = group.Name;
+                existing.TotalPoints = group.TotalPoints;
+            }
+            return group;
+        }
+
+        public bool DeleteAssignmentGroup(int courseId, int groupId)
+        {
+            var course = Courses.FirstOrDefault(c => c.Id == courseId);
+            if (course == null) return false;
+
+            var group = course.AssignmentGroups?.FirstOrDefault(g => g.Id == groupId);
+            if (group == null) return false;
+
+            foreach (var assignmentId in group.AssignmentIds)
+            {
+                var assignment = course.Assignments?.FirstOrDefault(a => a.Id == assignmentId);
+                if (assignment != null)
+                    assignment.GroupId = 0;
+            }
+
+            course.AssignmentGroups.Remove(group);
+            return true;
+        }
+
+        public bool AddAssignmentToGroup(int courseId, int groupId, int assignmentId)
+        {
+            var course = Courses.FirstOrDefault(c => c.Id == courseId);
+            if (course == null) return false;
+
+            var group = course.AssignmentGroups?.FirstOrDefault(g => g.Id == groupId);
+            var assignment = course.Assignments?.FirstOrDefault(a => a.Id == assignmentId);
+            if (group == null || assignment == null) return false;
+
+            if (assignment.GroupId != 0)
+                RemoveAssignmentFromGroup(courseId, assignment.GroupId, assignmentId);
+
+            assignment.GroupId = groupId;
+            if (!group.AssignmentIds.Contains(assignmentId))
+                group.AssignmentIds.Add(assignmentId);
+
+            return true;
+        }
+
+        public bool RemoveAssignmentFromGroup(int courseId, int groupId, int assignmentId)
+        {
+            var course = Courses.FirstOrDefault(c => c.Id == courseId);
+            if (course == null) return false;
+
+            var group = course.AssignmentGroups?.FirstOrDefault(g => g.Id == groupId);
+            var assignment = course.Assignments?.FirstOrDefault(a => a.Id == assignmentId);
+            if (group == null || assignment == null) return false;
+
+            assignment.GroupId = 0;
+            group.AssignmentIds.Remove(assignmentId);
+            return true;
+        }
+
+        public List<AssignmentGroup> GetAssignmentGroups(int courseId)
+        {
+            var course = Courses.FirstOrDefault(c => c.Id == courseId);
+            return course?.AssignmentGroups ?? new List<AssignmentGroup>();
+        }
+
+        public AssignmentGroup GetAssignmentGroupById(int courseId, int groupId)
+        {
+            var course = Courses.FirstOrDefault(c => c.Id == courseId);
+            return course?.AssignmentGroups?.FirstOrDefault(g => g.Id == groupId);
+        }
+
+        private int AssignmentGroupNextKey(Course course)
+        {
+            if (course.AssignmentGroups != null && course.AssignmentGroups.Any())
+                return course.AssignmentGroups.Max(g => g.Id) + 1;
+            return 1;
         }
         private CourseServiceProxy()
         {

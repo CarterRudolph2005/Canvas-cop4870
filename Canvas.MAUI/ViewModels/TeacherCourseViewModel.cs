@@ -25,18 +25,18 @@ namespace Canvas.MAUI.ViewModels
             Modules = new ObservableCollection<ModuleViewModel>();
             Assignments = new ObservableCollection<Assignment>();
             Roster = new ObservableCollection<Student>();
+            AssignmentGroups = new ObservableCollection<AssignmentGroupDisplay>();
+            UngroupedAssignments = new ObservableCollection<Assignment>();
         }
 
         public void ApplyQueryAttributes(IDictionary<string, object> query)
         {
-            if (query.TryGetValue("teacherId", out var tId) && int.TryParse(tId?.ToString(), out int _teacherId))
-            {
-                teacherId = _teacherId;
-            }
-            if (query.TryGetValue("sectionNumber", out var sNum) && int.TryParse(tId?.ToString(), out int _sectionNumber))
-            {
-                sectionNumber = _sectionNumber;
-            }
+            if (query.TryGetValue("teacherId", out var tId) && int.TryParse(tId?.ToString(), out int parsedTeacherId))
+                teacherId = parsedTeacherId;
+
+            if (query.TryGetValue("sectionNumber", out var sNum) && int.TryParse(sNum?.ToString(), out int parsedSectionNumber))
+                sectionNumber = parsedSectionNumber;
+
             if (query.TryGetValue("courseId", out var value) && int.TryParse(value?.ToString(), out int id))
             {
                 _courseId = id;
@@ -44,20 +44,22 @@ namespace Canvas.MAUI.ViewModels
             }
         }
 
-        // ── Properties ─────────────────────────────────────────────
+        // ── Properties ─────────────────────────────────────────────────────
 
         private int sectionNumber;
         public int SectionNumber
         {
             get => sectionNumber;
-            set{ sectionNumber = value; OnPropertyChanged(); }
+            set { sectionNumber = value; OnPropertyChanged(); }
         }
+
         private int teacherId;
         public int TeacherId
         {
             get => teacherId;
-            set{ teacherId = value; OnPropertyChanged(); }
+            set { teacherId = value; OnPropertyChanged(); }
         }
+
         private string _name;
         public string Name
         {
@@ -79,13 +81,13 @@ namespace Canvas.MAUI.ViewModels
             set { _selectedTabIndex = value; OnPropertyChanged(); }
         }
 
-        // Tab visibility
         public bool IsAnnouncementsTab => SelectedTabIndex == 0;
         public bool IsModulesTab => SelectedTabIndex == 1;
         public bool IsAssignmentsTab => SelectedTabIndex == 2;
         public bool IsRosterTab => SelectedTabIndex == 3;
 
-        // Announcement form
+        // ── Announcement form ───────────────────────────────────────────────
+
         private bool _showAnnouncementForm;
         public bool ShowAnnouncementForm
         {
@@ -107,7 +109,8 @@ namespace Canvas.MAUI.ViewModels
             set { _newAnnouncementBody = value; OnPropertyChanged(); }
         }
 
-        // Module form
+        // ── Module form ─────────────────────────────────────────────────────
+
         private bool _showModuleForm;
         public bool ShowModuleForm
         {
@@ -122,7 +125,8 @@ namespace Canvas.MAUI.ViewModels
             set { _newModuleName = value; OnPropertyChanged(); }
         }
 
-        // Enroll form
+        // ── Enroll form ─────────────────────────────────────────────────────
+
         private bool _showEnrollForm;
         public bool ShowEnrollForm
         {
@@ -148,15 +152,19 @@ namespace Canvas.MAUI.ViewModels
                 OnPropertyChanged(nameof(HasEnrollError));
             }
         }
-
         public bool HasEnrollError => !string.IsNullOrEmpty(EnrollError);
+
+        // ── Collections ─────────────────────────────────────────────────────
 
         public ObservableCollection<Announcement> Announcements { get; set; }
         public ObservableCollection<ModuleViewModel> Modules { get; set; }
         public ObservableCollection<Assignment> Assignments { get; set; }
         public ObservableCollection<Student> Roster { get; set; }
+        public ObservableCollection<AssignmentGroupDisplay> AssignmentGroups { get; set; }
+        public ObservableCollection<Assignment> UngroupedAssignments { get; set; }
+        public bool HasUngroupedAssignments => UngroupedAssignments?.Count > 0;
 
-        // ── Load ───────────────────────────────────────────────────
+        // ── Load ────────────────────────────────────────────────────────────
 
         public void LoadCourse()
         {
@@ -175,7 +183,7 @@ namespace Canvas.MAUI.ViewModels
             Roster.Clear();
             foreach (var s in course.Roster ?? new List<Student>())
                 Roster.Add(s);
-
+            
             RefreshModules();
             Modules = new ObservableCollection<ModuleViewModel>(
                 course.Modules?.Select(m => new ModuleViewModel
@@ -187,7 +195,6 @@ namespace Canvas.MAUI.ViewModels
                 }) ?? Enumerable.Empty<ModuleViewModel>()
             );
 
-            // Resolve AssignmentContent names from actual assignments
             foreach (var module in Modules)
             {
                 foreach (var content in module.ModuleContents)
@@ -205,24 +212,15 @@ namespace Canvas.MAUI.ViewModels
             OnPropertyChanged(nameof(Modules));
             OnPropertyChanged(nameof(Assignments));
             OnPropertyChanged(nameof(Roster));
+
+            // only new additions
+            RefreshAssignments();
+            RefreshGroups();
         }
 
-        private void RefreshModules()
-        {
-            var course = CourseServiceProxy.Current.Courses.FirstOrDefault(c => c.Id == _courseId);
-            Modules = new ObservableCollection<ModuleViewModel>(
-                (course?.Modules ?? new List<Module>()).Select(m => new ModuleViewModel
-                {
-                    Id = m.Id,
-                    ModuleName = m.ModuleName,
-                    Content = m.Content ?? new List<string>(),
-                    IsExpanded = true
-                })
-            );
-            OnPropertyChanged(nameof(Modules));
-        }
 
-        // ── Tab switching ──────────────────────────────────────────
+
+        // ── Tab switching ───────────────────────────────────────────────────
 
         public void SelectTab(int index)
         {
@@ -233,7 +231,7 @@ namespace Canvas.MAUI.ViewModels
             OnPropertyChanged(nameof(IsRosterTab));
         }
 
-        // ── Announcements ──────────────────────────────────────────
+        // ── Announcements ───────────────────────────────────────────────────
 
         public void ToggleAnnouncementForm()
             => ShowAnnouncementForm = !ShowAnnouncementForm;
@@ -260,7 +258,12 @@ namespace Canvas.MAUI.ViewModels
             Announcements.Remove(announcement);
         }
 
-        // ── Modules ────────────────────────────────────────────────
+        public void UpdateAnnouncement(Announcement announcement)
+        {
+            CourseServiceProxy.Current.UpdateAnnouncement(_courseId, announcement);
+        }
+
+        // ── Modules ─────────────────────────────────────────────────────────
 
         public void ToggleModuleForm()
             => ShowModuleForm = !ShowModuleForm;
@@ -277,7 +280,7 @@ namespace Canvas.MAUI.ViewModels
         public void DeleteModule(ModuleViewModel module)
         {
             CourseServiceProxy.Current.DeleteModule(_courseId, module.Id);
-            Modules.Remove(module);
+            LoadCourse();
         }
 
         public void AddModuleContent(int moduleId, string content)
@@ -289,15 +292,13 @@ namespace Canvas.MAUI.ViewModels
 
         public void DeleteModuleContent(int moduleId, ModuleContent content)
         {
-            // Handle assignment cleanup first if needed
             if (content is AssignmentContent a)
-            {
-                CourseServiceProxy.Current.DeleteAssignment(CourseId, a.AssignmentId);
-            }
+                CourseServiceProxy.Current.DeleteAssignment(_courseId, a.AssignmentId);
 
-            // Then always delete the module content entry
-            CourseServiceProxy.Current.DeleteModuleContents(CourseId, moduleId, content.Id);
+            CourseServiceProxy.Current.DeleteModuleContents(_courseId, moduleId, content.Id);
+            RefreshModules();
         }
+
         public void UpdateModuleName(int moduleId, string newName)
         {
             var course = CourseServiceProxy.Current.Courses.FirstOrDefault(c => c.Id == _courseId);
@@ -313,13 +314,62 @@ namespace Canvas.MAUI.ViewModels
             RefreshModules();
         }
 
-        // ── Assignments ────────────────────────────────────────────
+        private void RefreshModules()
+        {
+            var course = CourseServiceProxy.Current.Courses.FirstOrDefault(c => c.Id == _courseId);
+            Modules = new ObservableCollection<ModuleViewModel>(
+                (course?.Modules ?? new List<Module>()).Select(m => new ModuleViewModel
+                {
+                    Id = m.Id,
+                    ModuleName = m.ModuleName,
+                    Content = m.Content ?? new List<string>(),
+                    IsExpanded = true
+                })
+            );
+            OnPropertyChanged(nameof(Modules));
+        }
+
+        // private void RefreshModules()
+        // {
+        //     var course = CourseServiceProxy.Current.Courses.FirstOrDefault(c => c.Id == _courseId);
+        //     var assignments = course?.Assignments ?? new List<Assignment>();
+
+        //     Modules = new ObservableCollection<ModuleViewModel>(
+        //         (course?.Modules ?? new List<Module>()).Select(m => new ModuleViewModel
+        //         {
+        //             Id = m.Id,
+        //             ModuleName = m.ModuleName,
+        //             Content = m.Content ?? new List<string>(),
+        //             ModuleContents = m.ModuleContents ?? new List<ModuleContent>(),
+        //             IsExpanded = true
+        //         })
+        //     );
+
+        //     foreach (var module in Modules)
+        //     {
+        //         foreach (var content in module.ModuleContents)
+        //         {
+        //             if (content is AssignmentContent ac)
+        //             {
+        //                 var assignment = assignments.FirstOrDefault(a => a.Id == ac.AssignmentId);
+        //                 if (assignment != null)
+        //                     ac.Name = assignment.Name;
+        //             }
+        //         }
+        //     }
+
+        //     OnPropertyChanged(nameof(Modules));
+        // }
+
+        // ── Assignments ─────────────────────────────────────────────────────
 
         public void DeleteAssignment(Assignment assignment)
         {
+            // proxy now handles group cleanup internally
             CourseServiceProxy.Current.DeleteAssignment(_courseId, assignment.Id);
-            Assignments.Remove(assignment);
             DeleteAssignmentFromModuleContents(assignment.Id);
+            RefreshAssignments();
+            RefreshGroups();
         }
 
         private void DeleteAssignmentFromModuleContents(int assignmentId)
@@ -327,15 +377,13 @@ namespace Canvas.MAUI.ViewModels
             var course = CourseServiceProxy.Current.Courses?.FirstOrDefault(c => c.Id == _courseId);
             if (course == null) return;
 
-            foreach (var module in course.Modules ?? [])
+            foreach (var module in course.Modules ?? new List<Module>())
             {
                 var match = module.ModuleContents?
                     .FirstOrDefault(c => c is AssignmentContent a && a.AssignmentId == assignmentId);
 
                 if (match != null)
-                {
                     CourseServiceProxy.Current.DeleteModuleContents(_courseId, module.Id, match.Id);
-                }
             }
         }
 
@@ -346,7 +394,7 @@ namespace Canvas.MAUI.ViewModels
             OnPropertyChanged(nameof(Assignments));
         }
 
-        // ── Roster ─────────────────────────────────────────────────
+        // ── Roster ──────────────────────────────────────────────────────────
 
         public void ToggleEnrollForm()
             => ShowEnrollForm = !ShowEnrollForm;
@@ -379,6 +427,70 @@ namespace Canvas.MAUI.ViewModels
         {
             CourseServiceProxy.Current.UnenrollStudent(_courseId, student.Id);
             Roster.Remove(student);
+        }
+
+        // ── Assignment Groups ────────────────────────────────────────────────
+
+        public class AssignmentGroupDisplay
+        {
+            public AssignmentGroup Group { get; set; }
+            public ObservableCollection<Assignment> GroupAssignments { get; set; }
+            public bool IsEmpty => GroupAssignments?.Count == 0;
+            public string Name => Group.Name;
+            public int TotalPoints => Group.TotalPoints;
+            public int Id => Group.Id;
+        }
+
+        public void AddOrUpdateGroup(AssignmentGroup group)
+        {
+            var result = CourseServiceProxy.Current.AddOrUpdateAssignmentGroup(_courseId, group);
+            if (result != null)
+                RefreshGroups();
+        }
+
+        public void DeleteGroup(int groupId)
+        {
+            CourseServiceProxy.Current.DeleteAssignmentGroup(_courseId, groupId);
+            // RefreshAssignments not needed — proxy resets GroupId fields,
+            // RefreshGroups rebuilds UngroupedAssignments from proxy state
+            RefreshGroups();
+        }
+
+        public void AddAssignmentToGroup(int groupId, int assignmentId)
+        {
+            CourseServiceProxy.Current.AddAssignmentToGroup(_courseId, groupId, assignmentId);
+            RefreshGroups();
+        }
+
+        public void RemoveAssignmentFromGroup(int groupId, int assignmentId)
+        {
+            CourseServiceProxy.Current.RemoveAssignmentFromGroup(_courseId, groupId, assignmentId);
+            RefreshGroups();
+        }
+
+        private void RefreshGroups()
+        {
+            var groups = CourseServiceProxy.Current.GetAssignmentGroups(_courseId);
+            var allAssignments = CourseServiceProxy.Current.Courses
+                .FirstOrDefault(c => c.Id == _courseId)?.Assignments ?? new List<Assignment>();
+
+            AssignmentGroups = new ObservableCollection<AssignmentGroupDisplay>(
+                groups.Select(g => new AssignmentGroupDisplay
+                {
+                    Group = g,
+                    GroupAssignments = new ObservableCollection<Assignment>(
+                        allAssignments.Where(a => g.AssignmentIds.Contains(a.Id))
+                    )
+                })
+            );
+
+            UngroupedAssignments = new ObservableCollection<Assignment>(
+                allAssignments.Where(a => a.GroupId == 0)
+            );
+
+            OnPropertyChanged(nameof(AssignmentGroups));
+            OnPropertyChanged(nameof(UngroupedAssignments));
+            OnPropertyChanged(nameof(HasUngroupedAssignments));
         }
     }
 }

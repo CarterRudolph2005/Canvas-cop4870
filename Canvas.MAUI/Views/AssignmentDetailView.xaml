@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Canvas.MAUI.Views.AssignmentDetailView"
@@ -101,6 +102,30 @@
                                 BackgroundColor="Transparent"
                                 MinimumDate="{Binding TodayDate}"/>
                 </Border>
+            </VerticalStackLayout>
+
+            <!-- Assignment Group Picker -->
+            <VerticalStackLayout Spacing="6">
+                <Label Text="Assignment Group"
+                    FontSize="13"
+                    FontAttributes="Bold"
+                    TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#E0E0E0}"/>
+                <Border StrokeThickness="1"
+                        StrokeShape="RoundRectangle 8"
+                        Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#444444}"
+                        BackgroundColor="{AppThemeBinding Light=White, Dark=#2A2A2A}"
+                        Padding="12,4">
+                    <Picker ItemsSource="{Binding AvailableGroups}"
+                            ItemDisplayBinding="{Binding Name}"
+                            SelectedItem="{Binding SelectedGroup}"
+                            Title="None (ungrouped)"
+                            TitleColor="#888888"
+                            TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"
+                            BackgroundColor="Transparent"/>
+                </Border>
+                <Label Text="Groups are created from the Assignments tab."
+                    FontSize="12"
+                    TextColor="#888888"/>
             </VerticalStackLayout>
 
             <!-- Validation Error -->
