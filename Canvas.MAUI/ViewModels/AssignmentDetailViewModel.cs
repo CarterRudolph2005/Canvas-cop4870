@@ -10,7 +10,7 @@ using System.Runtime.CompilerServices;
 
 namespace Canvas.MAUI.ViewModels
 {
-    internal class AssignmentDetailViewModel: INotifyPropertyChanged, IQueryAttributable
+    internal class AssignmentDetailViewModel : INotifyPropertyChanged, IQueryAttributable
     {
         //************** Set up ******************************
         public event PropertyChangedEventHandler PropertyChanged;
@@ -20,21 +20,24 @@ namespace Canvas.MAUI.ViewModels
         private int courseId;
         public int AssignmentId => assignmentId;
         private int assignmentId;
-        
+
         public AssignmentDetailViewModel()
         {
             AssignmentName = string.Empty;
             AssignmentDescription = string.Empty;
             NewAvailablePoints = 0;
             NewDueDate = DateTime.Today;
-            // TodayDate = DateTime.Today;
             ValidationError = string.Empty;
+            AvailableGroups = new ObservableCollection<AssignmentGroup>();
         }
 
         public void ApplyQueryAttributes(IDictionary<string, object> query)
         {
             if (query.TryGetValue("courseId", out var cId) && int.TryParse(cId?.ToString(), out int _courseId))
                 courseId = _courseId;
+
+            // load groups first so LoadAssignment can pre-select correctly
+            LoadGroups();
 
             if (query.TryGetValue("assignmentId", out var aId) && int.TryParse(aId?.ToString(), out int _assignmentId) && _assignmentId != 0)
             {
@@ -44,51 +47,68 @@ namespace Canvas.MAUI.ViewModels
         }
 
         //************** Assignment Properties ******************************
-        public string CourseName {get; set;}
-        public string PageTitle => assignmentId == 0 
+        public string CourseName { get; set; }
+        public string PageTitle => assignmentId == 0
             ? "New Assignment" : "Edit Assignment";
 
         private string assignmentName;
         public string AssignmentName
         {
             get => assignmentName;
-            set
-            { assignmentName = value; OnPropertyChanged(); }
+            set { assignmentName = value; OnPropertyChanged(); }
         }
 
         private string assignmentDescription;
         public string AssignmentDescription
         {
             get => assignmentDescription;
-            set{ assignmentDescription = value; OnPropertyChanged(); }
+            set { assignmentDescription = value; OnPropertyChanged(); }
         }
-        
+
         private int newAvailablePoints;
         public int NewAvailablePoints
         {
             get => newAvailablePoints;
-            set{ newAvailablePoints = value; OnPropertyChanged(); }
+            set { newAvailablePoints = value; OnPropertyChanged(); }
         }
 
         private DateTime newDueDate;
         public DateTime NewDueDate
         {
             get => newDueDate;
-            set{ newDueDate = value; OnPropertyChanged(); }
+            set { newDueDate = value; OnPropertyChanged(); }
         }
 
         private string validationError;
         public string ValidationError
         {
             get => validationError;
-            set{ validationError = value; OnPropertyChanged(); }
+            set { validationError = value; OnPropertyChanged(); }
         }
 
         private bool hasValidationError;
         public bool HasValidationError
         {
             get => hasValidationError;
-            set{ hasValidationError = value; OnPropertyChanged(); }
+            set { hasValidationError = value; OnPropertyChanged(); }
+        }
+
+        //************** Group Picker Properties ******************************
+        public ObservableCollection<AssignmentGroup> AvailableGroups { get; set; }
+
+        private AssignmentGroup selectedGroup;
+        public AssignmentGroup SelectedGroup
+        {
+            get => selectedGroup;
+            set { selectedGroup = value; OnPropertyChanged(); }
+        }
+
+        private void LoadGroups()
+        {
+            AvailableGroups.Clear();
+            var groups = CourseServiceProxy.Current.GetAssignmentGroups(courseId);
+            foreach (var g in groups)
+                AvailableGroups.Add(g);
         }
 
         //************** Load Page ******************************
@@ -96,13 +116,17 @@ namespace Canvas.MAUI.ViewModels
         {
             var course = CourseServiceProxy.Current.Courses.FirstOrDefault(i => i.Id == CourseId);
             var assignment = course?.Assignments?.FirstOrDefault(i => i.Id == AssignmentId);
-            if(assignment != null)
+            if (assignment != null)
             {
                 AssignmentName = assignment.Name;
                 AssignmentDescription = assignment.Description;
                 NewAvailablePoints = assignment.AvailablePoints;
                 NewDueDate = assignment.DueDate;
                 CourseName = course.Name;
+
+                // groups already loaded so pre-selection will find the match
+                if (assignment.GroupId != 0)
+                    SelectedGroup = AvailableGroups.FirstOrDefault(g => g.Id == assignment.GroupId);
             }
         }
 
@@ -122,20 +146,35 @@ namespace Canvas.MAUI.ViewModels
                 return false;
             }
             ValidationError = string.Empty;
+            HasValidationError = false;
             return true;
         }
 
         public void Save()
         {
+            // capture original groupId before overwriting
+            var course = CourseServiceProxy.Current.Courses.FirstOrDefault(c => c.Id == courseId);
+            var original = course?.Assignments?.FirstOrDefault(a => a.Id == assignmentId);
+            int previousGroupId = original?.GroupId ?? 0;
+
             var assignmentToSave = new Assignment
             {
-                Id = AssignmentId,
+                Id = assignmentId,
                 Name = AssignmentName,
                 Description = AssignmentDescription,
                 AvailablePoints = NewAvailablePoints,
-                DueDate = newDueDate
+                DueDate = newDueDate,
+                GroupId = SelectedGroup?.Id ?? 0
             };
-            CourseServiceProxy.Current.AddOrUpdateAssignment(CourseId, assignmentToSave);
+
+            // capture returned assignment to get generated Id for new assignments
+            var saved = CourseServiceProxy.Current.AddOrUpdateAssignment(courseId, assignmentToSave);
+            if (saved == null) return;
+
+            if (saved.GroupId != 0)
+                CourseServiceProxy.Current.AddAssignmentToGroup(courseId, saved.GroupId, saved.Id);
+            else if (previousGroupId != 0)
+                CourseServiceProxy.Current.RemoveAssignmentFromGroup(courseId, previousGroupId, saved.Id);
         }
     }
 }
