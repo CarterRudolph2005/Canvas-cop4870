@@ -591,6 +591,85 @@ namespace Canvas.Library.Services
                 return course.AssignmentGroups.Max(g => g.Id) + 1;
             return 1;
         }
+
+        public Course CopyCourse(int sourceCourseId, int sectionNumber, int year, SemesterType semester)
+        {
+            var source = Courses.FirstOrDefault(c => c.Id == sourceCourseId);
+            if (source == null) return null;
+
+            var newId = NextKey;
+
+            var copy = new Course
+            {
+                Id = newId,
+                Name = source.Name,
+                Code = source.Code,
+                Description = source.Description,
+                SectionNumber = sectionNumber,
+                SemesterTaught = new Semester(year, semester),
+
+                Assignments = source.Assignments?.Select(a => new Assignment
+                {
+                    Id = a.Id,
+                    Name = a.Name,
+                    Description = a.Description,
+                    AvailablePoints = a.AvailablePoints,
+                    DueDate = a.DueDate,
+                    GroupId = a.GroupId,
+                    Submissions = new List<Submission>()
+                }).ToList() ?? new List<Assignment>(),
+
+                AssignmentGroups = source.AssignmentGroups?.Select(g => new AssignmentGroup
+                {
+                    Id = g.Id,
+                    CourseId = newId,
+                    Name = g.Name,
+                    TotalPoints = g.TotalPoints,
+                    AssignmentIds = new List<int>(g.AssignmentIds)
+                }).ToList() ?? new List<AssignmentGroup>(),
+
+                Modules = source.Modules?.Select(m => new Module
+                {
+                    Id = m.Id,
+                    ModuleName = m.ModuleName,
+                    Content = m.Content != null ? new List<string>(m.Content) : new List<string>(),
+                    ModuleContents = m.ModuleContents?.Select(c => c switch
+                    {
+                        AssignmentContent ac => (ModuleContent)new AssignmentContent
+                        {
+                            Id = ac.Id,
+                            AssignmentId = ac.AssignmentId,
+                            Name = ac.Name
+                        },
+                        FileContent fc => new FileContent
+                        {
+                            Id = fc.Id,
+                            Name = fc.Name,
+                            FilePath = fc.FilePath
+                        },
+                        PageContent pc => new PageContent
+                        {
+                            Id = pc.Id,
+                            Name = pc.Name
+                        },
+                        _ => null
+                    }).Where(c => c != null).ToList() ?? new List<ModuleContent>()
+                }).ToList() ?? new List<Module>(),
+
+                Announcements = source.Announcements?.Select(a => new Announcement
+                {
+                    Id = a.Id,
+                    Title = a.Title,
+                    Body = a.Body,
+                    PostedDate = a.PostedDate
+                }).ToList() ?? new List<Announcement>(),
+
+                Roster = new List<Student>()
+            };
+
+            Courses.Add(copy);
+            return copy;
+        }
         private CourseServiceProxy()
         {
             courses = new List<Course>
