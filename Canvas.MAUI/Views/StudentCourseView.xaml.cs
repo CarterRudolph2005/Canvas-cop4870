@@ -21,12 +21,11 @@ namespace Canvas.MAUI.Views
         private async void AssignmentTapped(object? sender, SelectionChangedEventArgs e)
         {
             if (e.CurrentSelection.Count == 0) return;
-            var selected = e.CurrentSelection[0] as Assignment;
+            var selected = e.CurrentSelection[0] as StudentCourseViewModel.StudentAssignmentDisplay;
             ((CollectionView)sender).SelectedItem = null;
-
             var vm = BindingContext as StudentCourseViewModel;
             await Shell.Current.GoToAsync(
-                $"AssignmentSubmissionView?courseId={vm.CourseId}&assignmentId={selected.Id}&studentId={vm.StudentId}");
+                $"AssignmentSubmissionView?courseId={vm.CourseId}&assignmentId={selected.Assignment.Id}&studentId={vm.StudentId}");
         }
 
         private void ModuleHeaderTapped(object? sender, TappedEventArgs e)

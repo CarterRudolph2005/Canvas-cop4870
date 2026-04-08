@@ -23,7 +23,7 @@
                         FontSize="20"
                         FontAttributes="Bold"
                         TextColor="White"/>
-                    <Label Text="{Binding GradePercentage, StringFormat='{0}%'}"
+                    <Label Text="{Binding GradePercentage, StringFormat='{0:F2}%'}"
                         FontSize="48"
                         FontAttributes="Bold"
                         TextColor="White"
@@ -90,11 +90,6 @@
             </Border>
             
             <!-- Assignments -->
-            <Label Text="Assignments"
-                   FontSize="16"
-                   FontAttributes="Bold"
-                   TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#E0E0E0}"/>
-
             <CollectionView ItemsSource="{Binding Assignments}"
                             SelectionMode="Single"
                             SelectionChanged="AssignmentTapped">
@@ -118,7 +113,21 @@
                                     <Label Text="{Binding AvailablePoints, StringFormat='Points: {0}'}"
                                         FontSize="12"
                                         TextColor="{AppThemeBinding Light=#555555, Dark=#AAAAAA}"/>
+
+                                    <!-- Group tag — only visible when assignment belongs to a group -->
+                                    <Border IsVisible="{Binding HasGroup}"
+                                            BackgroundColor="#6A1B9A"
+                                            StrokeThickness="0"
+                                            StrokeShape="RoundRectangle 4"
+                                            Padding="6,2"
+                                            HorizontalOptions="Start">
+                                        <Label Text="{Binding GroupName}"
+                                            FontSize="11"
+                                            FontAttributes="Bold"
+                                            TextColor="White"/>
+                                    </Border>
                                 </VerticalStackLayout>
+
                                 <Label Grid.Column="1"
                                     Text="{Binding DueDate, StringFormat='Due {0:MMM dd}'}"
                                     FontSize="12"
