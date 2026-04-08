@@ -235,5 +235,28 @@ namespace Canvas.MAUI.ViewModels
             LoadCourses();
             ToggleAddCourseForm();
         }
+
+
+        public List<Course> GetAllCourses()
+        {
+            return InstructorServiceProxy.Current.GetCoursesForInstructor(teacherId);
+        }
+
+        public Course CopyCourseWithDetails(int sourceCourseId, int sectionNumber, int year, SemesterType semester)
+        {
+            var copy = CourseServiceProxy.Current.CopyCourse(sourceCourseId, sectionNumber, year, semester);
+            if (copy == null) return null;
+
+            var instructor = InstructorServiceProxy.Current.GetById(teacherId);
+            if (instructor != null)
+            {
+                copy.Instructors ??= new List<Instructor>();
+                if (!copy.Instructors.Any(i => i.Id == instructor.Id))
+                    copy.Instructors.Add(instructor);
+            }
+
+            LoadCourses();
+            return copy;
+        }
     }
 }

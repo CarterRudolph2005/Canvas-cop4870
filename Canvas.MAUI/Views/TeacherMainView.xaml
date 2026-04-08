@@ -9,11 +9,10 @@
 
     <Grid RowDefinitions="Auto,Auto,Auto,*">
 
-        <!-- Action Buttons -->
         <Grid Grid.Row="0"
-              ColumnDefinitions="Auto,Auto,*"
-              ColumnSpacing="8"
-              Padding="16,12">
+            ColumnDefinitions="Auto,Auto,Auto,*"
+            ColumnSpacing="8"
+            Padding="16,12">
             <Button Grid.Column="0"
                     Text="+ Add Course"
                     Clicked="ToggleAddCourseClicked"
@@ -22,6 +21,13 @@
                     CornerRadius="8"
                     HorizontalOptions="Start"/>
             <Button Grid.Column="1"
+                    Text="⧉ Copy Course"
+                    Clicked="CopyCourseClicked"
+                    BackgroundColor="#1565C0"
+                    TextColor="White"
+                    CornerRadius="8"
+                    HorizontalOptions="Start"/>
+            <Button Grid.Column="2"
                     Text="⚙ Filter"
                     Clicked="ToggleFilterClicked"
                     BackgroundColor="#1565C0"

@@ -47,6 +47,63 @@ namespace Canvas.MAUI.Views
         {
             (BindingContext as TeacherMainViewModel)?.AddCourse();
         }
+
+        private async void CopyCourseClicked(object sender, EventArgs e)
+        {
+            var vm = BindingContext as TeacherMainViewModel;
+            if (vm == null) return;
+
+            var courses = vm.GetAllCourses();
+            if (!courses.Any())
+            {
+                await DisplayAlert("No Courses", "There are no courses available to copy.", "OK");
+                return;
+            }
+
+            // step 1 — pick source course
+            var options = courses
+                .Select(c => $"{c.Name} — {c.SemesterTaught?.Session} {c.SemesterTaught?.Year} (Section {c.SectionNumber})")
+                .ToArray();
+
+            var chosen = await DisplayActionSheet("Copy Which Course?", "Cancel", null, options);
+            if (chosen == null || chosen == "Cancel") return;
+
+            var index = Array.IndexOf(options, chosen);
+            if (index < 0) return;
+            var source = courses[index];
+
+            // step 2 — pick semester
+            var semesterOptions = Enum.GetNames(typeof(SemesterType));
+            var chosenSemester = await DisplayActionSheet("Select Semester", "Cancel", null, semesterOptions);
+            if (chosenSemester == null || chosenSemester == "Cancel") return;
+            var semesterType = Enum.Parse<SemesterType>(chosenSemester);
+
+            // step 3 — pick year
+            var yearOptions = Enumerable.Range(2026, 10).Select(y => y.ToString()).ToArray();
+            var chosenYear = await DisplayActionSheet("Select Year", "Cancel", null, yearOptions);
+            if (chosenYear == null || chosenYear == "Cancel") return;
+            var year = int.Parse(chosenYear);
+
+            // step 4 — enter section number
+            var sectionInput = await DisplayPromptAsync(
+                "Section Number",
+                "Enter the section number for the new course:",
+                keyboard: Keyboard.Numeric);
+
+            if (string.IsNullOrWhiteSpace(sectionInput)) return;
+            if (!int.TryParse(sectionInput, out int sectionNumber) || sectionNumber <= 0)
+            {
+                await DisplayAlert("Invalid Input", "Section number must be a positive number.", "OK");
+                return;
+            }
+
+            var copy = vm.CopyCourseWithDetails(source.Id, sectionNumber, year, semesterType);
+
+            if (copy != null)
+                await DisplayAlert("Course Copied", $"\"{source.Name}\" has been copied to {chosenSemester} {year} Section {sectionNumber}.", "OK");
+            else
+                await DisplayAlert("Error", "Course could not be copied.", "OK");
+        }
     }
 
 }
