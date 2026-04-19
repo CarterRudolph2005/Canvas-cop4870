@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Canvas.Library.Model;
 using Canvas.API.Enterprise;
+using Canvas.API.Data;
 using System.Security.Cryptography;
 
 namespace Canvas.API.Controllers
@@ -9,7 +10,12 @@ namespace Canvas.API.Controllers
     [Route("[controller]")]
     public class CourseController : ControllerBase
     {
-        private CourseEC _ec = new CourseEC();
+        private CourseEC _ec;
+
+        public CourseController(CanvasDbContext context)
+        {
+            _ec = new CourseEC(context);
+        }
 
         [HttpGet] public IEnumerable<Course> GetAll() => _ec.GetAll();
         [HttpGet("{id}")] public Course? GetById(int id) => _ec.GetById(id);

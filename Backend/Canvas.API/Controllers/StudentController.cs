@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Canvas.Library.Model;
 using Canvas.API.Enterprise;
+using Canvas.API.Data;
 
 namespace Canvas.API.Controllers
 {
@@ -8,7 +9,12 @@ namespace Canvas.API.Controllers
     [Route("[controller]")]
     public class StudentController : ControllerBase
     {
-        private StudentEC _ec = new StudentEC();
+        private StudentEC _ec;
+
+        public StudentController(CanvasDbContext context)
+        {
+            _ec = new StudentEC(context);
+        }
 
         [HttpGet]
         public IEnumerable<Student> GetAll()
