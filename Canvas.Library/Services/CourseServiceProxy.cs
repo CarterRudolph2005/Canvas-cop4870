@@ -1,37 +1,32 @@
-// using System.Dynamic;
 using Canvas.Library.Model;
-// using Microsoft.VisualBasic;
-// using System;
-// using System.Collections;
-// using System.Collections.Generic;
-// using System.ComponentModel;
-// using System.Data.Common;
-// using System.Net;
-// using System.Net.ServerSentEvents;
-// using System.Reflection;
 using System.Text;
+using Newtonsoft.Json;
+using Canvas.Library.Utilities;
+using System.ComponentModel;
 
 namespace Canvas.Library.Services
 {
     public class CourseServiceProxy
     {
-        private List<Course> courses;
+        private List<Course>? _courses;
+        private WebRequestHandler _handler = new WebRequestHandler();
 
         public List<Course> Courses
         {
             get
             {
-                return courses;
-            }
-
-            set
-            {
-                if(courses != value)
+                if (_courses == null)
                 {
-                    courses = value;
+                    var result = _handler.Get("/course").Result;
+                    var settings = new JsonSerializerSettings();
+                    settings.Converters.Add(new ModuleContentConverter());
+                    _courses = JsonConvert.DeserializeObject<List<Course>>(result, settings)
+                            ?? new List<Course>();
                 }
+                return _courses;
             }
         }
+
         private static CourseServiceProxy? instance;
         private static object instanceLock = new object();
 
@@ -41,10 +36,8 @@ namespace Canvas.Library.Services
             {
                 lock (instanceLock)
                 {
-                    if(instance == null)
-                    {
+                    if (instance == null)
                         instance = new CourseServiceProxy();
-                    }
                 }
                 return instance;
             }
@@ -53,623 +46,925 @@ namespace Canvas.Library.Services
         public void AddOrUpdate(Course? course)
         {
             if (course == null) return;
-            if (course.Id == 0)
-            {
-                course.Id = NextKey;
-                Courses.Add(course);
-            }
-            else 
-            {
-                var existing = Courses.FirstOrDefault(c => c.Id == course.Id);
-                if (existing != null)
-                {
-                    existing.Name = course.Name;
-                    existing.Code = course.Code;
-                    existing.Description = course.Description;
-                }
-            }
+            var result = _handler.Post("/course", course).Result;
+            var updated = JsonConvert.DeserializeObject<Course>(result);
+            _courses = null; // invalidate cache
         }
 
         public Course? Delete(Course? course)
         {
-            if(course == null){
-                return null;
-            }
-
-            Courses.Remove(course);
-
+            if (course == null) return null;
+            _handler.Delete($"/course/{course.Id}").Wait();
+            _courses = null;
             return course;
         }
 
-        public int NextKey
+        public void InvalidateCache()
         {
-            get
-            {
-                if(Courses.Any()){
-                    return Courses.Select(i => i.Id).Max() + 1;
-                }
-                return 1;
-            }
-        }
-        public void AddModule(int CourseID, string moduleName)
-        {
-            if(moduleName == null || CourseID == null)
-            {
-                return;
-            }
-            else
-            {
-                int NextModuleKey;
-                var course = Courses.FirstOrDefault(c => c.Id == CourseID);
-                if(course.Modules == null)
-                {
-                    course.Modules = new List<Canvas.Library.Model.Module>();
-                }
-                if(course.Modules.Any())
-                    NextModuleKey = course.Modules.Select(i => i.Id).Max() + 1;
-                else
-                    NextModuleKey = 1;
-                var module = new Canvas.Library.Model.Module
-                {
-                    ModuleName = moduleName,
-                    Id = NextModuleKey
-                };
-                Courses.FirstOrDefault(c => c.Id == CourseID)?.Modules.Add(module);
-            }
+            _courses = null;
         }
 
-        public bool AddModuleContent(int CourseID, int ModuleID, string newContent)
+        public void AddModule(int courseId, string moduleName)
         {
-            var module = Courses.FirstOrDefault(c => c.Id == CourseID)
-                        ?.Modules?.FirstOrDefault(m => m.Id == ModuleID);
-
-            if (module == null) return false;
-
-            module.Content ??= new List<string>(); // Initialize if null
-            module.Content.Add(newContent);
-            return true;
+            if (moduleName == null) return;
+            _handler.Post($"/course/{courseId}/modules", moduleName).Wait();
+            _courses = null;
         }
+
+        public bool AddModuleContent(int courseId, int moduleId, string newContent)
+        {
+            var result = _handler.Post($"/course/{courseId}/modules/{moduleId}/content", newContent).Result;
+            _courses = null;
+            return result != "ERROR";
+        }
+
         public bool AddModuleContents(int courseId, int moduleId, ModuleContent content)
         {
-            var course = Courses.FirstOrDefault(c => c.Id == courseId);
-            if (course == null) return false;
-
-            var module = course.Modules?.FirstOrDefault(m => m.Id == moduleId);
-            if (module == null) return false;
-
-            if (module.ModuleContents == null)
-                module.ModuleContents = new List<ModuleContent>();
-
-            var allContents = course.Modules
-                .SelectMany(m => m.ModuleContents ?? new List<ModuleContent>())
-                .ToList();
-            content.Id = allContents.Any() ? allContents.Max(c => c.Id) + 1 : 1;
-
-            module.ModuleContents.Add(content);
-            return true;
+            var result = _handler.Post($"/course/{courseId}/modules/{moduleId}/contents", content).Result;
+            _courses = null;
+            return result != "ERROR";
         }
 
-        public void UpdateModuleContent(int CourseId, int ModuleId, int ContentIndex, string newContent)
+        public void UpdateModuleContent(int courseId, int moduleId, int contentIndex, string newContent)
         {
-            //there is also this error checking in the CLI because I had to search the Lists, but can't have too much (for now at least)
-            var course = CourseServiceProxy.Current.Courses
-                .FirstOrDefault(c => c.Id == CourseId);
-            var module = course?.Modules?
-                .FirstOrDefault(m => m.Id == ModuleId);
-            if (module != null && module.Content != null)
-            {
-                if (ContentIndex >= 0 && ContentIndex < module.Content.Count)
-                {
-                    module.Content[ContentIndex] = newContent;
-                }
-            }
+            var request = new { Index = contentIndex, Content = newContent };
+            _handler.Post($"/course/{courseId}/modules/{moduleId}/content/update", request).Wait();
+            _courses = null;
         }
 
-        public void DeleteModuleContent(int CourseId, int ModuleId, int ContentIndex)
+        public void DeleteModuleContent(int courseId, int moduleId, int contentIndex)
         {
-            var course = Courses?.FirstOrDefault(c => c.Id == CourseId);
-            if (course == null) return;
-            var module = course.Modules?.FirstOrDefault(m => m.Id == ModuleId);
-            if (module == null || module.Content == null) return;
-            if (ContentIndex >= 0 && ContentIndex < module.Content.Count)
-            {
-                module.Content.RemoveAt(ContentIndex);
-            }
-        }
-        public void DeleteModuleContents(int CourseId, int ModuleId, int ContentId)
-        {
-            var course = Courses?.FirstOrDefault(c => c.Id == CourseId);
-            if (course == null) return;
-            var module = course.Modules?.FirstOrDefault(m => m.Id == ModuleId);
-            if (module == null || module.Content == null) return;
-            var content = module.ModuleContents.FirstOrDefault(i => i.Id == ContentId);
-            module.ModuleContents.Remove(content);
+            _handler.Delete($"/course/{courseId}/modules/{moduleId}/content/{contentIndex}").Wait();
+            _courses = null;
         }
 
-        public void UnenrollStudent(int CourseID, int StudnetID)
+        public void DeleteModuleContents(int courseId, int moduleId, int contentId)
         {
-            var course = Courses.FirstOrDefault(i => i.Id == CourseID);
-            var studentToRemove = course.Roster.FirstOrDefault(i => i.Id == StudnetID);
-
-            if (studentToRemove != null) 
-                course.Roster.Remove(studentToRemove);
-        }
-
-        public bool UnenrollStudentFromAllCourses(int studentId)
-        {
-            DeleteAllStudentsSubmissions(studentId);
-            bool found = false;
-            foreach (var course in Courses)
-            {
-                var studentToRemove = course.Roster.FirstOrDefault(i => i.Id == studentId);
-                if (studentToRemove != null)
-                {
-                    course.Roster.Remove(studentToRemove);
-                    found = true;
-                }
-            }
-            return found;
-        }
-
-        public void DeleteAllStudentsSubmissions(int studentID)
-        {
-            Courses.ForEach(m =>
-            {
-                m.Assignments.ForEach (n => {
-                    var index = n.Submissions.FindIndex(i => i.StudentId == studentID);
-                    if(index >= 0)
-                    {
-                        n.Submissions.RemoveAt(index);
-                    }
-                });
-            });
-        }
-
-        public List<Course> GetCoursesForStudent(int studentID)
-        {
-            return Courses
-                .Where(c => c.Roster != null && c.Roster.Any(m => m != null && m.Id == studentID))
-                .ToList();
-        }
-
-        public void EnrollStudent(int studentId, int courseId)
-        {
-            var student = StudentServiceProxy.Current.GetById(studentId);
-            var course = Courses.FirstOrDefault(i => i.Id == courseId);
-            if (student == null || course == null) return;
-            if (course.Roster?.Any(s => s.Id == studentId) == true) return;
-            course.Roster?.Add(student);
-        }
-
-
-        public Assignment AddOrUpdateAssignment(int courseId, Assignment assignment)
-        {
-            var course = Courses.FirstOrDefault(i => i.Id == courseId);
-            if (course == null) return null;
-
-            course.Assignments ??= new List<Assignment>();
-
-            if (assignment.Id == 0)
-            {
-                assignment.Id = AssignmentNextKey(course);
-                course.Assignments.Add(assignment);
-            }
-            else
-            {
-                var existing = course.Assignments.FirstOrDefault(a => a.Id == assignment.Id);
-                if (existing == null) return null;
-                existing.Name = assignment.Name;
-                existing.Description = assignment.Description;
-                existing.AvailablePoints = assignment.AvailablePoints;
-                existing.DueDate = assignment.DueDate;
-                existing.GroupId = assignment.GroupId;
-            }
-            return assignment;
-        }
-        private int AssignmentNextKey(Course course) 
-        {
-            if (course.Assignments != null && course.Assignments.Any()) {
-                return course.Assignments.Max(a => a.Id) + 1;
-            }
-            return 1;
-        }
-
-        public bool DeleteAssignment(int courseId, int assignmentId)
-        {
-            var course = Courses.FirstOrDefault(c => c.Id == courseId);
-            if (course == null || course.Assignments == null) return false;
-
-            var assignmentToRemove = course.Assignments.FirstOrDefault(a => a.Id == assignmentId);
-            if (assignmentToRemove == null) return false;
-
-            // fix: clean up group membership before deleting
-            if (assignmentToRemove.GroupId != 0)
-                RemoveAssignmentFromGroup(courseId, assignmentToRemove.GroupId, assignmentToRemove.Id);
-
-            assignmentToRemove.Submissions?.Clear();
-            course.Assignments.Remove(assignmentToRemove);
-
-            if (course.Modules == null) return true;
-            foreach (var module in course.Modules)
-                module.ModuleContents?.RemoveAll(c => c is AssignmentContent ac && ac.AssignmentId == assignmentId);
-
-            return true;
-        }
-
-        public List<Submission> GetStudentSubmissions(int courseId, int studentId)
-        {
-            return Courses.FirstOrDefault(c => c.Id == courseId)
-                ?.Assignments
-                ?.SelectMany(a => a.Submissions)
-                .Where(s => s.StudentId == studentId)
-                .ToList() ?? new List<Submission>();
-        }
-
-        public double CalculateGrade(int courseId, int studentId)
-        {
-            var course = Courses.FirstOrDefault(c => c.Id == courseId);
-            if (course == null) return 0;
-            if (course.Assignments == null || !course.Assignments.Any()) return 0;
-
-            double totalEarned = 0;
-            double totalAvailable = 0;
-
-            foreach (var group in course.AssignmentGroups ?? new List<AssignmentGroup>())
-            {
-                var groupAssignments = course.Assignments
-                    .Where(a => group.AssignmentIds.Contains(a.Id))
-                    .ToList();
-
-                var submittedInGroup = groupAssignments
-                    .Where(a => a.Submissions != null &&
-                                a.Submissions.Any(s => s.StudentId == studentId))
-                    .ToList();
-
-                if (!submittedInGroup.Any()) continue;
-
-                var groupAvailable = submittedInGroup.Sum(a => a.AvailablePoints);
-                var groupEarned = submittedInGroup
-                    .SelectMany(a => a.Submissions)
-                    .Where(s => s.StudentId == studentId)
-                    .Sum(s => s.PointsAwarded ?? 0);
-
-                if (groupAvailable > 0)
-                {
-                    totalEarned += (double)groupEarned / groupAvailable * group.TotalPoints;
-                    totalAvailable += group.TotalPoints;
-                }
-            }
-
-            var ungrouped = course.Assignments
-                .Where(a => a.GroupId == 0 &&
-                            a.Submissions != null &&
-                            a.Submissions.Any(s => s.StudentId == studentId))
-                .ToList();
-
-            totalAvailable += ungrouped.Sum(a => a.AvailablePoints);
-            totalEarned += ungrouped
-                .SelectMany(a => a.Submissions)
-                .Where(s => s.StudentId == studentId)
-                .Sum(s => s.PointsAwarded ?? 0);
-
-            return totalAvailable > 0 ? totalEarned / totalAvailable * 100 : 0;
-        }
-
-        public void SubmitAssignment(int CourseID, Submission submission)
-        {
-            var course = Courses.FirstOrDefault(i => i.Id == CourseID);
-            var assignment = course.Assignments.FirstOrDefault(i => i.Id == submission.AssignmentId);
-            if(assignment.Submissions == null)  {assignment.Submissions = new List<Submission>();}
-            int nextId = assignment.Submissions.Any() 
-                ? assignment.Submissions.Max(s => s.Id) + 1 
-                : 1;
-
-            submission.Id = nextId;
-            assignment.Submissions.Add(submission);
-        }
-
-        public void GradeSubmission(int CourseID, int AssignmentID, int SubmissionID, int Points)
-        {
-            var submission = Courses?.FirstOrDefault(i => i.Id == CourseID)
-                .Assignments?.FirstOrDefault(i => i.Id == AssignmentID)
-                .Submissions?.FirstOrDefault(i => i.Id == SubmissionID);
-            if (submission != null)
-                submission.PointsAwarded = Points;
-        }
-        public void AddAnnouncement(int courseId, Announcement announcement)
-        {
-            var course = Courses.FirstOrDefault(c => c.Id == courseId);
-            if (course == null) return;
-
-            course.Announcements ??= new List<Announcement>();
-            announcement.Id = course.Announcements.Any()
-                ? course.Announcements.Max(a => a.Id) + 1
-                : 1;
-            course.Announcements.Add(announcement);
-        }
-
-        public void DeleteAnnouncement(int courseId, int announcementId)
-        {
-            var course = Courses.FirstOrDefault(c => c.Id == courseId);
-            var announcement = course?.Announcements?.FirstOrDefault(a => a.Id == announcementId);
-            if (announcement != null)
-                course.Announcements.Remove(announcement);
-        }
-
-        public void UpdateAnnouncement(int courseId, Announcement updated)
-        {
-            var course = Courses.FirstOrDefault(c => c.Id == courseId);
-            var announcement = course?.Announcements?.FirstOrDefault(a => a.Id == updated.Id);
-            if (announcement == null) return;
-            announcement.Title = updated.Title;
-            announcement.Body = updated.Body;
+            _handler.Delete($"/course/{courseId}/modules/{moduleId}/contents/{contentId}").Wait();
+            _courses = null;
         }
 
         public void DeleteModule(int courseId, int moduleId)
         {
-            var course = Courses.FirstOrDefault(c => c.Id == courseId);
-            var module = course?.Modules?.FirstOrDefault(m => m.Id == moduleId);
-            if (module != null)
-                course.Modules.Remove(module);
+            _handler.Delete($"/course/{courseId}/modules/{moduleId}").Wait();
+            _courses = null;
+        }
+
+        public void UnenrollStudent(int courseId, int studentId)
+        {
+            _handler.Delete($"/course/{courseId}/roster/{studentId}").Wait();
+            _courses = null;
+        }
+
+        public void DeleteAllStudentsSubmissions(int studentId)
+        {
+            _handler.Delete($"/course/submissions/{studentId}").Wait();
+            _courses = null;
+        }
+
+        public List<Course> GetCoursesForStudent(int studentId)
+        {
+            _courses = null; // force fresh fetch
+            var result = _handler.Get($"/course/student/{studentId}").Result;
+            if (result == null) return new List<Course>();
+            var settings = new JsonSerializerSettings();
+            settings.Converters.Add(new ModuleContentConverter());
+            return JsonConvert.DeserializeObject<List<Course>>(result, settings) ?? new List<Course>();
+        }
+
+        public void EnrollStudent(int studentId, int courseId)
+        {
+            _handler.Post($"/course/{courseId}/roster/{studentId}", new { }).Wait();
+            _courses = null;
+        }
+
+        public Assignment AddOrUpdateAssignment(int courseId, Assignment assignment)
+        {
+            var result = _handler.Post($"/course/{courseId}/assignments", assignment).Result;
+            _courses = null;
+            return JsonConvert.DeserializeObject<Assignment>(result);
+        }
+
+        public bool DeleteAssignment(int courseId, int assignmentId)
+        {
+            var result = _handler.Delete($"/course/{courseId}/assignments/{assignmentId}").Result;
+            _courses = null;
+            return result != "ERROR";
         }
 
         public void CopyAssignmentToCourse(int assignmentId, int sourceCourseId, int targetCourseId)
         {
-            var source = Courses.FirstOrDefault(c => c.Id == sourceCourseId);
-            if (source == null) return;
-
-            var assignment = source.Assignments?.FirstOrDefault(a => a.Id == assignmentId);
-            if (assignment == null) return;
-
-            var copy = new Assignment
-            {
-                Id = 0, // signals AddOrUpdate to treat it as new
-                Name = assignment.Name,
-                Description = assignment.Description,
-                AvailablePoints = assignment.AvailablePoints,
-                DueDate = assignment.DueDate,
-                Submissions = new List<Submission>(),
-                GroupId = 0
-            };
-
-            AddOrUpdateAssignment(targetCourseId, copy);
+            var request = new { AssignmentId = assignmentId, SourceCourseId = sourceCourseId };
+            _handler.Post($"/course/{targetCourseId}/assignments/copy", request).Wait();
+            _courses = null;
         }
-        //**************** Import and Export Fuctions *********************** (REVIEW)
+
+        public Assignment GetAssignmentById(int courseId, int assignmentId)
+        {
+            var result = _handler.Get($"/course/{courseId}/assignments/{assignmentId}").Result;
+            return JsonConvert.DeserializeObject<Assignment>(result);
+        }
+
+        public List<Submission> GetStudentSubmissions(int courseId, int studentId)
+        {
+            var result = _handler.Get($"/course/{courseId}/submissions/{studentId}").Result;
+            return JsonConvert.DeserializeObject<List<Submission>>(result) ?? new List<Submission>();
+        }
+
+        public Submission? GetStudentSubmission(int courseId, int assignmentId, int studentId)
+        {
+            var result = _handler.Get($"/course/{courseId}/submission/{assignmentId}/student/{studentId}").Result;
+            return JsonConvert.DeserializeObject<Submission>(result);
+        }
+
+        public double CalculateGrade(int courseId, int studentId)
+        {
+            var result = _handler.Get($"/course/{courseId}/grades/{studentId}").Result;
+            return JsonConvert.DeserializeObject<double>(result);
+        }
+
+        // public void SubmitAssignment(int courseId, Submission submission)
+        // {
+        //     _handler.Post($"/course/{courseId}/submissions", submission).Wait();
+        //     _courses = null;
+        // }
+        public string SubmitAssignment(int courseId, Submission submission)
+        {
+            var result = _handler.Post($"/course/{courseId}/submissions", submission).Result;
+            _courses = null;
+            return result;
+        }
+
+        public void GradeSubmission(int courseId, int assignmentId, int submissionId, int points)
+        {
+            _handler.Post($"/course/{courseId}/assignments/{assignmentId}/submissions/{submissionId}/grade", points).Wait();
+            _courses = null;
+        }
+
+        public void AddAnnouncement(int courseId, Announcement announcement)
+        {
+            _handler.Post($"/course/{courseId}/announcements", announcement).Wait();
+            _courses = null;
+        }
+
+        public void UpdateAnnouncement(int courseId, Announcement updated)
+        {
+            _handler.Post($"/course/{courseId}/announcements", updated).Wait();
+            _courses = null;
+        }
+
+        public void DeleteAnnouncement(int courseId, int announcementId)
+        {
+            _handler.Delete($"/course/{courseId}/announcements/{announcementId}").Wait();
+            _courses = null;
+        }
+
         public string ExportRoster(int courseId)
         {
-            var course = Courses.FirstOrDefault(c => c.Id == courseId);
-            if (course == null) return string.Empty;
-
-            var sb = new StringBuilder();
-            sb.AppendLine("StudentCode");
-
-            foreach (var student in course.Roster ?? new List<Student>())
-                sb.AppendLine(student.Code);
-
-            return sb.ToString();
+            return _handler.Get($"/course/{courseId}/roster/export").Result ?? string.Empty;
         }
 
         public (int added, int skipped, int notFound) ImportRoster(int courseId, string csvContent)
         {
-            var course = Courses.FirstOrDefault(c => c.Id == courseId);
-            if (course == null) return (0, 0, 0);
-
-            if (course.Roster == null)
-                course.Roster = new List<Student>();
-
-            int added = 0, skipped = 0, notFound = 0;
-
-            var lines = csvContent
-                .Split('\n', StringSplitOptions.RemoveEmptyEntries)
-                .Select(l => l.Trim())
-                .Where(l => !string.IsNullOrWhiteSpace(l))
-                .Skip(1) // skip header
-                .ToList();
-
-            foreach (var code in lines)
-            {
-                // find student in system by code
-                var student = StudentServiceProxy.Current.Students.FirstOrDefault(s => s.Code == code);
-
-                if (student == null)
-                {
-                    notFound++;
-                    continue;
-                }
-
-                // idempotent — skip if already enrolled
-                if (course.Roster.Any(s => s.Code == code))
-                {
-                    skipped++;
-                    continue;
-                }
-
-                course.Roster.Add(student);
-                added++;
-            }
-
-            return (added, skipped, notFound);
+            var result = _handler.Post($"/course/{courseId}/roster/import", csvContent).Result;
+            var parsed = JsonConvert.DeserializeObject<ImportRosterResult>(result);
+            return (parsed.Added, parsed.Skipped, parsed.NotFound);
         }
-        public Assignment GetAssignmentById(int courseId, int assignmentId)
+
+        private class ImportRosterResult
         {
-            var course = Courses.FirstOrDefault(c => c.Id == courseId);
-            return course?.Assignments?.FirstOrDefault(a => a.Id == assignmentId);
+            public int Added { get; set; }
+            public int Skipped { get; set; }
+            public int NotFound { get; set; }
         }
-
-        // ── ASSIGNMENT GROUP FUNCTIONS ──
 
         public AssignmentGroup AddOrUpdateAssignmentGroup(int courseId, AssignmentGroup group)
         {
-            var course = Courses.FirstOrDefault(c => c.Id == courseId);
-            if (course == null) return null;
-
-            course.AssignmentGroups ??= new List<AssignmentGroup>();
-
-            if (group.Id == 0)
-            {
-                group.Id = AssignmentGroupNextKey(course);
-                group.CourseId = courseId;
-                course.AssignmentGroups.Add(group);
-            }
-            else
-            {
-                var existing = course.AssignmentGroups.FirstOrDefault(g => g.Id == group.Id);
-                if (existing == null) return null;
-                existing.Name = group.Name;
-                existing.TotalPoints = group.TotalPoints;
-            }
-            return group;
+            var result = _handler.Post($"/course/{courseId}/groups", group).Result;
+            _courses = null;
+            return JsonConvert.DeserializeObject<AssignmentGroup>(result);
         }
 
         public bool DeleteAssignmentGroup(int courseId, int groupId)
         {
-            var course = Courses.FirstOrDefault(c => c.Id == courseId);
-            if (course == null) return false;
-
-            var group = course.AssignmentGroups?.FirstOrDefault(g => g.Id == groupId);
-            if (group == null) return false;
-
-            foreach (var assignmentId in group.AssignmentIds)
-            {
-                var assignment = course.Assignments?.FirstOrDefault(a => a.Id == assignmentId);
-                if (assignment != null)
-                    assignment.GroupId = 0;
-            }
-
-            course.AssignmentGroups.Remove(group);
-            return true;
+            var result = _handler.Delete($"/course/{courseId}/groups/{groupId}").Result;
+            _courses = null;
+            return result != "ERROR";
         }
 
         public bool AddAssignmentToGroup(int courseId, int groupId, int assignmentId)
         {
-            var course = Courses.FirstOrDefault(c => c.Id == courseId);
-            if (course == null) return false;
-
-            var group = course.AssignmentGroups?.FirstOrDefault(g => g.Id == groupId);
-            var assignment = course.Assignments?.FirstOrDefault(a => a.Id == assignmentId);
-            if (group == null || assignment == null) return false;
-
-            if (assignment.GroupId != 0)
-                RemoveAssignmentFromGroup(courseId, assignment.GroupId, assignmentId);
-
-            assignment.GroupId = groupId;
-            if (!group.AssignmentIds.Contains(assignmentId))
-                group.AssignmentIds.Add(assignmentId);
-
-            return true;
+            var result = _handler.Post($"/course/{courseId}/groups/{groupId}/assignments/{assignmentId}", new { }).Result;
+            _courses = null;
+            return result != "ERROR";
         }
 
         public bool RemoveAssignmentFromGroup(int courseId, int groupId, int assignmentId)
         {
-            var course = Courses.FirstOrDefault(c => c.Id == courseId);
-            if (course == null) return false;
-
-            var group = course.AssignmentGroups?.FirstOrDefault(g => g.Id == groupId);
-            var assignment = course.Assignments?.FirstOrDefault(a => a.Id == assignmentId);
-            if (group == null || assignment == null) return false;
-
-            assignment.GroupId = 0;
-            group.AssignmentIds.Remove(assignmentId);
-            return true;
+            var result = _handler.Delete($"/course/{courseId}/groups/{groupId}/assignments/{assignmentId}").Result;
+            _courses = null;
+            return result != "ERROR";
         }
 
         public List<AssignmentGroup> GetAssignmentGroups(int courseId)
         {
-            var course = Courses.FirstOrDefault(c => c.Id == courseId);
-            return course?.AssignmentGroups ?? new List<AssignmentGroup>();
+            var result = _handler.Get($"/course/{courseId}/groups").Result;
+            return JsonConvert.DeserializeObject<List<AssignmentGroup>>(result) ?? new List<AssignmentGroup>();
         }
 
         public AssignmentGroup GetAssignmentGroupById(int courseId, int groupId)
         {
-            var course = Courses.FirstOrDefault(c => c.Id == courseId);
-            return course?.AssignmentGroups?.FirstOrDefault(g => g.Id == groupId);
-        }
-
-        private int AssignmentGroupNextKey(Course course)
-        {
-            if (course.AssignmentGroups != null && course.AssignmentGroups.Any())
-                return course.AssignmentGroups.Max(g => g.Id) + 1;
-            return 1;
+            var result = _handler.Get($"/course/{courseId}/groups/{groupId}").Result;
+            return JsonConvert.DeserializeObject<AssignmentGroup>(result);
         }
 
         public Course CopyCourse(int sourceCourseId, int sectionNumber, int year, SemesterType semester)
         {
-            var source = Courses.FirstOrDefault(c => c.Id == sourceCourseId);
-            if (source == null) return null;
-
-            var newId = NextKey;
-
-            var copy = new Course
-            {
-                Id = newId,
-                Name = source.Name,
-                Code = source.Code,
-                Description = source.Description,
-                SectionNumber = sectionNumber,
-                SemesterTaught = new Semester(year, semester),
-
-                Assignments = source.Assignments?.Select(a => new Assignment
-                {
-                    Id = a.Id,
-                    Name = a.Name,
-                    Description = a.Description,
-                    AvailablePoints = a.AvailablePoints,
-                    DueDate = a.DueDate,
-                    GroupId = a.GroupId,
-                    Submissions = new List<Submission>()
-                }).ToList() ?? new List<Assignment>(),
-
-                AssignmentGroups = source.AssignmentGroups?.Select(g => new AssignmentGroup
-                {
-                    Id = g.Id,
-                    CourseId = newId,
-                    Name = g.Name,
-                    TotalPoints = g.TotalPoints,
-                    AssignmentIds = new List<int>(g.AssignmentIds)
-                }).ToList() ?? new List<AssignmentGroup>(),
-
-                Modules = source.Modules?.Select(m => new Module
-                {
-                    Id = m.Id,
-                    ModuleName = m.ModuleName,
-                    Content = m.Content != null ? new List<string>(m.Content) : new List<string>(),
-                    ModuleContents = m.ModuleContents?.Select(c => c switch
-                    {
-                        AssignmentContent ac => (ModuleContent)new AssignmentContent
-                        {
-                            Id = ac.Id,
-                            AssignmentId = ac.AssignmentId,
-                            Name = ac.Name
-                        },
-                        FileContent fc => new FileContent
-                        {
-                            Id = fc.Id,
-                            Name = fc.Name,
-                            FilePath = fc.FilePath
-                        },
-                        PageContent pc => new PageContent
-                        {
-                            Id = pc.Id,
-                            Name = pc.Name
-                        },
-                        _ => null
-                    }).Where(c => c != null).ToList() ?? new List<ModuleContent>()
-                }).ToList() ?? new List<Module>(),
-
-                Announcements = source.Announcements?.Select(a => new Announcement
-                {
-                    Id = a.Id,
-                    Title = a.Title,
-                    Body = a.Body,
-                    PostedDate = a.PostedDate
-                }).ToList() ?? new List<Announcement>(),
-
-                Roster = new List<Student>()
-            };
-
-            Courses.Add(copy);
-            return copy;
+            var request = new { SectionNumber = sectionNumber, Year = year, Semester = semester };
+            var result = _handler.Post($"/course/{sourceCourseId}/copy", request).Result;
+            _courses = null;
+            return JsonConvert.DeserializeObject<Course>(result);
         }
+    }
+}
+
+// // using System.Dynamic;
+// using Canvas.Library.Model;
+// // using Microsoft.VisualBasic;
+// // using System;
+// // using System.Collections;
+// // using System.Collections.Generic;
+// // using System.ComponentModel;
+// // using System.Data.Common;
+// // using System.Net;
+// // using System.Net.ServerSentEvents;
+// // using System.Reflection;
+// using System.Text;
+
+// namespace Canvas.Library.Services
+// {
+//     public class CourseServiceProxy
+//     {
+//         private List<Course> courses;
+
+//         public List<Course> Courses
+//         {
+//             get
+//             {
+//                 return courses;
+//             }
+
+//             set
+//             {
+//                 if(courses != value)
+//                 {
+//                     courses = value;
+//                 }
+//             }
+//         }
+//         private static CourseServiceProxy? instance;
+//         private static object instanceLock = new object();
+
+//         public static CourseServiceProxy Current
+//         {
+//             get
+//             {
+//                 lock (instanceLock)
+//                 {
+//                     if(instance == null)
+//                     {
+//                         instance = new CourseServiceProxy();
+//                     }
+//                 }
+//                 return instance;
+//             }
+//         }
+
+//         public void AddOrUpdate(Course? course)
+//         {
+//             if (course == null) return;
+//             if (course.Id == 0)
+//             {
+//                 course.Id = NextKey;
+//                 Courses.Add(course);
+//             }
+//             else 
+//             {
+//                 var existing = Courses.FirstOrDefault(c => c.Id == course.Id);
+//                 if (existing != null)
+//                 {
+//                     existing.Name = course.Name;
+//                     existing.Code = course.Code;
+//                     existing.Description = course.Description;
+//                 }
+//             }
+//         }
+
+//         public Course? Delete(Course? course)
+//         {
+//             if(course == null){
+//                 return null;
+//             }
+
+//             Courses.Remove(course);
+
+//             return course;
+//         }
+
+//         public int NextKey
+//         {
+//             get
+//             {
+//                 if(Courses.Any()){
+//                     return Courses.Select(i => i.Id).Max() + 1;
+//                 }
+//                 return 1;
+//             }
+//         }
+//         public void AddModule(int CourseID, string moduleName)
+//         {
+//             if(moduleName == null || CourseID == null)
+//             {
+//                 return;
+//             }
+//             else
+//             {
+//                 int NextModuleKey;
+//                 var course = Courses.FirstOrDefault(c => c.Id == CourseID);
+//                 if(course.Modules == null)
+//                 {
+//                     course.Modules = new List<Canvas.Library.Model.Module>();
+//                 }
+//                 if(course.Modules.Any())
+//                     NextModuleKey = course.Modules.Select(i => i.Id).Max() + 1;
+//                 else
+//                     NextModuleKey = 1;
+//                 var module = new Canvas.Library.Model.Module
+//                 {
+//                     ModuleName = moduleName,
+//                     Id = NextModuleKey
+//                 };
+//                 Courses.FirstOrDefault(c => c.Id == CourseID)?.Modules.Add(module);
+//             }
+//         }
+
+//         public bool AddModuleContent(int CourseID, int ModuleID, string newContent)
+//         {
+//             var module = Courses.FirstOrDefault(c => c.Id == CourseID)
+//                         ?.Modules?.FirstOrDefault(m => m.Id == ModuleID);
+
+//             if (module == null) return false;
+
+//             module.Content ??= new List<string>(); // Initialize if null
+//             module.Content.Add(newContent);
+//             return true;
+//         }
+//         public bool AddModuleContents(int courseId, int moduleId, ModuleContent content)
+//         {
+//             var course = Courses.FirstOrDefault(c => c.Id == courseId);
+//             if (course == null) return false;
+
+//             var module = course.Modules?.FirstOrDefault(m => m.Id == moduleId);
+//             if (module == null) return false;
+
+//             if (module.ModuleContents == null)
+//                 module.ModuleContents = new List<ModuleContent>();
+
+//             var allContents = course.Modules
+//                 .SelectMany(m => m.ModuleContents ?? new List<ModuleContent>())
+//                 .ToList();
+//             content.Id = allContents.Any() ? allContents.Max(c => c.Id) + 1 : 1;
+
+//             module.ModuleContents.Add(content);
+//             return true;
+//         }
+
+//         public void UpdateModuleContent(int CourseId, int ModuleId, int ContentIndex, string newContent)
+//         {
+//             //there is also this error checking in the CLI because I had to search the Lists, but can't have too much (for now at least)
+//             var course = CourseServiceProxy.Current.Courses
+//                 .FirstOrDefault(c => c.Id == CourseId);
+//             var module = course?.Modules?
+//                 .FirstOrDefault(m => m.Id == ModuleId);
+//             if (module != null && module.Content != null)
+//             {
+//                 if (ContentIndex >= 0 && ContentIndex < module.Content.Count)
+//                 {
+//                     module.Content[ContentIndex] = newContent;
+//                 }
+//             }
+//         }
+
+//         public void DeleteModuleContent(int CourseId, int ModuleId, int ContentIndex)
+//         {
+//             var course = Courses?.FirstOrDefault(c => c.Id == CourseId);
+//             if (course == null) return;
+//             var module = course.Modules?.FirstOrDefault(m => m.Id == ModuleId);
+//             if (module == null || module.Content == null) return;
+//             if (ContentIndex >= 0 && ContentIndex < module.Content.Count)
+//             {
+//                 module.Content.RemoveAt(ContentIndex);
+//             }
+//         }
+//         public void DeleteModuleContents(int CourseId, int ModuleId, int ContentId)
+//         {
+//             var course = Courses?.FirstOrDefault(c => c.Id == CourseId);
+//             if (course == null) return;
+//             var module = course.Modules?.FirstOrDefault(m => m.Id == ModuleId);
+//             if (module == null || module.Content == null) return;
+//             var content = module.ModuleContents.FirstOrDefault(i => i.Id == ContentId);
+//             module.ModuleContents.Remove(content);
+//         }
+
+//         public void UnenrollStudent(int CourseID, int StudnetID)
+//         {
+//             var course = Courses.FirstOrDefault(i => i.Id == CourseID);
+//             var studentToRemove = course.Roster.FirstOrDefault(i => i.Id == StudnetID);
+
+//             if (studentToRemove != null) 
+//                 course.Roster.Remove(studentToRemove);
+//         }
+
+//         public bool UnenrollStudentFromAllCourses(int studentId)
+//         {
+//             DeleteAllStudentsSubmissions(studentId);
+//             bool found = false;
+//             foreach (var course in Courses)
+//             {
+//                 var studentToRemove = course.Roster.FirstOrDefault(i => i.Id == studentId);
+//                 if (studentToRemove != null)
+//                 {
+//                     course.Roster.Remove(studentToRemove);
+//                     found = true;
+//                 }
+//             }
+//             return found;
+//         }
+
+//         public void DeleteAllStudentsSubmissions(int studentID)
+//         {
+//             Courses.ForEach(m =>
+//             {
+//                 m.Assignments.ForEach (n => {
+//                     var index = n.Submissions.FindIndex(i => i.StudentId == studentID);
+//                     if(index >= 0)
+//                     {
+//                         n.Submissions.RemoveAt(index);
+//                     }
+//                 });
+//             });
+//         }
+
+//         public List<Course> GetCoursesForStudent(int studentID)
+//         {
+//             return Courses
+//                 .Where(c => c.Roster != null && c.Roster.Any(m => m != null && m.Id == studentID))
+//                 .ToList();
+//         }
+
+//         public void EnrollStudent(int studentId, int courseId)
+//         {
+//             var student = StudentServiceProxy.Current.GetById(studentId);
+//             var course = Courses.FirstOrDefault(i => i.Id == courseId);
+//             if (student == null || course == null) return;
+//             if (course.Roster?.Any(s => s.Id == studentId) == true) return;
+//             course.Roster?.Add(student);
+//         }
+
+
+//         public Assignment AddOrUpdateAssignment(int courseId, Assignment assignment)
+//         {
+//             var course = Courses.FirstOrDefault(i => i.Id == courseId);
+//             if (course == null) return null;
+
+//             course.Assignments ??= new List<Assignment>();
+
+//             if (assignment.Id == 0)
+//             {
+//                 assignment.Id = AssignmentNextKey(course);
+//                 course.Assignments.Add(assignment);
+//             }
+//             else
+//             {
+//                 var existing = course.Assignments.FirstOrDefault(a => a.Id == assignment.Id);
+//                 if (existing == null) return null;
+//                 existing.Name = assignment.Name;
+//                 existing.Description = assignment.Description;
+//                 existing.AvailablePoints = assignment.AvailablePoints;
+//                 existing.DueDate = assignment.DueDate;
+//                 existing.GroupId = assignment.GroupId;
+//             }
+//             return assignment;
+//         }
+//         private int AssignmentNextKey(Course course) 
+//         {
+//             if (course.Assignments != null && course.Assignments.Any()) {
+//                 return course.Assignments.Max(a => a.Id) + 1;
+//             }
+//             return 1;
+//         }
+
+//         public bool DeleteAssignment(int courseId, int assignmentId)
+//         {
+//             var course = Courses.FirstOrDefault(c => c.Id == courseId);
+//             if (course == null || course.Assignments == null) return false;
+
+//             var assignmentToRemove = course.Assignments.FirstOrDefault(a => a.Id == assignmentId);
+//             if (assignmentToRemove == null) return false;
+
+//             // fix: clean up group membership before deleting
+//             if (assignmentToRemove.GroupId != 0)
+//                 RemoveAssignmentFromGroup(courseId, assignmentToRemove.GroupId, assignmentToRemove.Id);
+
+//             assignmentToRemove.Submissions?.Clear();
+//             course.Assignments.Remove(assignmentToRemove);
+
+//             if (course.Modules == null) return true;
+//             foreach (var module in course.Modules)
+//                 module.ModuleContents?.RemoveAll(c => c is AssignmentContent ac && ac.AssignmentId == assignmentId);
+
+//             return true;
+//         }
+
+//         public List<Submission> GetStudentSubmissions(int courseId, int studentId)
+//         {
+//             return Courses.FirstOrDefault(c => c.Id == courseId)
+//                 ?.Assignments
+//                 ?.SelectMany(a => a.Submissions)
+//                 .Where(s => s.StudentId == studentId)
+//                 .ToList() ?? new List<Submission>();
+//         }
+
+//         public double CalculateGrade(int courseId, int studentId)
+//         {
+//             var course = Courses.FirstOrDefault(c => c.Id == courseId);
+//             if (course == null) return 0;
+//             if (course.Assignments == null || !course.Assignments.Any()) return 0;
+
+//             double totalEarned = 0;
+//             double totalAvailable = 0;
+
+//             foreach (var group in course.AssignmentGroups ?? new List<AssignmentGroup>())
+//             {
+//                 var groupAssignments = course.Assignments
+//                     .Where(a => group.AssignmentIds.Contains(a.Id))
+//                     .ToList();
+
+//                 var submittedInGroup = groupAssignments
+//                     .Where(a => a.Submissions != null &&
+//                                 a.Submissions.Any(s => s.StudentId == studentId))
+//                     .ToList();
+
+//                 if (!submittedInGroup.Any()) continue;
+
+//                 var groupAvailable = submittedInGroup.Sum(a => a.AvailablePoints);
+//                 var groupEarned = submittedInGroup
+//                     .SelectMany(a => a.Submissions)
+//                     .Where(s => s.StudentId == studentId)
+//                     .Sum(s => s.PointsAwarded ?? 0);
+
+//                 if (groupAvailable > 0)
+//                 {
+//                     totalEarned += (double)groupEarned / groupAvailable * group.TotalPoints;
+//                     totalAvailable += group.TotalPoints;
+//                 }
+//             }
+
+//             var ungrouped = course.Assignments
+//                 .Where(a => a.GroupId == 0 &&
+//                             a.Submissions != null &&
+//                             a.Submissions.Any(s => s.StudentId == studentId))
+//                 .ToList();
+
+//             totalAvailable += ungrouped.Sum(a => a.AvailablePoints);
+//             totalEarned += ungrouped
+//                 .SelectMany(a => a.Submissions)
+//                 .Where(s => s.StudentId == studentId)
+//                 .Sum(s => s.PointsAwarded ?? 0);
+
+//             return totalAvailable > 0 ? totalEarned / totalAvailable * 100 : 0;
+//         }
+
+//         public void SubmitAssignment(int CourseID, Submission submission)
+//         {
+//             var course = Courses.FirstOrDefault(i => i.Id == CourseID);
+//             var assignment = course.Assignments.FirstOrDefault(i => i.Id == submission.AssignmentId);
+//             if(assignment.Submissions == null)  {assignment.Submissions = new List<Submission>();}
+//             int nextId = assignment.Submissions.Any() 
+//                 ? assignment.Submissions.Max(s => s.Id) + 1 
+//                 : 1;
+
+//             submission.Id = nextId;
+//             assignment.Submissions.Add(submission);
+//         }
+
+//         public void GradeSubmission(int CourseID, int AssignmentID, int SubmissionID, int Points)
+//         {
+//             var submission = Courses?.FirstOrDefault(i => i.Id == CourseID)
+//                 .Assignments?.FirstOrDefault(i => i.Id == AssignmentID)
+//                 .Submissions?.FirstOrDefault(i => i.Id == SubmissionID);
+//             if (submission != null)
+//                 submission.PointsAwarded = Points;
+//         }
+//         public void AddAnnouncement(int courseId, Announcement announcement)
+//         {
+//             var course = Courses.FirstOrDefault(c => c.Id == courseId);
+//             if (course == null) return;
+
+//             course.Announcements ??= new List<Announcement>();
+//             announcement.Id = course.Announcements.Any()
+//                 ? course.Announcements.Max(a => a.Id) + 1
+//                 : 1;
+//             course.Announcements.Add(announcement);
+//         }
+
+//         public void DeleteAnnouncement(int courseId, int announcementId)
+//         {
+//             var course = Courses.FirstOrDefault(c => c.Id == courseId);
+//             var announcement = course?.Announcements?.FirstOrDefault(a => a.Id == announcementId);
+//             if (announcement != null)
+//                 course.Announcements.Remove(announcement);
+//         }
+
+//         public void UpdateAnnouncement(int courseId, Announcement updated)
+//         {
+//             var course = Courses.FirstOrDefault(c => c.Id == courseId);
+//             var announcement = course?.Announcements?.FirstOrDefault(a => a.Id == updated.Id);
+//             if (announcement == null) return;
+//             announcement.Title = updated.Title;
+//             announcement.Body = updated.Body;
+//         }
+
+//         public void DeleteModule(int courseId, int moduleId)
+//         {
+//             var course = Courses.FirstOrDefault(c => c.Id == courseId);
+//             var module = course?.Modules?.FirstOrDefault(m => m.Id == moduleId);
+//             if (module != null)
+//                 course.Modules.Remove(module);
+//         }
+
+//         public void CopyAssignmentToCourse(int assignmentId, int sourceCourseId, int targetCourseId)
+//         {
+//             var source = Courses.FirstOrDefault(c => c.Id == sourceCourseId);
+//             if (source == null) return;
+
+//             var assignment = source.Assignments?.FirstOrDefault(a => a.Id == assignmentId);
+//             if (assignment == null) return;
+
+//             var copy = new Assignment
+//             {
+//                 Id = 0, // signals AddOrUpdate to treat it as new
+//                 Name = assignment.Name,
+//                 Description = assignment.Description,
+//                 AvailablePoints = assignment.AvailablePoints,
+//                 DueDate = assignment.DueDate,
+//                 Submissions = new List<Submission>(),
+//                 GroupId = 0
+//             };
+
+//             AddOrUpdateAssignment(targetCourseId, copy);
+//         }
+//         //**************** Import and Export Fuctions *********************** (REVIEW)
+//         public string ExportRoster(int courseId)
+//         {
+//             var course = Courses.FirstOrDefault(c => c.Id == courseId);
+//             if (course == null) return string.Empty;
+
+//             var sb = new StringBuilder();
+//             sb.AppendLine("StudentCode");
+
+//             foreach (var student in course.Roster ?? new List<Student>())
+//                 sb.AppendLine(student.Code);
+
+//             return sb.ToString();
+//         }
+
+//         public (int added, int skipped, int notFound) ImportRoster(int courseId, string csvContent)
+//         {
+//             var course = Courses.FirstOrDefault(c => c.Id == courseId);
+//             if (course == null) return (0, 0, 0);
+
+//             if (course.Roster == null)
+//                 course.Roster = new List<Student>();
+
+//             int added = 0, skipped = 0, notFound = 0;
+
+//             var lines = csvContent
+//                 .Split('\n', StringSplitOptions.RemoveEmptyEntries)
+//                 .Select(l => l.Trim())
+//                 .Where(l => !string.IsNullOrWhiteSpace(l))
+//                 .Skip(1) // skip header
+//                 .ToList();
+
+//             foreach (var code in lines)
+//             {
+//                 // find student in system by code
+//                 var student = StudentServiceProxy.Current.Students.FirstOrDefault(s => s.Code == code);
+
+//                 if (student == null)
+//                 {
+//                     notFound++;
+//                     continue;
+//                 }
+
+//                 // idempotent — skip if already enrolled
+//                 if (course.Roster.Any(s => s.Code == code))
+//                 {
+//                     skipped++;
+//                     continue;
+//                 }
+
+//                 course.Roster.Add(student);
+//                 added++;
+//             }
+
+//             return (added, skipped, notFound);
+//         }
+//         public Assignment GetAssignmentById(int courseId, int assignmentId)
+//         {
+//             var course = Courses.FirstOrDefault(c => c.Id == courseId);
+//             return course?.Assignments?.FirstOrDefault(a => a.Id == assignmentId);
+//         }
+
+//         // ── ASSIGNMENT GROUP FUNCTIONS ──
+
+//         public AssignmentGroup AddOrUpdateAssignmentGroup(int courseId, AssignmentGroup group)
+//         {
+//             var course = Courses.FirstOrDefault(c => c.Id == courseId);
+//             if (course == null) return null;
+
+//             course.AssignmentGroups ??= new List<AssignmentGroup>();
+
+//             if (group.Id == 0)
+//             {
+//                 group.Id = AssignmentGroupNextKey(course);
+//                 group.CourseId = courseId;
+//                 course.AssignmentGroups.Add(group);
+//             }
+//             else
+//             {
+//                 var existing = course.AssignmentGroups.FirstOrDefault(g => g.Id == group.Id);
+//                 if (existing == null) return null;
+//                 existing.Name = group.Name;
+//                 existing.TotalPoints = group.TotalPoints;
+//             }
+//             return group;
+//         }
+
+//         public bool DeleteAssignmentGroup(int courseId, int groupId)
+//         {
+//             var course = Courses.FirstOrDefault(c => c.Id == courseId);
+//             if (course == null) return false;
+
+//             var group = course.AssignmentGroups?.FirstOrDefault(g => g.Id == groupId);
+//             if (group == null) return false;
+
+//             foreach (var assignmentId in group.AssignmentIds)
+//             {
+//                 var assignment = course.Assignments?.FirstOrDefault(a => a.Id == assignmentId);
+//                 if (assignment != null)
+//                     assignment.GroupId = 0;
+//             }
+
+//             course.AssignmentGroups.Remove(group);
+//             return true;
+//         }
+
+//         public bool AddAssignmentToGroup(int courseId, int groupId, int assignmentId)
+//         {
+//             var course = Courses.FirstOrDefault(c => c.Id == courseId);
+//             if (course == null) return false;
+
+//             var group = course.AssignmentGroups?.FirstOrDefault(g => g.Id == groupId);
+//             var assignment = course.Assignments?.FirstOrDefault(a => a.Id == assignmentId);
+//             if (group == null || assignment == null) return false;
+
+//             if (assignment.GroupId != 0)
+//                 RemoveAssignmentFromGroup(courseId, assignment.GroupId, assignmentId);
+
+//             assignment.GroupId = groupId;
+//             if (!group.AssignmentIds.Contains(assignmentId))
+//                 group.AssignmentIds.Add(assignmentId);
+
+//             return true;
+//         }
+
+//         public bool RemoveAssignmentFromGroup(int courseId, int groupId, int assignmentId)
+//         {
+//             var course = Courses.FirstOrDefault(c => c.Id == courseId);
+//             if (course == null) return false;
+
+//             var group = course.AssignmentGroups?.FirstOrDefault(g => g.Id == groupId);
+//             var assignment = course.Assignments?.FirstOrDefault(a => a.Id == assignmentId);
+//             if (group == null || assignment == null) return false;
+
+//             assignment.GroupId = 0;
+//             group.AssignmentIds.Remove(assignmentId);
+//             return true;
+//         }
+
+//         public List<AssignmentGroup> GetAssignmentGroups(int courseId)
+//         {
+//             var course = Courses.FirstOrDefault(c => c.Id == courseId);
+//             return course?.AssignmentGroups ?? new List<AssignmentGroup>();
+//         }
+
+//         public AssignmentGroup GetAssignmentGroupById(int courseId, int groupId)
+//         {
+//             var course = Courses.FirstOrDefault(c => c.Id == courseId);
+//             return course?.AssignmentGroups?.FirstOrDefault(g => g.Id == groupId);
+//         }
+
+//         private int AssignmentGroupNextKey(Course course)
+//         {
+//             if (course.AssignmentGroups != null && course.AssignmentGroups.Any())
+//                 return course.AssignmentGroups.Max(g => g.Id) + 1;
+//             return 1;
+//         }
+
+//         public Course CopyCourse(int sourceCourseId, int sectionNumber, int year, SemesterType semester)
+//         {
+//             var source = Courses.FirstOrDefault(c => c.Id == sourceCourseId);
+//             if (source == null) return null;
+
+//             var newId = NextKey;
+
+//             var copy = new Course
+//             {
+//                 Id = newId,
+//                 Name = source.Name,
+//                 Code = source.Code,
+//                 Description = source.Description,
+//                 SectionNumber = sectionNumber,
+//                 SemesterTaught = new Semester(year, semester),
+
+//                 Assignments = source.Assignments?.Select(a => new Assignment
+//                 {
+//                     Id = a.Id,
+//                     Name = a.Name,
+//                     Description = a.Description,
+//                     AvailablePoints = a.AvailablePoints,
+//                     DueDate = a.DueDate,
+//                     GroupId = a.GroupId,
+//                     Submissions = new List<Submission>()
+//                 }).ToList() ?? new List<Assignment>(),
+
+//                 AssignmentGroups = source.AssignmentGroups?.Select(g => new AssignmentGroup
+//                 {
+//                     Id = g.Id,
+//                     CourseId = newId,
+//                     Name = g.Name,
+//                     TotalPoints = g.TotalPoints,
+//                     AssignmentIds = new List<int>(g.AssignmentIds)
+//                 }).ToList() ?? new List<AssignmentGroup>(),
+
+//                 Modules = source.Modules?.Select(m => new Module
+//                 {
+//                     Id = m.Id,
+//                     ModuleName = m.ModuleName,
+//                     Content = m.Content != null ? new List<string>(m.Content) : new List<string>(),
+//                     ModuleContents = m.ModuleContents?.Select(c => c switch
+//                     {
+//                         AssignmentContent ac => (ModuleContent)new AssignmentContent
+//                         {
+//                             Id = ac.Id,
+//                             AssignmentId = ac.AssignmentId,
+//                             Name = ac.Name
+//                         },
+//                         FileContent fc => new FileContent
+//                         {
+//                             Id = fc.Id,
+//                             Name = fc.Name,
+//                             FilePath = fc.FilePath
+//                         },
+//                         PageContent pc => new PageContent
+//                         {
+//                             Id = pc.Id,
+//                             Name = pc.Name
+//                         },
+//                         _ => null
+//                     }).Where(c => c != null).ToList() ?? new List<ModuleContent>()
+//                 }).ToList() ?? new List<Module>(),
+
+//                 Announcements = source.Announcements?.Select(a => new Announcement
+//                 {
+//                     Id = a.Id,
+//                     Title = a.Title,
+//                     Body = a.Body,
+//                     PostedDate = a.PostedDate
+//                 }).ToList() ?? new List<Announcement>(),
+
+//                 Roster = new List<Student>()
+//             };
+
+//             Courses.Add(copy);
+//             return copy;
+//         }
+//     }
+// }
+
+/*
+
         private CourseServiceProxy()
         {
             courses = new List<Course>
@@ -1474,5 +1769,5 @@ namespace Canvas.Library.Services
                 }
             };
         }
-    }
-}
+
+*/

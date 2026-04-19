@@ -46,10 +46,23 @@ namespace Canvas.MAUI.ViewModels
         private void OnPropertyChanged([CallerMemberName] string propertyName = null)
         => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
+        // public void LoadCourses()
+        // {
+        //     var courses = CourseServiceProxy.Current.GetCoursesForStudent(studentId);
+        //     Courses = new ObservableCollection<Course>(courses);
+        // }
+
         public void LoadCourses()
         {
-            var courses = CourseServiceProxy.Current.GetCoursesForStudent(studentId);
-            Courses = new ObservableCollection<Course>(courses);
+            try
+            {
+                var courses = CourseServiceProxy.Current.GetCoursesForStudent(studentId);
+                Courses = new ObservableCollection<Course>(courses ?? new List<Course>());
+            }
+            catch (Exception ex)
+            {
+                Shell.Current.DisplayAlert("Error", ex.Message + "\n\n" + ex.StackTrace, "OK");
+            }
         }
 
     }

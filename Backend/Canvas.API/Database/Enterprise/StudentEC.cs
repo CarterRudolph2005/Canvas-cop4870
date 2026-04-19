@@ -60,13 +60,26 @@ namespace Canvas.API.Enterprise
 
         public Student? Delete(int id)
         {
-            // CourseServiceProxy.Current.UnenrollStudentFromAllCourses(studentID);
             Student? studentToRemove = FakeDatabase.Students.FirstOrDefault(s => s.Id == id);
-            if (studentToRemove != null){
-                // var student = new Student(Students[index]);
-                FakeDatabase.Students.Remove(studentToRemove);
-                // return Task.FromResult(student);
+            if (studentToRemove == null) return null;
+
+            // remove from all course rosters
+            foreach (var course in FakeDatabase.Courses)
+            {
+                var studentInRoster = course.Roster?.FirstOrDefault(s => s.Id == id);
+                if (studentInRoster != null)
+                    course.Roster.Remove(studentInRoster);
+
+                // delete all their submissions
+                course.Assignments?.ForEach(a =>
+                {
+                    var index = a.Submissions?.FindIndex(s => s.StudentId == id) ?? -1;
+                    if (index >= 0)
+                        a.Submissions.RemoveAt(index);
+                });
             }
+
+            FakeDatabase.Students.Remove(studentToRemove);
             return studentToRemove;
         }
     }

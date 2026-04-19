@@ -218,7 +218,17 @@ namespace Canvas.API.Enterprise
         public void UnenrollStudent(int courseId, int studentId)
         {
             var course = FakeDatabase.Courses.FirstOrDefault(c => c.Id == courseId);
-            var student = course?.Roster?.FirstOrDefault(s => s.Id == studentId);
+            if (course == null) return;
+
+            // clean up submissions for this course only
+            course.Assignments?.ForEach(a =>
+            {
+                var index = a.Submissions?.FindIndex(s => s.StudentId == studentId) ?? -1;
+                if (index >= 0)
+                    a.Submissions.RemoveAt(index);
+            });
+
+            var student = course.Roster?.FirstOrDefault(s => s.Id == studentId);
             if (student != null)
                 course.Roster.Remove(student);
         }
@@ -317,14 +327,14 @@ namespace Canvas.API.Enterprise
             assignment.Submissions.Add(submission);
         }
 
-        public void GradeSubmission(int courseId, int assignmentId, int submissionId, int points)
-        {
-            var submission = FakeDatabase.Courses.FirstOrDefault(c => c.Id == courseId)
-                ?.Assignments?.FirstOrDefault(a => a.Id == assignmentId)
-                ?.Submissions?.FirstOrDefault(s => s.Id == submissionId);
-            if (submission != null)
-                submission.PointsAwarded = points;
-        }
+public void GradeSubmission(int courseId, int assignmentId, int submissionId, int points)
+{
+    FakeDatabase.Courses
+        .FirstOrDefault(c => c.Id == courseId)
+        ?.Assignments?.FirstOrDefault(a => a.Id == assignmentId)
+        ?.Submissions?.FirstOrDefault(s => s.Id == submissionId)
+        .PointsAwarded = points; // you already have this logic
+}
 
         public double CalculateGrade(int courseId, int studentId)
         {
@@ -532,6 +542,12 @@ namespace Canvas.API.Enterprise
             };
             FakeDatabase.Courses.Add(copy);
             return copy;
+        }
+
+        public Submission? GetStudentSubmission(int courseId, int assignmentId, int studentId)
+        {
+            return FakeDatabase.Courses.FirstOrDefault(i => i.Id == courseId).Assignments.FirstOrDefault(i => i.Id == assignmentId).Submissions?
+                .FirstOrDefault(s => s.StudentId == studentId);
         }
     }
 }

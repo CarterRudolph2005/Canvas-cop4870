@@ -24,6 +24,7 @@ namespace Canvas.MAUI.Views
         private void OnNavigatedTo(object sender, NavigatedToEventArgs e)
         {
             base.OnNavigatedTo(e);
+            CourseServiceProxy.Current.InvalidateCache();
             ViewModel.LoadCourse();
         }   
 

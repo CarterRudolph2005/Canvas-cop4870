@@ -13,7 +13,6 @@ namespace Canvas.MAUI.ViewModels
 {
     internal class StudentCourseViewModel : INotifyPropertyChanged, IQueryAttributable
     {
-        // ── Wrapper for assignment + resolved group name ────────────────────
         public class StudentAssignmentDisplay
         {
             public Assignment Assignment { get; set; }
@@ -86,11 +85,18 @@ namespace Canvas.MAUI.ViewModels
         }
 
         private ObservableCollection<StudentAssignmentDisplay> assignments;
-        public ObservableCollection<StudentAssignmentDisplay> Assignments
-        {
-            get => assignments;
-            set { assignments = value; OnPropertyChanged(); }
-        }
+public bool HasAssignments => Assignments != null && Assignments.Count > 0;
+
+public ObservableCollection<StudentAssignmentDisplay> Assignments
+{
+    get => assignments;
+    set
+    {
+        assignments = value;
+        OnPropertyChanged();
+        OnPropertyChanged(nameof(HasAssignments));
+    }
+}
 
         private ObservableCollection<Announcement> announcements;
         public ObservableCollection<Announcement> Announcements
@@ -105,14 +111,15 @@ namespace Canvas.MAUI.ViewModels
 
         public void LoadMenu()
         {
-            var _course = CourseServiceProxy.Current.Courses.FirstOrDefault(i => i.Id == courseId);
+            var _course = CourseServiceProxy.Current.GetCoursesForStudent(studentId)
+                            .FirstOrDefault(i => i.Id == courseId);
             if (_course == null) return;
 
             Name = _course.Name ?? string.Empty;
             Code = _course.Code ?? string.Empty;
             Announcements = new ObservableCollection<Announcement>(_course.Announcements ?? new List<Announcement>());
-            GradePercentage = CourseServiceProxy.Current.CalculateGrade(CourseId, StudentId);
-
+            // GradePercentage = CourseServiceProxy.Current.CalculateGrade(CourseId, StudentId);
+            GradePercentage = CourseServiceProxy.Current.CalculateGrade(courseId, studentId);
             // build display wrappers with resolved group names
             var groups = CourseServiceProxy.Current.GetAssignmentGroups(courseId);
             var displayList = new ObservableCollection<StudentAssignmentDisplay>();
@@ -145,8 +152,7 @@ namespace Canvas.MAUI.ViewModels
                         if (content is AssignmentContent ac)
                         {
                             var assignment = _course.Assignments?.FirstOrDefault(a => a.Id == ac.AssignmentId);
-                            if (assignment != null)
-                                ac.Name = assignment.Name;
+                            ac.Name = assignment?.Name ?? "[Deleted Assignment]";
                         }
                     }
 

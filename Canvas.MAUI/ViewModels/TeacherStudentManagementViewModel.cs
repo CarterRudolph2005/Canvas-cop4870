@@ -29,6 +29,7 @@ namespace Canvas.MAUI.ViewModels
         {
             var student = await StudentServiceProxy.Current.DeleteStudent(SelectedStudent.Id);
             SelectedStudent = null;
+            CourseServiceProxy.Current.InvalidateCache();
             Refresh();
             return student;
         }
