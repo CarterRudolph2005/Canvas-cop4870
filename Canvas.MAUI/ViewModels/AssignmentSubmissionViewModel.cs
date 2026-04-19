@@ -108,8 +108,7 @@ namespace Canvas.MAUI.ViewModels
             Description = assignment.Description ?? string.Empty;
             AvailablePoints = assignment.AvailablePoints;
 
-            existingSubmission = assignment.Submissions?
-                .FirstOrDefault(s => s.StudentId == StudentId);
+            existingSubmission = CourseServiceProxy.Current.GetStudentSubmission(courseId, assignmentId, studentId);
 
             if (existingSubmission != null)
             {
@@ -133,7 +132,10 @@ namespace Canvas.MAUI.ViewModels
                 SubmissionDate = DateTime.Now
             };
 
-            CourseServiceProxy.Current.SubmitAssignment(courseId, existingSubmission);
+            // CourseServiceProxy.Current.SubmitAssignment(courseId, existingSubmission);
+
+        var submitResult = CourseServiceProxy.Current.SubmitAssignment(courseId, existingSubmission);
+        var grade = CourseServiceProxy.Current.CalculateGrade(courseId, StudentId);
 
             SubmittedAt = existingSubmission.SubmissionDate;
             IsSubmitted = true;

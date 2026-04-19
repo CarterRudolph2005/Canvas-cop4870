@@ -314,50 +314,47 @@ namespace Canvas.MAUI.ViewModels
             RefreshModules();
         }
 
-        private void RefreshModules()
+        private async void RefreshModules()
         {
             var course = CourseServiceProxy.Current.Courses.FirstOrDefault(c => c.Id == _courseId);
+            var assignments = course?.Assignments ?? new List<Assignment>();
+
             Modules = new ObservableCollection<ModuleViewModel>(
                 (course?.Modules ?? new List<Module>()).Select(m => new ModuleViewModel
                 {
                     Id = m.Id,
                     ModuleName = m.ModuleName,
                     Content = m.Content ?? new List<string>(),
+                    ModuleContents = m.ModuleContents ?? new List<ModuleContent>(),
                     IsExpanded = true
                 })
             );
+
+
+            foreach (var module in Modules)
+                foreach (var content in module.ModuleContents)
+                    if (content is AssignmentContent ac)
+                    {
+                        var assignment = assignments.FirstOrDefault(a => a.Id == ac.AssignmentId);
+                        if (assignment != null)
+                            ac.Name = assignment.Name;
+                    }
+
             OnPropertyChanged(nameof(Modules));
         }
 
         // private void RefreshModules()
         // {
         //     var course = CourseServiceProxy.Current.Courses.FirstOrDefault(c => c.Id == _courseId);
-        //     var assignments = course?.Assignments ?? new List<Assignment>();
-
         //     Modules = new ObservableCollection<ModuleViewModel>(
         //         (course?.Modules ?? new List<Module>()).Select(m => new ModuleViewModel
         //         {
         //             Id = m.Id,
         //             ModuleName = m.ModuleName,
         //             Content = m.Content ?? new List<string>(),
-        //             ModuleContents = m.ModuleContents ?? new List<ModuleContent>(),
         //             IsExpanded = true
         //         })
         //     );
-
-        //     foreach (var module in Modules)
-        //     {
-        //         foreach (var content in module.ModuleContents)
-        //         {
-        //             if (content is AssignmentContent ac)
-        //             {
-        //                 var assignment = assignments.FirstOrDefault(a => a.Id == ac.AssignmentId);
-        //                 if (assignment != null)
-        //                     ac.Name = assignment.Name;
-        //             }
-        //         }
-        //     }
-
         //     OnPropertyChanged(nameof(Modules));
         // }
 
