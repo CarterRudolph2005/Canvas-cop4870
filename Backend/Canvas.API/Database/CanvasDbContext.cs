@@ -16,6 +16,9 @@ namespace Canvas.API.Data
         public DbSet<ModuleContent> ModuleContents { get; set; }
         public DbSet<Submission> Submissions { get; set; }
         public DbSet<Announcement> Announcements { get; set; }
+        public DbSet<PageContent> PageContents { get; set; }
+        public DbSet<FileContent> FileContents { get; set; }
+        public DbSet<AssignmentContent> AssignmentContents { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -30,11 +33,14 @@ namespace Canvas.API.Data
             // ── MODULECONTENT INHERITANCE (TPH) ──
             // PageContent, FileContent, AssignmentContent share "ModuleContents" table
             // with a "ContentType" discriminator — matches your existing contentType field
-            modelBuilder.Entity<ModuleContent>()
-                .HasDiscriminator<string>("ContentType")
-                .HasValue<PageContent>("Page")
-                .HasValue<FileContent>("File")
-                .HasValue<AssignmentContent>("Assignment");
+            modelBuilder.Entity<ModuleContent>(b =>
+            {
+                b.HasDiscriminator<string>("Discriminator")
+                    .HasValue<PageContent>("Page")
+                    .HasValue<FileContent>("File")
+                    .HasValue<AssignmentContent>("Assignment");
+                b.Ignore(m => m.ContentType);
+            });
 
             // ── SEMESTER (owned entity) ──
             // Stored as two columns on the Course table: SemesterTaught_Year, SemesterTaught_Session

@@ -3,6 +3,7 @@ using Canvas.Library.Utilities;
 using Canvas.API.Data;
 using Microsoft.EntityFrameworkCore;
 
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<CanvasDbContext>(options =>
@@ -18,6 +19,13 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<CanvasDbContext>();
+    db.Database.Migrate();
+    DatabaseSeeder.Seed(db);
+}
 
 if (app.Environment.IsDevelopment())
 {
