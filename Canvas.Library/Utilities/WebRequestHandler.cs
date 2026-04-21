@@ -12,10 +12,12 @@ namespace Canvas.Library.Utilities
         private string host = "localhost";
         private string port = "5258";
         private HttpClient Client { get; }
+
         public WebRequestHandler()
         {
             Client = new HttpClient();
         }
+
         public async Task<string> Get(string url)
         {
             var fullUrl = $"http://{host}:{port}{url}";
@@ -28,12 +30,8 @@ namespace Canvas.Library.Utilities
                         .ConfigureAwait(false);
                     return response;
                 }
-            } catch(Exception e)
-            {
-
             }
-
-
+            catch (Exception e) { }
             return null;
         }
 
@@ -47,24 +45,17 @@ namespace Canvas.Library.Utilities
                     using (var request = new HttpRequestMessage(HttpMethod.Delete, fullUrl))
                     {
                         using (var response = await client
-                                .SendAsync(request, HttpCompletionOption.ResponseHeadersRead)
-                                .ConfigureAwait(false))
+                            .SendAsync(request, HttpCompletionOption.ResponseHeadersRead)
+                            .ConfigureAwait(false))
                         {
                             if (response.IsSuccessStatusCode)
-                            {
                                 return await response.Content.ReadAsStringAsync();
-                            }
                             return "ERROR";
                         }
                     }
                 }
             }
-            catch (Exception e)
-            {
-
-            }
-
-
+            catch (Exception e) { }
             return null;
         }
 
@@ -73,24 +64,48 @@ namespace Canvas.Library.Utilities
             var fullUrl = $"http://{host}:{port}{url}";
             using (var client = new HttpClient())
             {
-                using(var request = new HttpRequestMessage(HttpMethod.Post, fullUrl))
+                using (var request = new HttpRequestMessage(HttpMethod.Post, fullUrl))
                 {
-                    // var json = JsonConvert.SerializeObject(obj);
                     var settings = new JsonSerializerSettings();
                     settings.Converters.Add(new ModuleContentConverter());
                     var json = JsonConvert.SerializeObject(obj, settings);
-                    using(var stringContent = new StringContent(json, Encoding.UTF8, "application/json"))
+
+                    using (var stringContent = new StringContent(json, Encoding.UTF8, "application/json"))
                     {
                         request.Content = stringContent;
-
-                        using(var response = await client
+                        using (var response = await client
                             .SendAsync(request, HttpCompletionOption.ResponseHeadersRead)
                             .ConfigureAwait(false))
                         {
-                            if(response.IsSuccessStatusCode)
-                            {
+                            if (response.IsSuccessStatusCode)
                                 return await response.Content.ReadAsStringAsync();
-                            }
+                            return "ERROR";
+                        }
+                    }
+                }
+            }
+        }
+
+        public async Task<string> Put(string url, object obj)
+        {
+            var fullUrl = $"http://{host}:{port}{url}";
+            using (var client = new HttpClient())
+            {
+                using (var request = new HttpRequestMessage(HttpMethod.Put, fullUrl))
+                {
+                    var settings = new JsonSerializerSettings();
+                    settings.Converters.Add(new ModuleContentConverter());
+                    var json = JsonConvert.SerializeObject(obj, settings);
+
+                    using (var stringContent = new StringContent(json, Encoding.UTF8, "application/json"))
+                    {
+                        request.Content = stringContent;
+                        using (var response = await client
+                            .SendAsync(request, HttpCompletionOption.ResponseHeadersRead)
+                            .ConfigureAwait(false))
+                        {
+                            if (response.IsSuccessStatusCode)
+                                return await response.Content.ReadAsStringAsync();
                             return "ERROR";
                         }
                     }

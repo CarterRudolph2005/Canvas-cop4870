@@ -287,6 +287,27 @@ namespace Canvas.MAUI.Views
             await Shell.Current.GoToAsync($"GradeSubmissionView?courseId={ViewModel.CourseId}&assignmentId={assignment.Id}");
         }
 
+        private async void AddQuizClicked(object sender, EventArgs e)
+        {
+            await Shell.Current.GoToAsync(nameof(QuizEditorPage), new Dictionary<string, object>
+            {
+                { "courseId", ViewModel.CourseId }
+            });
+        }
+
+        private async void EditQuizClicked(object sender, EventArgs e)
+        {
+            if (sender is VisualElement el && el.BindingContext is Assignment assignment)
+            {
+                await Shell.Current.GoToAsync(nameof(QuizEditorPage), new Dictionary<string, object>
+                {
+                    { "courseId", ViewModel.CourseId },
+                    { "assignmentId", assignment.Id }
+                });
+            }
+        }
+
+
         // ── Roster ─────────────────────────────────────────────────
         private void ToggleEnrollFormClicked(object sender, EventArgs e)
             => ViewModel.ToggleEnrollForm();

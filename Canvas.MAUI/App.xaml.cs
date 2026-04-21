@@ -15,6 +15,8 @@ public partial class App : Application
 		Routing.RegisterRoute("ModuleContentCreationView", typeof(ModuleContentCreationView));
 		Routing.RegisterRoute("GradeSubmissionView", typeof(GradeSubmissionView));
 		Routing.RegisterRoute(nameof(AssignmentGroupView), typeof(AssignmentGroupView));
+		Routing.RegisterRoute(nameof(QuizEditorPage), typeof(QuizEditorPage));
+		Routing.RegisterRoute(nameof(QuizAttemptPage), typeof(QuizAttemptPage));
 	}
 
 	protected override Window CreateWindow(IActivationState? activationState)

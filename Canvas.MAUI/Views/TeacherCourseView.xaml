@@ -189,7 +189,6 @@
                                         <!-- Module Header Row -->
                                         <Grid ColumnDefinitions="*,44,44,44,44"
                                             Padding="14,12">
-                                            <!-- Expand/Collapse Arrow -->
                                             <Grid Grid.Column="0"
                                                 ColumnDefinitions="Auto,*">
                                                 <Label Grid.Column="0"
@@ -236,12 +235,10 @@
                                                     CommandParameter="{Binding .}"/>
                                         </Grid>
 
-                                        <!-- Divider (only when expanded) -->
                                         <BoxView HeightRequest="1"
                                                 BackgroundColor="{AppThemeBinding Light=#E0E0E0, Dark=#444444}"
                                                 IsVisible="{Binding IsExpanded}"/>
 
-                                        <!-- Expandable Content -->
                                         <VerticalStackLayout BindableLayout.ItemsSource="{Binding ModuleContents}"
                                                             Spacing="0"
                                                             IsVisible="{Binding IsExpanded}"
@@ -252,7 +249,6 @@
                                                             StrokeShape="RoundRectangle 8"
                                                             Margin="0,4"
                                                             Padding="0">
-                                                        <!-- Background color by type -->
                                                         <Border.Triggers>
                                                             <DataTrigger TargetType="Border"
                                                                         Binding="{Binding ContentType}"
@@ -330,11 +326,15 @@
                 <!-- ── ASSIGNMENTS TAB ── -->
                 <VerticalStackLayout IsVisible="{Binding IsAssignmentsTab}" Spacing="12">
 
-                    <!-- Action Buttons -->
+                    <!-- Action Buttons  + New Quiz added here -->
                     <HorizontalStackLayout Spacing="10">
                         <Button Text="+ New Assignment"
                                 Clicked="AddAssignmentClicked"
                                 BackgroundColor="#1565C0" TextColor="White"
+                                CornerRadius="8"/>
+                        <Button Text="+ New Quiz"
+                                Clicked="AddQuizClicked"
+                                BackgroundColor="#E65100" TextColor="White"
                                 CornerRadius="8"/>
                         <Button Text="+ New Group"
                                 Clicked="AddGroupClicked"
@@ -381,7 +381,7 @@
                                                     VerticalOptions="Start"/>
                                         </Grid>
 
-                                        <!-- Assignments nested inside group -->
+                                        <!-- Grouped assignment cards: quiz badge + Edit Quiz added -->
                                         <VerticalStackLayout BindableLayout.ItemsSource="{Binding GroupAssignments}" Spacing="6" Margin="8,0,0,0">
                                             <BindableLayout.ItemTemplate>
                                                 <DataTemplate>
@@ -390,11 +390,19 @@
                                                             Padding="14"
                                                             BackgroundColor="{AppThemeBinding Light=White, Dark=#2A2A2A}"
                                                             Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#444444}">
-                                                        <Grid ColumnDefinitions="*,Auto,44,44,44">
+                                                        <Grid ColumnDefinitions="*,Auto,Auto,44,44,44">
                                                             <VerticalStackLayout Grid.Column="0" Spacing="4">
                                                                 <Label Text="{Binding Name}"
                                                                     FontSize="14" FontAttributes="Bold"
                                                                     TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"/>
+                                                                <Border IsVisible="{Binding IsQuiz}"
+                                                                        BackgroundColor="#E65100"
+                                                                        StrokeThickness="0"
+                                                                        StrokeShape="RoundRectangle 4"
+                                                                        Padding="6,2"
+                                                                        HorizontalOptions="Start">
+                                                                    <Label Text="🧩 Quiz" FontSize="10" FontAttributes="Bold" TextColor="White"/>
+                                                                </Border>
                                                                 <Label Text="{Binding Description}"
                                                                     FontSize="12"
                                                                     TextColor="{AppThemeBinding Light=#555555, Dark=#AAAAAA}"/>
@@ -404,7 +412,6 @@
                                                                     FontSize="12" FontAttributes="Bold" TextColor="#42A5F5"/>
                                                             </VerticalStackLayout>
 
-                                                            <!-- Grade Button -->
                                                             <Border Grid.Column="1"
                                                                     BackgroundColor="#2E7D32"
                                                                     StrokeShape="RoundRectangle 6"
@@ -421,18 +428,35 @@
                                                                     VerticalOptions="Center" HorizontalOptions="Center"/>
                                                             </Border>
 
-                                                            <Button Grid.Column="2" Text="⎘"
+                                                            <Border Grid.Column="2"
+                                                                    IsVisible="{Binding IsQuiz}"
+                                                                    BackgroundColor="#E65100"
+                                                                    StrokeShape="RoundRectangle 6"
+                                                                    StrokeThickness="0"
+                                                                    Padding="10,6"
+                                                                    VerticalOptions="Center"
+                                                                    Margin="0,0,8,0">
+                                                                <Border.GestureRecognizers>
+                                                                    <TapGestureRecognizer Tapped="EditQuizClicked"
+                                                                                        CommandParameter="{Binding .}"/>
+                                                                </Border.GestureRecognizers>
+                                                                <Label Text="Edit Quiz" FontSize="12" FontAttributes="Bold"
+                                                                    TextColor="White"
+                                                                    VerticalOptions="Center" HorizontalOptions="Center"/>
+                                                            </Border>
+
+                                                            <Button Grid.Column="3" Text="⎘"
                                                                     FontSize="14" BackgroundColor="Transparent"
                                                                     TextColor="#42A5F5"
                                                                     Clicked="CopyAssignmentClicked"
                                                                     CommandParameter="{Binding .}"
                                                                     VerticalOptions="Start"/>
-                                                            <Button Grid.Column="3" Text="✏️"
+                                                            <Button Grid.Column="4" Text="✏️"
                                                                     FontSize="12" BackgroundColor="Transparent"
                                                                     Clicked="EditAssignmentClicked"
                                                                     CommandParameter="{Binding .}"
                                                                     VerticalOptions="Start"/>
-                                                            <Button Grid.Column="4" Text="🗑"
+                                                            <Button Grid.Column="5" Text="🗑"
                                                                     FontSize="12" BackgroundColor="Transparent"
                                                                     Clicked="DeleteAssignmentClicked"
                                                                     CommandParameter="{Binding .}"
@@ -443,7 +467,6 @@
                                             </BindableLayout.ItemTemplate>
                                         </VerticalStackLayout>
 
-                                        <!-- Empty group hint -->
                                         <Label Text="No assignments in this group yet."
                                             FontSize="12" TextColor="#888888"
                                             Margin="8,0,0,0"
@@ -454,7 +477,7 @@
                         </BindableLayout.ItemTemplate>
                     </VerticalStackLayout>
 
-                    <!-- Ungrouped Assignments -->
+                    <!-- Ungrouped Assignments: quiz badge + Edit Quiz added -->
                     <Label Text="Ungrouped Assignments"
                         FontSize="13" FontAttributes="Bold"
                         TextColor="#888888"
@@ -467,11 +490,19 @@
                                         Padding="14"
                                         BackgroundColor="{AppThemeBinding Light=White, Dark=#2A2A2A}"
                                         Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#444444}">
-                                    <Grid ColumnDefinitions="*,Auto,44,44,44">
+                                    <Grid ColumnDefinitions="*,Auto,Auto,44,44,44">
                                         <VerticalStackLayout Grid.Column="0" Spacing="4">
                                             <Label Text="{Binding Name}"
                                                 FontSize="14" FontAttributes="Bold"
                                                 TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"/>
+                                            <Border IsVisible="{Binding IsQuiz}"
+                                                    BackgroundColor="#E65100"
+                                                    StrokeThickness="0"
+                                                    StrokeShape="RoundRectangle 4"
+                                                    Padding="6,2"
+                                                    HorizontalOptions="Start">
+                                                <Label Text="🧩 Quiz" FontSize="10" FontAttributes="Bold" TextColor="White"/>
+                                            </Border>
                                             <Label Text="{Binding Description}"
                                                 FontSize="12"
                                                 TextColor="{AppThemeBinding Light=#555555, Dark=#AAAAAA}"/>
@@ -497,18 +528,35 @@
                                                 VerticalOptions="Center" HorizontalOptions="Center"/>
                                         </Border>
 
-                                        <Button Grid.Column="2" Text="⎘"
+                                        <Border Grid.Column="2"
+                                                IsVisible="{Binding IsQuiz}"
+                                                BackgroundColor="#E65100"
+                                                StrokeShape="RoundRectangle 6"
+                                                StrokeThickness="0"
+                                                Padding="10,6"
+                                                VerticalOptions="Center"
+                                                Margin="0,0,8,0">
+                                            <Border.GestureRecognizers>
+                                                <TapGestureRecognizer Tapped="EditQuizClicked"
+                                                                    CommandParameter="{Binding .}"/>
+                                            </Border.GestureRecognizers>
+                                            <Label Text="Edit Quiz" FontSize="12" FontAttributes="Bold"
+                                                TextColor="White"
+                                                VerticalOptions="Center" HorizontalOptions="Center"/>
+                                        </Border>
+
+                                        <Button Grid.Column="3" Text="⎘"
                                                 FontSize="14" BackgroundColor="Transparent"
                                                 TextColor="#42A5F5"
                                                 Clicked="CopyAssignmentClicked"
                                                 CommandParameter="{Binding .}"
                                                 VerticalOptions="Start"/>
-                                        <Button Grid.Column="3" Text="✏️"
+                                        <Button Grid.Column="4" Text="✏️"
                                                 FontSize="12" BackgroundColor="Transparent"
                                                 Clicked="EditAssignmentClicked"
                                                 CommandParameter="{Binding .}"
                                                 VerticalOptions="Start"/>
-                                        <Button Grid.Column="4" Text="🗑"
+                                        <Button Grid.Column="5" Text="🗑"
                                                 FontSize="12" BackgroundColor="Transparent"
                                                 Clicked="DeleteAssignmentClicked"
                                                 CommandParameter="{Binding .}"
@@ -521,7 +569,7 @@
 
                 </VerticalStackLayout>
 
-                <!-- ── ROSTER TAB ── -->
+                <!-- ROSTER TAB -->
                 <VerticalStackLayout IsVisible="{Binding IsRosterTab}" Spacing="12">
 
                     <Grid ColumnDefinitions="Auto,Auto,Auto" ColumnSpacing="8">
