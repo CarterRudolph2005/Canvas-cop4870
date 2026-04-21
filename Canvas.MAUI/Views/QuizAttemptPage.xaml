@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Canvas.MAUI.Views.QuizAttemptPage"
+             Title="{Binding QuizName}">
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Back" Clicked="BackClicked"/>
+    </ContentPage.ToolbarItems>
+
+    <ScrollView>
+        <VerticalStackLayout Spacing="16" Margin="16">
+
+            <!-- Time limit -->
+            <Label Text="{Binding TimeLimitText}"
+                   FontSize="13"
+                   TextColor="#888888"
+                   IsVisible="{Binding HasTimeLimit}"
+                   HorizontalOptions="Center"/>
+
+            <!-- Already submitted banner -->
+            <Border IsVisible="{Binding AlreadySubmitted}"
+                    BackgroundColor="#2E7D32"
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 10"
+                    Padding="14">
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="Quiz Submitted"
+                           FontSize="15" FontAttributes="Bold"
+                           TextColor="White"
+                           HorizontalOptions="Center"/>
+                    <Label Text="{Binding SubmittedScoreText}"
+                           FontSize="13"
+                           TextColor="White"
+                           HorizontalOptions="Center"/>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Questions -->
+            <VerticalStackLayout BindableLayout.ItemsSource="{Binding Questions}" Spacing="16">
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate>
+                        <Border StrokeThickness="1"
+                                Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#444444}"
+                                StrokeShape="RoundRectangle 10"
+                                BackgroundColor="{AppThemeBinding Light=White, Dark=#2A2A2A}"
+                                Padding="14">
+                            <VerticalStackLayout Spacing="10">
+
+                                <!-- Question text and points -->
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <Label Grid.Column="0"
+                                           Text="{Binding QuestionText}"
+                                           FontSize="14" FontAttributes="Bold"
+                                           TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"
+                                           VerticalOptions="Center"/>
+                                    <Label Grid.Column="1"
+                                           Text="{Binding Points, StringFormat='{0} pts'}"
+                                           FontSize="12"
+                                           TextColor="#888888"
+                                           VerticalOptions="Center"/>
+                                </Grid>
+
+                                <!-- Options -->
+                                <VerticalStackLayout BindableLayout.ItemsSource="{Binding Options}" Spacing="8">
+                                    <BindableLayout.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border StrokeThickness="1"
+                                                    StrokeShape="RoundRectangle 8"
+                                                    Padding="12,10">
+                                                <Border.Triggers>
+                                                    <DataTrigger TargetType="Border"
+                                                                 Binding="{Binding IsSelected}"
+                                                                 Value="True">
+                                                        <Setter Property="BackgroundColor" Value="#1565C0"/>
+                                                        <Setter Property="Stroke" Value="#1565C0"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger TargetType="Border"
+                                                                 Binding="{Binding IsSelected}"
+                                                                 Value="False">
+                                                        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light=White, Dark=#2A2A2A}"/>
+                                                        <Setter Property="Stroke" Value="{AppThemeBinding Light=#E0E0E0, Dark=#444444}"/>
+                                                    </DataTrigger>
+                                                </Border.Triggers>
+                                                <Border.GestureRecognizers>
+                                                    <TapGestureRecognizer Tapped="OptionTapped"
+                                                                          CommandParameter="{Binding .}"/>
+                                                </Border.GestureRecognizers>
+                                                <Label Text="{Binding OptionText}"
+                                                       FontSize="13">
+                                                    <Label.Triggers>
+                                                        <DataTrigger TargetType="Label"
+                                                                     Binding="{Binding IsSelected}"
+                                                                     Value="True">
+                                                            <Setter Property="TextColor" Value="White"/>
+                                                            <Setter Property="FontAttributes" Value="Bold"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger TargetType="Label"
+                                                                     Binding="{Binding IsSelected}"
+                                                                     Value="False">
+                                                            <Setter Property="TextColor" Value="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"/>
+                                                            <Setter Property="FontAttributes" Value="None"/>
+                                                        </DataTrigger>
+                                                    </Label.Triggers>
+                                                </Label>
+                                            </Border>
+                                        </DataTemplate>
+                                    </BindableLayout.ItemTemplate>
+                                </VerticalStackLayout>
+
+                            </VerticalStackLayout>
+                        </Border>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </VerticalStackLayout>
+
+            <!-- Error message -->
+            <Label Text="{Binding ErrorMessage}"
+                   TextColor="#EF5350"
+                   FontSize="13"
+                   IsVisible="{Binding HasError}"/>
+
+            <!-- Submit button - hidden once submitted -->
+            <Button Text="Submit Quiz"
+                    Clicked="SubmitClicked"
+                    IsVisible="{Binding CanAttempt}"
+                    BackgroundColor="#1565C0" TextColor="White"
+                    CornerRadius="8" FontSize="15"
+                    FontAttributes="Bold"
+                    HeightRequest="50"
+                    Margin="0,4,0,24"/>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

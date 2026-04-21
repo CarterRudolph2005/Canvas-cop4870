@@ -285,6 +285,86 @@ namespace Canvas.Library.Services
             _courses = null;
             return JsonConvert.DeserializeObject<Course>(result);
         }
+
+        // ── QUIZ METHODS ──
+
+        public Quiz? GetQuiz(int courseId, int assignmentId)
+        {
+            var result = _handler.Get($"/course/{courseId}/assignments/{assignmentId}/quiz").Result;
+            if (result == "ERROR" || string.IsNullOrWhiteSpace(result)) return null;
+            return JsonConvert.DeserializeObject<Quiz>(result);
+        }
+
+        public Quiz? CreateQuiz(int courseId, int assignmentId, int? timeLimitMinutes, int allowedAttempts)
+        {
+            var body = new { TimeLimitMinutes = timeLimitMinutes, AllowedAttempts = allowedAttempts };
+            var result = _handler.Post($"/course/{courseId}/assignments/{assignmentId}/quiz", body).Result;
+            if (result == "ERROR") return null;
+            _courses = null;
+            return JsonConvert.DeserializeObject<Quiz>(result);
+        }
+
+        public Quiz? UpdateQuiz(int courseId, int assignmentId, int? timeLimitMinutes, int allowedAttempts)
+        {
+            var body = new { TimeLimitMinutes = timeLimitMinutes, AllowedAttempts = allowedAttempts };
+            var result = _handler.Put($"/course/{courseId}/assignments/{assignmentId}/quiz", body).Result;
+            if (result == "ERROR") return null;
+            _courses = null;
+            return JsonConvert.DeserializeObject<Quiz>(result);
+        }
+
+        public bool DeleteQuiz(int courseId, int assignmentId)
+        {
+            var result = _handler.Delete($"/course/{courseId}/assignments/{assignmentId}/quiz").Result;
+            _courses = null;
+            return result != "ERROR";
+        }
+
+        // ── QUIZ QUESTION METHODS ──
+
+        public QuizQuestion? AddQuestion(int courseId, int assignmentId, QuizQuestion question)
+        {
+            var result = _handler.Post($"/course/{courseId}/assignments/{assignmentId}/quiz/questions", question).Result;
+            if (result == "ERROR") return null;
+            return JsonConvert.DeserializeObject<QuizQuestion>(result);
+        }
+
+        public QuizQuestion? UpdateQuestion(int courseId, int assignmentId, int questionId, string questionText, int points)
+        {
+            var body = new { QuestionText = questionText, Points = points };
+            var result = _handler.Put($"/course/{courseId}/assignments/{assignmentId}/quiz/questions/{questionId}", body).Result;
+            if (result == "ERROR") return null;
+            return JsonConvert.DeserializeObject<QuizQuestion>(result);
+        }
+
+        public bool DeleteQuestion(int courseId, int assignmentId, int questionId)
+        {
+            var result = _handler.Delete($"/course/{courseId}/assignments/{assignmentId}/quiz/questions/{questionId}").Result;
+            return result != "ERROR";
+        }
+
+        // ── QUIZ QUESTION OPTION METHODS ──
+
+        public QuizQuestionOption? AddOption(int courseId, int assignmentId, int questionId, QuizQuestionOption option)
+        {
+            var result = _handler.Post($"/course/{courseId}/assignments/{assignmentId}/quiz/questions/{questionId}/options", option).Result;
+            if (result == "ERROR") return null;
+            return JsonConvert.DeserializeObject<QuizQuestionOption>(result);
+        }
+
+        public QuizQuestionOption? UpdateOption(int courseId, int assignmentId, int questionId, int optionId, string optionText, bool isCorrect)
+        {
+            var body = new { OptionText = optionText, IsCorrect = isCorrect };
+            var result = _handler.Put($"/course/{courseId}/assignments/{assignmentId}/quiz/questions/{questionId}/options/{optionId}", body).Result;
+            if (result == "ERROR") return null;
+            return JsonConvert.DeserializeObject<QuizQuestionOption>(result);
+        }
+
+        public bool DeleteOption(int courseId, int assignmentId, int questionId, int optionId)
+        {
+            var result = _handler.Delete($"/course/{courseId}/assignments/{assignmentId}/quiz/questions/{questionId}/options/{optionId}").Result;
+            return result != "ERROR";
+        }
     }
 }
 

@@ -118,6 +118,14 @@
                                    FontSize="14"
                                    FontAttributes="Bold"
                                    TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"/>
+                            <Border IsVisible="{Binding Assignment.IsQuiz}"
+                                    BackgroundColor="#E65100"
+                                    StrokeThickness="0"
+                                    StrokeShape="RoundRectangle 4"
+                                    Padding="6,2"
+                                    HorizontalOptions="Start">
+                                <Label Text="🧩 Quiz" FontSize="10" FontAttributes="Bold" TextColor="White"/>
+                            </Border>
                             <Label Text="{Binding Description}"
                                    FontSize="12"
                                    TextColor="{AppThemeBinding Light=#555555, Dark=#AAAAAA}"/>

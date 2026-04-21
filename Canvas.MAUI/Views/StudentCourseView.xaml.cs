@@ -18,15 +18,35 @@ namespace Canvas.MAUI.Views
             await Shell.Current.GoToAsync("//MainPage");
         }
 
-        private async void AssignmentTapped(object? sender, SelectionChangedEventArgs e)
+private async void AssignmentTapped(object sender, SelectionChangedEventArgs e)
+{
+    if (e.CurrentSelection.Count == 0) return;
+ 
+    var display = e.CurrentSelection[0] as StudentCourseViewModel.StudentAssignmentDisplay;
+    ((CollectionView)sender).SelectedItem = null;
+ 
+    if (display == null) return;
+ 
+    var vm = BindingContext as StudentCourseViewModel;
+    if (vm == null) return;
+ 
+    if (display.Assignment.IsQuiz)
+    {
+        // Route to quiz attempt page
+        await Shell.Current.GoToAsync(nameof(QuizAttemptPage), new Dictionary<string, object>
         {
-            if (e.CurrentSelection.Count == 0) return;
-            var selected = e.CurrentSelection[0] as StudentCourseViewModel.StudentAssignmentDisplay;
-            ((CollectionView)sender).SelectedItem = null;
-            var vm = BindingContext as StudentCourseViewModel;
-            await Shell.Current.GoToAsync(
-                $"AssignmentSubmissionView?courseId={vm.CourseId}&assignmentId={selected.Assignment.Id}&studentId={vm.StudentId}");
-        }
+            { "courseId", vm.CourseId },
+            { "assignmentId", display.Assignment.Id },
+            { "studentId", vm.StudentId }
+        });
+    }
+    else
+    {
+        // Route to regular submission page — match your existing navigation pattern
+        await Shell.Current.GoToAsync(
+            $"AssignmentSubmissionView?courseId={vm.CourseId}&assignmentId={display.Assignment.Id}&studentId={vm.StudentId}");
+    }
+}
 
         private void ModuleHeaderTapped(object? sender, TappedEventArgs e)
         {

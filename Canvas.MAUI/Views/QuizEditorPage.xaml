@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Canvas.MAUI.Views.QuizEditorPage"
+             Title="New Quiz">
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Cancel" Clicked="CancelClicked"/>
+    </ContentPage.ToolbarItems>
+
+    <ScrollView>
+        <VerticalStackLayout Spacing="16" Margin="16">
+
+            <!-- ── QUIZ DETAILS ── -->
+            <Border StrokeThickness="1"
+                    Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#444444}"
+                    StrokeShape="RoundRectangle 10"
+                    BackgroundColor="{AppThemeBinding Light=White, Dark=#2A2A2A}"
+                    Padding="14">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Quiz Details"
+                           FontSize="15" FontAttributes="Bold"
+                           TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"/>
+
+                    <Label Text="Name" FontSize="12" TextColor="#888888"/>
+                    <Entry Placeholder="Quiz name"
+                           Text="{Binding QuizName}"
+                           PlaceholderColor="#888888"
+                           TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"
+                           BackgroundColor="Transparent"/>
+
+                    <Label Text="Description" FontSize="12" TextColor="#888888"/>
+                    <Editor Placeholder="Description (optional)"
+                            Text="{Binding QuizDescription}"
+                            PlaceholderColor="#888888"
+                            TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"
+                            BackgroundColor="Transparent"
+                            HeightRequest="70"/>
+
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                        <VerticalStackLayout Grid.Column="0" Spacing="4">
+                            <Label Text="Points" FontSize="12" TextColor="#888888"/>
+                            <Entry Placeholder="100"
+                                   Text="{Binding AvailablePointsText}"
+                                   Keyboard="Numeric"
+                                   PlaceholderColor="#888888"
+                                   TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"
+                                   BackgroundColor="Transparent"/>
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1" Spacing="4">
+                            <Label Text="Due Date" FontSize="12" TextColor="#888888"/>
+                            <DatePicker Date="{Binding DueDate}"
+                                        TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"
+                                        BackgroundColor="Transparent"/>
+                        </VerticalStackLayout>
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- ── QUIZ SETTINGS ── -->
+            <Border StrokeThickness="1"
+                    Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#444444}"
+                    StrokeShape="RoundRectangle 10"
+                    BackgroundColor="{AppThemeBinding Light=White, Dark=#2A2A2A}"
+                    Padding="14">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Quiz Settings"
+                           FontSize="15" FontAttributes="Bold"
+                           TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"/>
+
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                        <VerticalStackLayout Grid.Column="0" Spacing="4">
+                            <Label Text="Time Limit (minutes)" FontSize="12" TextColor="#888888"/>
+                            <Entry Placeholder="No limit"
+                                   Text="{Binding TimeLimitText}"
+                                   Keyboard="Numeric"
+                                   PlaceholderColor="#888888"
+                                   TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"
+                                   BackgroundColor="Transparent"/>
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1" Spacing="4">
+                            <Label Text="Allowed Attempts" FontSize="12" TextColor="#888888"/>
+                            <Entry Placeholder="1"
+                                   Text="{Binding AllowedAttemptsText}"
+                                   Keyboard="Numeric"
+                                   PlaceholderColor="#888888"
+                                   TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"
+                                   BackgroundColor="Transparent"/>
+                        </VerticalStackLayout>
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- ── QUESTIONS ── -->
+            <Grid ColumnDefinitions="*,Auto">
+                <Label Grid.Column="0"
+                       Text="Questions"
+                       FontSize="15" FontAttributes="Bold"
+                       TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"
+                       VerticalOptions="Center"/>
+                <Button Grid.Column="1"
+                        Text="+ Add Question"
+                        Clicked="AddQuestionClicked"
+                        BackgroundColor="#1565C0" TextColor="White"
+                        CornerRadius="8" FontSize="12"
+                        Padding="12,6"/>
+            </Grid>
+
+            <VerticalStackLayout BindableLayout.ItemsSource="{Binding Questions}" Spacing="12">
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate>
+                        <Border StrokeThickness="1"
+                                Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#444444}"
+                                StrokeShape="RoundRectangle 10"
+                                BackgroundColor="{AppThemeBinding Light=White, Dark=#2A2A2A}"
+                                Padding="14">
+                            <VerticalStackLayout Spacing="10">
+
+                                <Grid ColumnDefinitions="*,44">
+                                    <Label Grid.Column="0"
+                                           Text="Question"
+                                           FontSize="13" FontAttributes="Bold"
+                                           TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"
+                                           VerticalOptions="Center"/>
+                                    <Button Grid.Column="1" Text="🗑"
+                                            FontSize="12" BackgroundColor="Transparent"
+                                            Clicked="RemoveQuestionClicked"
+                                            CommandParameter="{Binding .}"/>
+                                </Grid>
+
+                                <Entry Placeholder="Question text"
+                                       Text="{Binding QuestionText}"
+                                       PlaceholderColor="#888888"
+                                       TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"
+                                       BackgroundColor="Transparent"/>
+
+                                <VerticalStackLayout Spacing="4">
+                                    <Label Text="Points" FontSize="12" TextColor="#888888"/>
+                                    <Entry Placeholder="1"
+                                           Text="{Binding PointsText}"
+                                           Keyboard="Numeric"
+                                           PlaceholderColor="#888888"
+                                           TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"
+                                           BackgroundColor="Transparent"
+                                           WidthRequest="80"
+                                           HorizontalOptions="Start"/>
+                                </VerticalStackLayout>
+
+                                <Label Text="Answer Options"
+                                       FontSize="12" FontAttributes="Bold"
+                                       TextColor="#888888"/>
+
+                                <VerticalStackLayout BindableLayout.ItemsSource="{Binding Options}" Spacing="8">
+                                    <BindableLayout.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid ColumnDefinitions="Auto,*,44" ColumnSpacing="8">
+                                                <CheckBox Grid.Column="0"
+                                                          IsChecked="{Binding IsCorrect}"
+                                                          Color="#2E7D32"
+                                                          VerticalOptions="Center"/>
+                                                <Entry Grid.Column="1"
+                                                       Placeholder="Option text"
+                                                       Text="{Binding OptionText}"
+                                                       PlaceholderColor="#888888"
+                                                       TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"
+                                                       BackgroundColor="Transparent"
+                                                       VerticalOptions="Center"/>
+                                                <Button Grid.Column="2" Text="✕"
+                                                        FontSize="11"
+                                                        TextColor="#EF5350"
+                                                        BackgroundColor="Transparent"
+                                                        Clicked="RemoveOptionClicked"
+                                                        CommandParameter="{Binding .}"
+                                                        VerticalOptions="Center"/>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </BindableLayout.ItemTemplate>
+                                </VerticalStackLayout>
+
+                                <Button Text="+ Add Option"
+                                        Clicked="AddOptionClicked"
+                                        CommandParameter="{Binding .}"
+                                        BackgroundColor="Transparent"
+                                        TextColor="#1565C0"
+                                        FontSize="12"
+                                        HorizontalOptions="Start"
+                                        Padding="0"/>
+
+                            </VerticalStackLayout>
+                        </Border>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </VerticalStackLayout>
+
+            <!-- ── ERROR ── -->
+            <Label Text="{Binding ErrorMessage}"
+                   TextColor="#EF5350"
+                   FontSize="13"
+                   IsVisible="{Binding HasError}"/>
+
+            <!-- ── SAVE ── -->
+            <Button Text="Save Quiz"
+                    Clicked="SaveClicked"
+                    BackgroundColor="#1565C0" TextColor="White"
+                    CornerRadius="8" FontSize="15"
+                    FontAttributes="Bold"
+                    HeightRequest="50"
+                    Margin="0,4,0,24"/>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

@@ -93,9 +93,104 @@ namespace Canvas.API.Controllers
         [HttpGet("{courseId}/submissions/{studentId}")] public List<Submission> GetStudentSubmissions(int courseId, int studentId) => _ec.GetStudentSubmissions(courseId, studentId);
         [HttpPost("{courseId}/modules/{moduleId}/contents")] public bool AddModuleContents(int courseId, int moduleId, [FromBody] ModuleContent content) => _ec.AddModuleContents(courseId, moduleId, content);
         [HttpDelete("{courseId}/modules/{moduleId}/contents/{contentId}")] public void DeleteModuleContents(int courseId, int moduleId, int contentId) => _ec.DeleteModuleContents(courseId, moduleId, contentId);
+           
+        // ────────────────────────────────────────────────────────────────────────────
+        // ADD THESE ENDPOINTS INSIDE CourseController, before the closing brace.
+        // Also add these request records at the bottom of the file alongside
+        // the existing CopyCourseRequest / CopyAssignmentRequest records.
+        // ────────────────────────────────────────────────────────────────────────────
+
+        // ── QUIZ ENDPOINTS ──
+
+        [HttpGet("{courseId}/assignments/{assignmentId}/quiz")]
+        public IActionResult GetQuiz(int courseId, int assignmentId)
+        {
+            var quiz = _ec.GetQuiz(courseId, assignmentId);
+            if (quiz == null) return NotFound();
+            return Ok(quiz);
+        }
+
+        [HttpPost("{courseId}/assignments/{assignmentId}/quiz")]
+        public IActionResult CreateQuiz(int courseId, int assignmentId, [FromBody] CreateQuizRequest r)
+        {
+            var quiz = _ec.CreateQuiz(courseId, assignmentId, r.TimeLimitMinutes, r.AllowedAttempts);
+            if (quiz == null) return NotFound();
+            return Ok(quiz);
+        }
+
+        [HttpPut("{courseId}/assignments/{assignmentId}/quiz")]
+        public IActionResult UpdateQuiz(int courseId, int assignmentId, [FromBody] CreateQuizRequest r)
+        {
+            var quiz = _ec.UpdateQuiz(courseId, assignmentId, r.TimeLimitMinutes, r.AllowedAttempts);
+            if (quiz == null) return NotFound();
+            return Ok(quiz);
+        }
+
+        [HttpDelete("{courseId}/assignments/{assignmentId}/quiz")]
+        public IActionResult DeleteQuiz(int courseId, int assignmentId)
+        {
+            var ok = _ec.DeleteQuiz(courseId, assignmentId);
+            return ok ? Ok() : NotFound();
+        }
+
+        // ── QUIZ QUESTION ENDPOINTS ──
+
+        [HttpPost("{courseId}/assignments/{assignmentId}/quiz/questions")]
+        public IActionResult AddQuestion(int courseId, int assignmentId, [FromBody] QuizQuestion question)
+        {
+            var result = _ec.AddQuestion(courseId, assignmentId, question);
+            if (result == null) return NotFound();
+            return Ok(result);
+        }
+
+        [HttpPut("{courseId}/assignments/{assignmentId}/quiz/questions/{questionId}")]
+        public IActionResult UpdateQuestion(int courseId, int assignmentId, int questionId, [FromBody] UpdateQuestionRequest r)
+        {
+            var result = _ec.UpdateQuestion(courseId, assignmentId, questionId, r.QuestionText, r.Points);
+            if (result == null) return NotFound();
+            return Ok(result);
+        }
+
+        [HttpDelete("{courseId}/assignments/{assignmentId}/quiz/questions/{questionId}")]
+        public IActionResult DeleteQuestion(int courseId, int assignmentId, int questionId)
+        {
+            var ok = _ec.DeleteQuestion(courseId, assignmentId, questionId);
+            return ok ? Ok() : NotFound();
+        }
+
+        // ── QUIZ QUESTION OPTION ENDPOINTS ──
+
+        [HttpPost("{courseId}/assignments/{assignmentId}/quiz/questions/{questionId}/options")]
+        public IActionResult AddOption(int courseId, int assignmentId, int questionId, [FromBody] QuizQuestionOption option)
+        {
+            var result = _ec.AddOption(courseId, assignmentId, questionId, option);
+            if (result == null) return NotFound();
+            return Ok(result);
+        }
+
+        [HttpPut("{courseId}/assignments/{assignmentId}/quiz/questions/{questionId}/options/{optionId}")]
+        public IActionResult UpdateOption(int courseId, int assignmentId, int questionId, int optionId, [FromBody] UpdateOptionRequest r)
+        {
+            var result = _ec.UpdateOption(courseId, assignmentId, questionId, optionId, r.OptionText, r.IsCorrect);
+            if (result == null) return NotFound();
+            return Ok(result);
+        }
+
+        [HttpDelete("{courseId}/assignments/{assignmentId}/quiz/questions/{questionId}/options/{optionId}")]
+        public IActionResult DeleteOption(int courseId, int assignmentId, int questionId, int optionId)
+        {
+            var ok = _ec.DeleteOption(courseId, assignmentId, questionId, optionId);
+            return ok ? Ok() : NotFound();
+        }
     }
 
     public record CopyCourseRequest(int SectionNumber, int Year, SemesterType Semester);
     public record CopyAssignmentRequest(int AssignmentId, int SourceCourseId);
     public record UpdateContentRequest(int Index, string Content);
+
+        // ── ADD THESE RECORDS ALONGSIDE THE OTHER RECORDS AT THE BOTTOM OF THE FILE ──
+
+        public record CreateQuizRequest(int? TimeLimitMinutes, int AllowedAttempts);
+        public record UpdateQuestionRequest(string QuestionText, int Points);
+        public record UpdateOptionRequest(string OptionText, bool IsCorrect);
 }

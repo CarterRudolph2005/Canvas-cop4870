@@ -7,9 +7,11 @@ Assignment
     - DueDate
     - Submissions (list of submissions)
     - GroupId (0 = ungrouped)
+    - IsQuiz (true = this assignment has an associated Quiz)
 */
 using System;
 using System.Collections.Generic;
+
 namespace Canvas.Library.Model
 {
     public class Assignment
@@ -21,8 +23,9 @@ namespace Canvas.Library.Model
         public DateTime DueDate { get; set; }
         public List<Submission>? Submissions { get; set; }
         public int GroupId { get; set; } = 0; // 0 = ungrouped
+        public bool IsQuiz { get; set; } = false;
 
-        public Assignment() {}
+        public Assignment() { }
 
         public Assignment(Assignment other)
         {
@@ -32,6 +35,7 @@ namespace Canvas.Library.Model
             this.DueDate = other.DueDate;
             this.AvailablePoints = other.AvailablePoints;
             this.GroupId = other.GroupId;
+            this.IsQuiz = other.IsQuiz;
         }
 
         public override string ToString()

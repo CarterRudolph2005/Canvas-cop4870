@@ -20,19 +20,20 @@ namespace Canvas.API.Data
         public DbSet<FileContent> FileContents { get; set; }
         public DbSet<AssignmentContent> AssignmentContents { get; set; }
 
+        // ── QUIZ TABLES ──
+        public DbSet<Quiz> Quizzes { get; set; }
+        public DbSet<QuizQuestion> QuizQuestions { get; set; }
+        public DbSet<QuizQuestionOption> QuizQuestionOptions { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // ── USER INHERITANCE (TPH) ──
-            // Student and Instructor share a single "Users" table
-            // with a "UserType" discriminator column
             modelBuilder.Entity<User>()
                 .HasDiscriminator<string>("UserType")
                 .HasValue<Student>("Student")
                 .HasValue<Instructor>("Instructor");
 
             // ── MODULECONTENT INHERITANCE (TPH) ──
-            // PageContent, FileContent, AssignmentContent share "ModuleContents" table
-            // with a "ContentType" discriminator — matches your existing contentType field
             modelBuilder.Entity<ModuleContent>(b =>
             {
                 b.HasDiscriminator<string>("Discriminator")
@@ -43,12 +44,10 @@ namespace Canvas.API.Data
             });
 
             // ── SEMESTER (owned entity) ──
-            // Stored as two columns on the Course table: SemesterTaught_Year, SemesterTaught_Session
             modelBuilder.Entity<Course>()
                 .OwnsOne(c => c.SemesterTaught);
 
             // ── ASSIGNMENTGROUP.ASSIGNMENTIDS (List<int>) ──
-            // Stored as a JSON column in Postgres
             modelBuilder.Entity<AssignmentGroup>()
                 .Property(g => g.AssignmentIds)
                 .HasColumnType("jsonb");
@@ -107,6 +106,28 @@ namespace Canvas.API.Data
             // ── IGNORE Module.Content (List<string> field, CLI only) ──
             modelBuilder.Entity<Module>()
                 .Ignore("Content");
+
+            // ── QUIZ RELATIONSHIPS ──
+            // Quiz is 1-to-1 with Assignment (one Quiz per quiz-type assignment)
+            modelBuilder.Entity<Quiz>()
+                .HasOne<Assignment>()
+                .WithOne()
+                .HasForeignKey<Quiz>(q => q.AssignmentId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Quiz has many QuizQuestions
+            modelBuilder.Entity<QuizQuestion>()
+                .HasOne<Quiz>()
+                .WithMany(q => q.Questions)
+                .HasForeignKey(qq => qq.QuizId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // QuizQuestion has many QuizQuestionOptions
+            modelBuilder.Entity<QuizQuestionOption>()
+                .HasOne<QuizQuestion>()
+                .WithMany(q => q.Options)
+                .HasForeignKey(o => o.QuizQuestionId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }
