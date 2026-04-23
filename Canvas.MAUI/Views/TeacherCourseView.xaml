@@ -5,6 +5,7 @@
              NavigatedTo="OnNavigatedTo">
     <ContentPage.ToolbarItems>
         <ToolbarItem Text="Log Out" Clicked="BackClicked"/>
+        <ToolbarItem Text="⚙️" Clicked="SettingsClicked"/>
     </ContentPage.ToolbarItems>
 
     <Grid RowDefinitions="Auto,Auto,*">

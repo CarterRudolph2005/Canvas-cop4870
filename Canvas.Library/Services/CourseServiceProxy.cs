@@ -365,6 +365,35 @@ namespace Canvas.Library.Services
             var result = _handler.Delete($"/course/{courseId}/assignments/{assignmentId}/quiz/questions/{questionId}/options/{optionId}").Result;
             return result != "ERROR";
         }
+
+        // ── GRADE SCALE ──
+        public List<LetterGrade> GetGradeScale(int courseId)
+        {
+            var result = _handler.Get($"/course/{courseId}/gradescale").Result;
+            if (result == "ERROR" || string.IsNullOrWhiteSpace(result)) return new List<LetterGrade>();
+            return JsonConvert.DeserializeObject<List<LetterGrade>>(result) ?? new List<LetterGrade>();
+        }
+
+        public LetterGrade? AddOrUpdateLetterGrade(int courseId, LetterGrade grade)
+        {
+            var result = _handler.Post($"/course/{courseId}/gradescale", grade).Result;
+            if (result == "ERROR") return null;
+            _courses = null;
+            return JsonConvert.DeserializeObject<LetterGrade>(result);
+        }
+
+        public bool DeleteLetterGrade(int courseId, int gradeId)
+        {
+            var result = _handler.Delete($"/course/{courseId}/gradescale/{gradeId}").Result;
+            _courses = null;
+            return result != "ERROR";
+        }
+
+        public string GetLetterGradeForScore(int courseId, double percentage)
+        {
+            var result = _handler.Get($"/course/{courseId}/gradescale/calculate?percentage={percentage}").Result;
+            return result?.Trim('"') ?? "N/A";
+        }
     }
 }
 

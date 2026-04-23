@@ -30,6 +30,14 @@ namespace Canvas.MAUI.Views
 
         private async void BackClicked(object sender, EventArgs e)
             => await Shell.Current.GoToAsync("//MainPage");
+        
+        private async void SettingsClicked(object sender, EventArgs e)
+        {
+            var vm = BindingContext as TeacherCourseViewModel;
+            if (vm == null) return;
+            await Shell.Current.GoToAsync(
+                $"{nameof(CourseSettingsPage)}?courseId={vm.CourseId}");
+        }
 
         // ── Tab switching ──────────────────────────────────────────
         private void UpdateTabStyles(int selectedIndex)
