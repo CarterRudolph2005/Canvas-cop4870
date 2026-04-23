@@ -182,6 +182,29 @@ namespace Canvas.API.Controllers
             var ok = _ec.DeleteOption(courseId, assignmentId, questionId, optionId);
             return ok ? Ok() : NotFound();
         }
+        // ── GRADE SCALE ──
+
+        [HttpGet("{courseId}/gradescale")]
+        public List<LetterGrade> GetGradeScale(int courseId) => _ec.GetGradeScale(courseId);
+
+        [HttpPost("{courseId}/gradescale")]
+        public IActionResult AddOrUpdateLetterGrade(int courseId, [FromBody] LetterGrade grade)
+        {
+            var result = _ec.AddOrUpdateLetterGrade(courseId, grade);
+            if (result == null) return NotFound();
+            return Ok(result);
+        }
+
+        [HttpDelete("{courseId}/gradescale/{gradeId}")]
+        public IActionResult DeleteLetterGrade(int courseId, int gradeId)
+        {
+            var ok = _ec.DeleteLetterGrade(courseId, gradeId);
+            return ok ? Ok() : NotFound();
+        }
+
+        [HttpGet("{courseId}/gradescale/calculate")]
+        public string GetLetterGradeForScore(int courseId, [FromQuery] double percentage)
+            => _ec.GetLetterGradeForScore(courseId, percentage);
     }
 
     public record CopyCourseRequest(int SectionNumber, int Year, SemesterType Semester);

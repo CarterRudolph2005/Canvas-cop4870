@@ -21,7 +21,8 @@ namespace Canvas.API.Enterprise
                 .Include(c => c.Announcements)
                 .Include(c => c.AssignmentGroups)
                 .Include(c => c.Roster)
-                .Include(c => c.Instructors);
+                .Include(c => c.Instructors)
+                .Include(c => c.GradeScale);
 
         public IEnumerable<Course> GetAll() => CoursesWithAll.ToList();
 
@@ -782,6 +783,55 @@ namespace Canvas.API.Enterprise
             _context.QuizQuestionOptions.Remove(option);
             _context.SaveChanges();
             return true;
+        }
+        // ── GRADE SCALE ──
+
+        public List<LetterGrade> GetGradeScale(int courseId)
+        {
+            var course = CoursesWithAll.FirstOrDefault(c => c.Id == courseId);
+            return course?.GradeScale ?? new List<LetterGrade>();
+        }
+
+        public LetterGrade? AddOrUpdateLetterGrade(int courseId, LetterGrade grade)
+        {
+            var course = CoursesWithAll.FirstOrDefault(c => c.Id == courseId);
+            if (course == null) return null;
+            course.GradeScale ??= new List<LetterGrade>();
+
+            if (grade.Id == 0)
+            {
+                grade.CourseId = courseId;
+                course.GradeScale.Add(grade);
+            }
+            else
+            {
+                var existing = course.GradeScale.FirstOrDefault(g => g.Id == grade.Id);
+                if (existing == null) return null;
+                existing.MinPercentage = grade.MinPercentage;
+                existing.MaxPercentage = grade.MaxPercentage;
+                existing.HexColor = grade.HexColor;
+            }
+            _context.SaveChanges();
+            return grade;
+        }
+
+        public bool DeleteLetterGrade(int courseId, int gradeId)
+        {
+            var course = CoursesWithAll.FirstOrDefault(c => c.Id == courseId);
+            var grade = course?.GradeScale?.FirstOrDefault(g => g.Id == gradeId);
+            if (grade == null) return false;
+            course.GradeScale.Remove(grade);
+            _context.SaveChanges();
+            return true;
+        }
+
+        public string GetLetterGradeForScore(int courseId, double percentage)
+        {
+            var course = CoursesWithAll.FirstOrDefault(c => c.Id == courseId);
+            if (course?.GradeScale == null || !course.GradeScale.Any()) return "N/A";
+            var match = course.GradeScale
+                .FirstOrDefault(g => percentage >= g.MinPercentage && percentage <= g.MaxPercentage);
+            return match?.Letter ?? "N/A";
         }
     }
 }

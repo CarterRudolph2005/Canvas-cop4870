@@ -24,6 +24,7 @@ namespace Canvas.API.Data
         public DbSet<Quiz> Quizzes { get; set; }
         public DbSet<QuizQuestion> QuizQuestions { get; set; }
         public DbSet<QuizQuestionOption> QuizQuestionOptions { get; set; }
+        public DbSet<LetterGrade> LetterGrades { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -127,6 +128,13 @@ namespace Canvas.API.Data
                 .HasOne<QuizQuestion>()
                 .WithMany(q => q.Options)
                 .HasForeignKey(o => o.QuizQuestionId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Letter Grade Scale builder
+            modelBuilder.Entity<Course>()
+                .HasMany(c => c.GradeScale)
+                .WithOne()
+                .HasForeignKey(g => g.CourseId)
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }
