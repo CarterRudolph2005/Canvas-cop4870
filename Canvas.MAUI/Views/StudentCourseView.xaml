@@ -23,12 +23,17 @@
                         FontSize="20"
                         FontAttributes="Bold"
                         TextColor="White"/>
-                    <Label Text="{Binding GradePercentage, StringFormat='{0:F2}%'}"
-                        FontSize="48"
-                        FontAttributes="Bold"
-                        TextColor="White"
-                        HorizontalOptions="Center"
-                        Margin="0,8,0,0"/>
+                    <VerticalStackLayout HorizontalOptions="Center" Spacing="0" Margin="0,8,0,0">
+                        <Label Text="{Binding LetterGrade}"
+                            FontSize="48"
+                            FontAttributes="Bold"
+                            TextColor="{Binding LetterGradeColor}"
+                            HorizontalOptions="Center"/>
+                        <Label Text="{Binding GradePercentage, StringFormat='{0:F2}%'}"
+                            FontSize="16"
+                            TextColor="White"
+                            HorizontalOptions="Center"/>
+                    </VerticalStackLayout>
                 </VerticalStackLayout>
             </Border>
             

@@ -41,6 +41,20 @@ namespace Canvas.MAUI.ViewModels
                 LoadMenu();
             }
         }
+        private string _letterGrade;
+        public string LetterGrade
+        {
+            get => _letterGrade;
+            set { _letterGrade = value; OnPropertyChanged(); }
+        }
+
+        private Color _letterGradeColor;
+        public Color LetterGradeColor
+        {
+            get => _letterGradeColor;
+            set { _letterGradeColor = value; OnPropertyChanged(); }
+        }
+
 
         private string name;
         public string Name
@@ -120,6 +134,14 @@ public ObservableCollection<StudentAssignmentDisplay> Assignments
             Announcements = new ObservableCollection<Announcement>(_course.Announcements ?? new List<Announcement>());
             // GradePercentage = CourseServiceProxy.Current.CalculateGrade(CourseId, StudentId);
             GradePercentage = CourseServiceProxy.Current.CalculateGrade(courseId, studentId);
+            var match = _course.GradeScale?
+            .FirstOrDefault(g => GradePercentage >= g.MinPercentage 
+                            && GradePercentage <= g.MaxPercentage);
+
+            LetterGrade = match?.Letter ?? "N/A";
+            LetterGradeColor = match != null
+                ? Color.FromArgb(match.HexColor)
+                : Colors.White;
             // build display wrappers with resolved group names
             var groups = CourseServiceProxy.Current.GetAssignmentGroups(courseId);
             var displayList = new ObservableCollection<StudentAssignmentDisplay>();
