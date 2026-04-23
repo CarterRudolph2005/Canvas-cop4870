@@ -212,6 +212,7 @@ namespace Canvas.MAUI.ViewModels
             OnPropertyChanged(nameof(Modules));
             OnPropertyChanged(nameof(Assignments));
             OnPropertyChanged(nameof(Roster));
+            OnPropertyChanged(nameof(FilteredRoster));
 
             // only new additions
             RefreshAssignments();
@@ -415,6 +416,7 @@ namespace Canvas.MAUI.ViewModels
 
             CourseServiceProxy.Current.EnrollStudent(student.Id, _courseId);
             Roster.Add(student);
+            OnPropertyChanged(nameof(FilteredRoster));
             EnrollStudentCode = string.Empty;
             EnrollError = string.Empty;
             ShowEnrollForm = false;
@@ -424,6 +426,7 @@ namespace Canvas.MAUI.ViewModels
         {
             CourseServiceProxy.Current.UnenrollStudent(_courseId, student.Id);
             Roster.Remove(student);
+            OnPropertyChanged(nameof(FilteredRoster));
         }
 
         // ── Assignment Groups ────────────────────────────────────────────────
@@ -489,5 +492,24 @@ namespace Canvas.MAUI.ViewModels
             OnPropertyChanged(nameof(UngroupedAssignments));
             OnPropertyChanged(nameof(HasUngroupedAssignments));
         }
+        // ── Roster Search ────────────────────────────────────────────────────
+        private string _searchQuery;
+        public string SearchQuery
+        {
+            get => _searchQuery;
+            set
+            {
+                _searchQuery = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(FilteredRoster));
+            }
+        }
+
+        public IEnumerable<Student> FilteredRoster =>
+            string.IsNullOrWhiteSpace(SearchQuery)
+                ? Roster
+                : Roster.Where(s =>
+                    (s.Name?.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                    (s.Code?.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase) ?? false));
     }
 }
