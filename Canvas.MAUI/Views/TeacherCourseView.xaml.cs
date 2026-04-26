@@ -28,6 +28,88 @@ namespace Canvas.MAUI.Views
             ViewModel.LoadCourse();
         }   
 
+        private async void ImportAssignmentsClicked(object sender, EventArgs e)
+        {
+            try
+            {
+                var result = await FilePicker.Default.PickAsync(new PickOptions
+                {
+                    PickerTitle = "Select Assignment CSV",
+                    FileTypes = new FilePickerFileType(new Dictionary<DevicePlatform, IEnumerable<string>>
+                    {
+                        { DevicePlatform.MacCatalyst, new[] { "public.comma-separated-values-text" } },
+                        { DevicePlatform.WinUI,       new[] { ".csv" } }
+                    })
+                });
+
+                if (result == null) return;
+
+                string[] lines;
+                using (var stream = await result.OpenReadAsync())
+                using (var reader = new StreamReader(stream))
+                {
+                    var content = await reader.ReadToEndAsync();
+                    lines = content.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+                }
+
+                if (lines.Length < 2)
+                {
+                    await DisplayAlert("Empty File", "CSV has no data rows.", "OK");
+                    return;
+                }
+
+                var assignments = ViewModel.ParseAssignmentCsv(lines);
+                var (imported, skipped) = ViewModel.ImportAssignments(assignments, lines.Length - 1);
+
+                var summary = $"✓ {imported} imported";
+                if (skipped > 0) summary += $"\n✕ {skipped} row(s) skipped (invalid format)";
+
+                await DisplayAlert("Import Complete", summary, "OK");
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Import Failed", ex.Message, "OK");
+            }
+        }
+
+        private async void ExportAssignmentsClicked(object sender, EventArgs e)
+        {
+            try
+            {
+                var vm = BindingContext as TeacherCourseViewModel;
+                if (vm == null) return;
+
+                var assignments = vm.Assignments;
+                if (!assignments.Any())
+                {
+                    await DisplayAlert("No Assignments", "There are no assignments to export.", "OK");
+                    return;
+                }
+
+                var sb = new StringBuilder();
+                sb.AppendLine("Name,DueDate,Points,GroupId,IsQuiz,Description");
+                foreach (var a in assignments)
+                {
+                    var name        = (a.Name ?? "").Replace(",", " ");
+                    var description = (a.Description ?? "").Replace(",", " ");
+                    sb.AppendLine($"{name},{a.DueDate:yyyy-MM-dd},{a.AvailablePoints},{a.GroupId},{a.IsQuiz.ToString().ToLower()},{description}");
+                }
+
+                var fileName = $"{vm.Code}_assignments.csv";
+                using var stream = new MemoryStream(Encoding.UTF8.GetBytes(sb.ToString()));
+                var result = await FileSaver.Default.SaveAsync(fileName, stream, CancellationToken.None);
+
+                if (result.IsSuccessful)
+                    await DisplayAlert("Exported", $"Saved to {result.FilePath}", "OK");
+                else
+                    await DisplayAlert("Cancelled", "File was not saved.", "OK");
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Export Failed", ex.Message, "OK");
+            }
+        }
+
         private async void BackClicked(object sender, EventArgs e)
             => await Shell.Current.GoToAsync("//MainPage");
         

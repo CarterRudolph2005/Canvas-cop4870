@@ -467,6 +467,60 @@ namespace Canvas.MAUI.ViewModels
             CourseServiceProxy.Current.RemoveAssignmentFromGroup(_courseId, groupId, assignmentId);
             RefreshGroups();
         }
+        private string _importStatus;
+        public string ImportStatus
+        {
+            get => _importStatus;
+            set { _importStatus = value; OnPropertyChanged(); OnPropertyChanged(nameof(HasImportStatus)); }
+        }
+        public bool HasImportStatus => !string.IsNullOrEmpty(ImportStatus);
+
+        public List<Assignment> ParseAssignmentCsv(string[] lines)
+        {
+            var assignments = new List<Assignment>();
+
+            foreach (var line in lines.Skip(1))
+            {
+                if (string.IsNullOrWhiteSpace(line)) continue;
+
+                var cols = line.Split(',');
+                if (cols.Length < 6) continue;
+
+                var name        = cols[0].Trim();
+                var dueDateStr  = cols[1].Trim();
+                var pointsStr   = cols[2].Trim();
+                var groupIdStr  = cols[3].Trim();
+                var isQuizStr   = cols[4].Trim();
+                var description = cols[5].Trim();
+
+                if (string.IsNullOrWhiteSpace(name)) continue;
+                if (!DateTime.TryParse(dueDateStr, out var dueDate)) continue;
+                if (!int.TryParse(pointsStr, out var points)) continue;
+                if (!int.TryParse(groupIdStr, out var groupId)) groupId = 0;
+                if (!bool.TryParse(isQuizStr, out var isQuiz)) isQuiz = false;
+
+                assignments.Add(new Assignment
+                {
+                    Name            = name,
+                    DueDate         = dueDate,
+                    AvailablePoints = points,
+                    GroupId         = groupId,
+                    IsQuiz          = isQuiz,
+                    Description     = description
+                });
+            }
+
+            return assignments;
+        }
+
+        public (int imported, int skipped) ImportAssignments(List<Assignment> assignments, int totalRows)
+        {
+            if (assignments.Count == 0) return (0, totalRows);
+            var result = CourseServiceProxy.Current.ImportAssignments(_courseId, assignments);
+            RefreshAssignments();
+            RefreshGroups();
+            return (result.Count, totalRows - result.Count);
+        }
 
         private void RefreshGroups()
         {

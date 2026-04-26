@@ -43,6 +43,14 @@ namespace Canvas.Library.Services
             }
         }
 
+        public List<Assignment> ImportAssignments(int courseId, List<Assignment> assignments)
+        {
+            var result = _handler.Post($"/course/{courseId}/assignments/import", assignments).Result;
+            if (result == "ERROR" || string.IsNullOrWhiteSpace(result)) return new List<Assignment>();
+            _courses = null;
+            return JsonConvert.DeserializeObject<List<Assignment>>(result) ?? new List<Assignment>();
+        }
+
         public void AddOrUpdate(Course? course)
         {
             if (course == null) return;

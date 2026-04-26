@@ -327,21 +327,29 @@
                 <!-- ── ASSIGNMENTS TAB ── -->
                 <VerticalStackLayout IsVisible="{Binding IsAssignmentsTab}" Spacing="12">
 
-                    <!-- Action Buttons  + New Quiz added here -->
-                    <HorizontalStackLayout Spacing="10">
-                        <Button Text="+ New Assignment"
-                                Clicked="AddAssignmentClicked"
-                                BackgroundColor="#1565C0" TextColor="White"
-                                CornerRadius="8"/>
-                        <Button Text="+ New Quiz"
-                                Clicked="AddQuizClicked"
-                                BackgroundColor="#E65100" TextColor="White"
-                                CornerRadius="8"/>
-                        <Button Text="+ New Group"
-                                Clicked="AddGroupClicked"
-                                BackgroundColor="#6A1B9A" TextColor="White"
-                                CornerRadius="8"/>
-                    </HorizontalStackLayout>
+                <!-- Action Buttons -->
+                <HorizontalStackLayout Spacing="10" >
+                    <Button Text="+ New Assignment"
+                            Clicked="AddAssignmentClicked"
+                            BackgroundColor="#1565C0" TextColor="White"
+                            CornerRadius="8"/>
+                    <Button Text="+ New Quiz"
+                            Clicked="AddQuizClicked"
+                            BackgroundColor="#E65100" TextColor="White"
+                            CornerRadius="8"/>
+                    <Button Text="+ New Group"
+                            Clicked="AddGroupClicked"
+                            BackgroundColor="#6A1B9A" TextColor="White"
+                            CornerRadius="8"/>
+                    <Button Text="⬇ Import CSV"
+                            Clicked="ImportAssignmentsClicked"
+                            BackgroundColor="#2E7D32" TextColor="White"
+                            CornerRadius="8"/>
+                    <Button Text="⬆ Export CSV"
+                            Clicked="ExportAssignmentsClicked"
+                            BackgroundColor="#00695C" TextColor="White"
+                            CornerRadius="8"/>
+                </HorizontalStackLayout>
 
                     <!-- Assignment Groups -->
                     <VerticalStackLayout BindableLayout.ItemsSource="{Binding AssignmentGroups}" Spacing="12">
