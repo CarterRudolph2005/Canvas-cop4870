@@ -2,6 +2,7 @@ using Canvas.Library.Model;
 using Canvas.Library.Services;
 using Canvas.MAUI.Models;
 using System;
+using System.Text;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -460,6 +461,42 @@ namespace Canvas.MAUI.ViewModels
         {
             CourseServiceProxy.Current.AddAssignmentToGroup(_courseId, groupId, assignmentId);
             RefreshGroups();
+        }
+
+        public string BuildGradebookCsv()
+        {
+            var assignments = Assignments.ToList();
+            var roster = Roster.ToList();
+
+            var sb = new StringBuilder();
+
+            // Header row: Student, Code, then one column per assignment, then Total
+            sb.Append("Student,Code");
+            foreach (var a in assignments)
+                sb.Append($",{(a.Name ?? "").Replace(",", " ")}");
+            sb.AppendLine(",Total Points,Total Available");
+
+            // One row per student
+            foreach (var student in roster)
+            {
+                var earned = 0;
+                var available = 0;
+
+                sb.Append($"{(student.Name ?? "").Replace(",", " ")},{student.Code}");
+
+                foreach (var a in assignments)
+                {
+                    var submission = a.Submissions?.FirstOrDefault(s => s.StudentId == student.Id);
+                    var points = submission?.PointsAwarded ?? 0;
+                    sb.Append($",{points}");
+                    earned += points;
+                    available += a.AvailablePoints;
+                }
+
+                sb.AppendLine($",{earned},{available}");
+            }
+
+            return sb.ToString();
         }
 
         public void RemoveAssignmentFromGroup(int groupId, int assignmentId)
