@@ -110,6 +110,35 @@ namespace Canvas.MAUI.Views
             }
         }
 
+        private async void ExportGradebookClicked(object sender, EventArgs e)
+        {
+            var vm = BindingContext as TeacherCourseViewModel;
+            if (vm == null) return;
+
+            if (!vm.Roster.Any())
+            {
+                await DisplayAlert("Empty Roster", "There are no students to export.", "OK");
+                return;
+            }
+
+            try
+            {
+                var csv = vm.BuildGradebookCsv();
+                var fileName = $"{vm.Code}_gradebook.csv";
+                using var stream = new MemoryStream(Encoding.UTF8.GetBytes(csv));
+                var result = await FileSaver.Default.SaveAsync(fileName, stream, CancellationToken.None);
+
+                if (result.IsSuccessful)
+                    await DisplayAlert("Exported", $"Saved to {result.FilePath}", "OK");
+                else
+                    await DisplayAlert("Cancelled", "File was not saved.", "OK");
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Export Failed", ex.Message, "OK");
+            }
+        }
+
         private async void BackClicked(object sender, EventArgs e)
             => await Shell.Current.GoToAsync("//MainPage");
         

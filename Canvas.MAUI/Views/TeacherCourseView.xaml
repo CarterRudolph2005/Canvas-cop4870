@@ -581,23 +581,28 @@
                 <!-- ROSTER TAB -->
                 <VerticalStackLayout IsVisible="{Binding IsRosterTab}" Spacing="12">
 
-                    <Grid ColumnDefinitions="Auto,Auto,Auto" ColumnSpacing="8">
-                        <Button Grid.Column="0"
-                                Text="+ Enroll Student"
-                                Clicked="ToggleEnrollFormClicked"
-                                BackgroundColor="#1565C0" TextColor="White"
-                                CornerRadius="8"/>
-                        <Button Grid.Column="1"
-                                Text="⬆ Import CSV"
-                                Clicked="ImportRosterClicked"
-                                BackgroundColor="#2E7D32" TextColor="White"
-                                CornerRadius="8"/>
-                        <Button Grid.Column="2"
-                                Text="⬇ Export CSV"
-                                Clicked="ExportRosterClicked"
-                                BackgroundColor="#00695C" TextColor="White"
-                                CornerRadius="8"/>
-                    </Grid>
+                <Grid ColumnDefinitions="Auto,Auto,Auto,Auto" ColumnSpacing="8">
+                    <Button Grid.Column="0"
+                            Text="+ Enroll Student"
+                            Clicked="ToggleEnrollFormClicked"
+                            BackgroundColor="#1565C0" TextColor="White"
+                            CornerRadius="8"/>
+                    <Button Grid.Column="1"
+                            Text="⬆ Import CSV"
+                            Clicked="ImportRosterClicked"
+                            BackgroundColor="#2E7D32" TextColor="White"
+                            CornerRadius="8"/>
+                    <Button Grid.Column="2"
+                            Text="⬇ Export Roster"
+                            Clicked="ExportRosterClicked"
+                            BackgroundColor="#00695C" TextColor="White"
+                            CornerRadius="8"/>
+                    <Button Grid.Column="3"
+                            Text="⬇ Gradebook"
+                            Clicked="ExportGradebookClicked"
+                            BackgroundColor="#E65100" TextColor="White"
+                            CornerRadius="8"/>
+                </Grid>
 
                     <Border IsVisible="{Binding ShowEnrollForm}"
                             StrokeThickness="1"
