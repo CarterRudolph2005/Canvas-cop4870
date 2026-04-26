@@ -118,6 +118,16 @@ namespace Canvas.API.Controllers
             return Ok(quiz);
         }
 
+        [HttpPost("{courseId}/assignments/import")]
+        public async Task<IActionResult> ImportAssignments(int courseId, [FromBody] List<Assignment> assignments)
+        {
+            if (assignments == null || assignments.Count == 0)
+                return BadRequest("No assignments provided.");
+
+            var result = await _ec.ImportAssignmentsAsync(courseId, assignments);
+            return Ok(result);
+        }
+
         [HttpPut("{courseId}/assignments/{assignmentId}/quiz")]
         public IActionResult UpdateQuiz(int courseId, int assignmentId, [FromBody] CreateQuizRequest r)
         {

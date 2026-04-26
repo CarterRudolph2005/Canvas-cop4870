@@ -770,6 +770,24 @@ namespace Canvas.API.Enterprise
             return option;
         }
 
+        public async Task<List<Assignment>> ImportAssignmentsAsync(int courseId, List<Assignment> assignments)
+        {
+            var course = await _context.Courses
+                .Include(c => c.Assignments)
+                .FirstOrDefaultAsync(c => c.Id == courseId);
+
+            if (course == null) return [];
+
+            foreach (var assignment in assignments)
+            {
+                assignment.Id = 0; // let Postgres auto-generate
+                course.Assignments.Add(assignment); // EF tracks the relationship via the parent
+            }
+
+            await _context.SaveChangesAsync();
+            return assignments;
+        }
+
         /// <summary>
         /// Deletes a single option from a question.
         /// </summary>
