@@ -182,5 +182,11 @@ namespace Canvas.MAUI.ViewModels
                 }
             }
         }
+
+        public void DeleteCourse()
+        {
+            var course = CourseServiceProxy.Current.Courses.FirstOrDefault(c => c.Id == _courseId);
+            CourseServiceProxy.Current.Delete(course);
+        }
     }
 }

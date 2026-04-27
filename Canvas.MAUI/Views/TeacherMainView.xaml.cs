@@ -104,6 +104,10 @@ namespace Canvas.MAUI.Views
             else
                 await DisplayAlert("Error", "Course could not be copied.", "OK");
         }
+        private void ContentPage_NavigatedTo(object sender, NavigatedToEventArgs e)
+        {
+            (BindingContext as TeacherMainViewModel)?.Refresh();
+        }
     }
 
 }

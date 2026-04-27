@@ -57,7 +57,10 @@ namespace Canvas.Library.Services
         public void AddOrUpdate(Student? student)
         {
             if (student == null) return;
-            _handler.Post("/student", student).Wait();
+            if (student.Id == 0)
+                _handler.Post("/student", student).Wait();
+            else
+                _handler.Put("/student", student).Wait();
             _students = null;
         }
 

@@ -15,6 +15,7 @@ namespace Canvas.Library.Model
     {
         public Classification Classification{get; set;}
         public Student() {}
+        public string Email { get; set; } = string.Empty;
         public Student(Student student)
         {
             this.Id = student.Id;

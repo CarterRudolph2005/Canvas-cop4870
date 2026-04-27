@@ -2,7 +2,8 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Canvas.MAUI.Views.TeacherMainView"
-             Title="My Courses">
+             Title="My Courses"
+             NavigatedTo="ContentPage_NavigatedTo">
     <ContentPage.ToolbarItems>
         <ToolbarItem Text="Log Out" Clicked="BackClicked"/>
     </ContentPage.ToolbarItems>
