@@ -62,7 +62,12 @@ namespace Canvas.MAUI.ViewModels
         public bool IsSubmitted
         {
             get => isSubmitted;
-            set { isSubmitted = value; OnPropertyChanged(); }
+            set 
+            { 
+                isSubmitted = value; 
+                OnPropertyChanged(); 
+                OnPropertyChanged(nameof(IsNotSubmitted)); 
+            }
         }
 
         private DateTime? submittedAt;
@@ -121,7 +126,8 @@ namespace Canvas.MAUI.ViewModels
         }
 
         private bool CanSubmit() =>
-            !string.IsNullOrWhiteSpace(SubmissionContent) && !IsSubmitted;
+            (!string.IsNullOrWhiteSpace(SubmissionContent) || !string.IsNullOrWhiteSpace(AttachedFilePath))
+            && !IsSubmitted;
 
         private void Submit()
         {
@@ -130,20 +136,19 @@ namespace Canvas.MAUI.ViewModels
                 StudentId = StudentId,
                 AssignmentId = assignmentId,
                 Content = SubmissionContent,
-                SubmissionDate = DateTime.Now
+                SubmissionDate = DateTime.Now,
+                FilePath = string.IsNullOrWhiteSpace(AttachedFilePath) ? null : AttachedFilePath,
+                MimeType = string.IsNullOrWhiteSpace(AttachedMimeType) ? null : AttachedMimeType
             };
 
-            // CourseServiceProxy.Current.SubmitAssignment(courseId, existingSubmission);
-
-        var submitResult = CourseServiceProxy.Current.SubmitAssignment(courseId, existingSubmission);
-        var grade = CourseServiceProxy.Current.CalculateGrade(courseId, StudentId);
+            var submitResult = CourseServiceProxy.Current.SubmitAssignment(courseId, existingSubmission);
+            var grade = CourseServiceProxy.Current.CalculateGrade(courseId, StudentId);
 
             SubmittedAt = existingSubmission.SubmissionDate;
             IsSubmitted = true;
             OnPropertyChanged(nameof(PointsDisplay));
             ((Command)SubmitCommand).ChangeCanExecute();
         }
-
         public event PropertyChangedEventHandler PropertyChanged;
         private void OnPropertyChanged([CallerMemberName] string propertyName = null)
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
@@ -183,5 +188,30 @@ namespace Canvas.MAUI.ViewModels
             LoadComments();
         }
     
+        private string _attachedFilePath = string.Empty;
+        public string AttachedFilePath
+        {
+            get => _attachedFilePath;
+            set { _attachedFilePath = value; OnPropertyChanged(); OnPropertyChanged(nameof(HasAttachment)); }
+        }
+
+        private string _attachedMimeType = string.Empty;
+        public string AttachedMimeType
+        {
+            get => _attachedMimeType;
+            set { _attachedMimeType = value; OnPropertyChanged(); }
+        }
+
+        private string _attachedFileName = string.Empty;
+        public string AttachedFileName
+        {
+            get => _attachedFileName;
+            set { _attachedFileName = value; OnPropertyChanged(); }
+        }
+
+        public bool HasAttachment => !string.IsNullOrWhiteSpace(AttachedFilePath);
+
+        public bool IsNotSubmitted => !IsSubmitted;
+
     }
 }

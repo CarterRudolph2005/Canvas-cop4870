@@ -65,6 +65,18 @@
                                 IsReadOnly="{Binding IsSubmitted}"
                                 MinimumHeightRequest="200"
                                 AutoSize="TextChanges"/>
+                        <!-- Attach File -->
+                        <Button Text="📎 Attach File"
+                                Clicked="AttachFileClicked"
+                                BackgroundColor="#1565C0"
+                                TextColor="White"
+                                CornerRadius="8"
+                                HorizontalOptions="Start"
+                                IsVisible="{Binding IsNotSubmitted}"/>
+                        <Label Text="{Binding AttachedFileName}"
+                            FontSize="12"
+                            TextColor="#90CAF9"
+                            IsVisible="{Binding HasAttachment}"/>
                     </VerticalStackLayout>
                 </Border>
 

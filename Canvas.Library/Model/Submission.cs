@@ -19,6 +19,8 @@ namespace Canvas.Library.Model
         public int StudentId {get; set;}
         public int AssignmentId {get; set;}
         public string? Content {get; set;}
+        public string? FilePath { get; set; }
+        public string? MimeType { get; set; }
         public DateTime SubmissionDate {get; set;}
         public List<AssignmentComment> Comments { get; set; } = new();
         public int? PointsAwarded {get; set;}

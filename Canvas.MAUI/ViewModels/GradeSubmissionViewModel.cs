@@ -116,5 +116,26 @@ namespace Canvas.MAUI.ViewModels
             LoadComments(_selectedSubmissionId);
         }
 
+        private string? _selectedSubmissionFilePath;
+        public string? SelectedSubmissionFilePath
+        {
+            get => _selectedSubmissionFilePath;
+            set 
+            { 
+                _selectedSubmissionFilePath = value; 
+                OnPropertyChanged(); 
+                OnPropertyChanged(nameof(HasAttachment));
+            }
+        }
+
+        private string? _selectedSubmissionMimeType;
+        public string? SelectedSubmissionMimeType
+        {
+            get => _selectedSubmissionMimeType;
+            set { _selectedSubmissionMimeType = value; OnPropertyChanged(); }
+        }
+
+        public bool HasAttachment => !string.IsNullOrWhiteSpace(SelectedSubmissionFilePath);
+
     }
 }

@@ -280,19 +280,16 @@ namespace Canvas.MAUI.Views
                     return;
 
                 case FileContent f:
-                    var confirm = await DisplayAlert(f.Name, $"Download {f.Name}?", "Download", "Cancel");
+                    var confirm = await DisplayAlert(f.Name, $"Open {f.Name}?", "Open", "Cancel");
                     if (!confirm) break;
-                    
                     try
                     {
-                        var stream = await FileSystem.OpenAppPackageFileAsync(f.FilePath);
-                        var result = await FileSaver.Default.SaveAsync(f.FilePath, stream, CancellationToken.None);
-                        if (result.IsSuccessful)
-                            await DisplayAlert("Downloaded", $"Saved to {result.FilePath}", "OK");
+                        var url = $"http://localhost:5258{f.FilePath}";
+                        await Launcher.OpenAsync(url);
                     }
                     catch (Exception ex)
                     {
-                        await DisplayAlert("Download Failed", ex.Message, "OK");
+                        await DisplayAlert("Error", ex.Message, "OK");
                     }
                     break;
 
