@@ -20,11 +20,13 @@ namespace Canvas.MAUI.Views
             await DisplayAlert("Saved", "Settings saved successfully.", "OK");
         }
         
-        // private async void SaveClicked(object sender, EventArgs e)
-        // {
-        //     await _vm.SaveGradeScale();
-        //     await DisplayAlert("Saved", "Grade scale saved successfully.", "OK");
-        // }
+        private async void DeleteCourseClicked(object sender, EventArgs e)
+        {
+            bool confirm = await DisplayAlert("Delete Course", "Are you sure? This cannot be undone.", "Delete", "Cancel");
+            if (!confirm) return;
+            _vm.DeleteCourse();
+            await Shell.Current.GoToAsync("//TeacherMainView");
+        }
 
         private void PresetColorTapped(object sender, TappedEventArgs e)
         {

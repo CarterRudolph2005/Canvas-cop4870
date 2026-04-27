@@ -2,6 +2,9 @@ using Microsoft.AspNetCore.Mvc;
 using Canvas.Library.Model;
 using Canvas.API.Enterprise;
 using Canvas.API.Data;
+using Canvas.API.Services;
+using Canvas.API.Settings;
+using Microsoft.Extensions.Options;
 using System.Security.Cryptography;
 
 namespace Canvas.API.Controllers
@@ -11,10 +14,9 @@ namespace Canvas.API.Controllers
     public class CourseController : ControllerBase
     {
         private CourseEC _ec;
-
-        public CourseController(CanvasDbContext context)
+        public CourseController(CanvasDbContext context, IOptions<EmailSettings> emailSettings)
         {
-            _ec = new CourseEC(context);
+            _ec = new CourseEC(context, new EmailService(emailSettings));
         }
 
         [HttpGet] public IEnumerable<Course> GetAll() => _ec.GetAll();
@@ -52,7 +54,10 @@ public Course? CopyCourse(int id, [FromBody] CopyCourseRequest r)
 
         [HttpGet("{id}/assignments")] public IEnumerable<Assignment>? GetAssignments(int id) => _ec.GetById(id)?.Assignments;
         [HttpGet("{courseId}/assignments/{id}")] public Assignment? GetAssignmentById(int courseId, int id) => _ec.GetAssignmentById(courseId, id);
-        [HttpPost("{courseId}/assignments")] public Assignment? AddOrUpdateAssignment(int courseId, [FromBody] Assignment assignment) => _ec.AddOrUpdateAssignment(courseId, assignment);
+
+        [HttpPost("{courseId}/assignments")]
+        public async Task<Assignment?> AddOrUpdateAssignment(int courseId, [FromBody] Assignment assignment) 
+            => await _ec.AddOrUpdateAssignment(courseId, assignment);
         [HttpDelete("{courseId}/assignments/{id}")] public bool DeleteAssignment(int courseId, int id) => _ec.DeleteAssignment(courseId, id);
         [HttpPost("{courseId}/assignments/copy")] public void CopyAssignment(int courseId, [FromBody] CopyAssignmentRequest r) => _ec.CopyAssignmentToCourse(r.AssignmentId, r.SourceCourseId, courseId);
 

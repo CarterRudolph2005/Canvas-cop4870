@@ -20,6 +20,9 @@
                 ItemsSource="{Binding Source={x:Reference ThisPage}, Path=ClassificationOptions}"
                 SelectedItem="{Binding Classification}" />
 
+            <Label Text="Email" FontAttributes="Bold"/>
+            <Entry Text="{Binding Email}" Placeholder="Enter student email"/>
+
             <HorizontalStackLayout Spacing="12" Margin="0,24,0,0">
                 <Button 
                     Text="Save" 

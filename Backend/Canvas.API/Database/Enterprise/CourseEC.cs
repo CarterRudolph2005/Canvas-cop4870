@@ -1,6 +1,7 @@
 using System.Text;
 using Canvas.Library.Model;
 using Canvas.API.Data;
+using Canvas.API.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace Canvas.API.Enterprise
@@ -9,10 +10,13 @@ namespace Canvas.API.Enterprise
     {
         private readonly CanvasDbContext _context;
 
-        public CourseEC(CanvasDbContext context)
+        private readonly EmailService _emailService;
+
+        public CourseEC(CanvasDbContext context, EmailService emailService)
         {
             _context = context;
-        }
+            _emailService = emailService;
+}
 
         private IQueryable<Course> CoursesWithAll =>
             _context.Courses
@@ -102,7 +106,7 @@ public Course? Create(Course course)
 
         // ── ASSIGNMENTS ──
 
-        public Assignment? AddOrUpdateAssignment(int courseId, Assignment assignment)
+        public async Task<Assignment?> AddOrUpdateAssignment(int courseId, Assignment assignment)
         {
             var course = CoursesWithAll.FirstOrDefault(c => c.Id == courseId);
             if (course == null) return null;
@@ -111,6 +115,18 @@ public Course? Create(Course course)
             {
                 assignment.DueDate = assignment.DueDate.ToUniversalTime();
                 course.Assignments.Add(assignment);
+                _context.SaveChanges();
+
+                // Email all enrolled students on new assignment
+                foreach (var student in course.Roster?.Where(s => !string.IsNullOrEmpty(s.Email)) ?? Enumerable.Empty<Student>())
+                {
+                    await _emailService.SendNewAssignmentEmailAsync(
+                        student.Email,
+                        student.Name,
+                        assignment.Name,
+                        course.Name
+                    );
+                }
             }
             else
             {
@@ -121,8 +137,8 @@ public Course? Create(Course course)
                 existing.AvailablePoints = assignment.AvailablePoints;
                 existing.DueDate = assignment.DueDate;
                 existing.GroupId = assignment.GroupId;
+                _context.SaveChanges();
             }
-            _context.SaveChanges();
             return assignment;
         }
 

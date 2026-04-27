@@ -3,7 +3,7 @@
              x:Class="Canvas.MAUI.Views.CourseSettingsPage"
              Title="Course Settings">
 
-    <Grid RowDefinitions="Auto,Auto,Auto,Auto,8" Padding="16" RowSpacing="16">
+    <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,8" Padding="16" RowSpacing="16">
 
         <!-- ── EDITOR SECTION ── -->
         <Border Grid.Row="0"
@@ -188,6 +188,12 @@
                 </VerticalStackLayout>
             </VerticalStackLayout>
         </ScrollView>
+        <Button Grid.Row="4"
+        Text="Delete Course"
+        Clicked="DeleteCourseClicked"
+        BackgroundColor="#C62828"
+        TextColor="White"
+        CornerRadius="8"/>
 
     </Grid>
 </ContentPage>

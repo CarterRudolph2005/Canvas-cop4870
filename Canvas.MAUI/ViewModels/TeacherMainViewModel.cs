@@ -33,6 +33,13 @@ namespace Canvas.MAUI.ViewModels
             }
         }
 
+        public void Refresh()
+        {
+            var courses = InstructorServiceProxy.Current.GetCoursesForInstructor(teacherId);
+            Courses = new ObservableCollection<Course>(courses);
+            InitializeFilterOptions();
+        }
+
         private ObservableCollection<Course> courses;
         public ObservableCollection<Course> Courses
         {

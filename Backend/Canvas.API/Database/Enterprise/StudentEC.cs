@@ -29,21 +29,11 @@ namespace Canvas.API.Enterprise
             if (student == null) return null;
             if (student.Id == 0)
             {
-                student.Id = NextKey;
+                student.Id = 0;
                 _context.Students.Add(student);
                 _context.SaveChanges();
             }
             return student;
-        }
-
-        public int NextKey
-        {
-            get
-            {
-                if (_context.Students.Any())
-                    return _context.Students.Select(s => s.Id).Max() + 1;
-                return 1;
-            }
         }
 
         public Student? Update(Student student)
@@ -53,6 +43,7 @@ namespace Canvas.API.Enterprise
             existing.Name = student.Name;
             existing.Code = student.Code;
             existing.Classification = student.Classification;
+            existing.Email = student.Email; // add this
             _context.SaveChanges();
             return existing;
         }
