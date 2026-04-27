@@ -43,6 +43,17 @@ namespace Canvas.Library.Services
             }
         }
 
+        // ── SEMESTER ──
+
+        public Course? UpdateSemesterDates(int courseId, DateTime? startDate, DateTime? endDate)
+        {
+            var body = new { StartDate = startDate, EndDate = endDate };
+            var result = _handler.Put($"/course/{courseId}/semester-dates", body).Result;
+            if (result == "ERROR" || string.IsNullOrWhiteSpace(result)) return null;
+            _courses = null;
+            return JsonConvert.DeserializeObject<Course>(result);
+        }
+
         public List<Assignment> ImportAssignments(int courseId, List<Assignment> assignments)
         {
             var result = _handler.Post($"/course/{courseId}/assignments/import", assignments).Result;
@@ -51,13 +62,24 @@ namespace Canvas.Library.Services
             return JsonConvert.DeserializeObject<List<Assignment>>(result) ?? new List<Assignment>();
         }
 
-        public void AddOrUpdate(Course? course)
-        {
-            if (course == null) return;
-            var result = _handler.Post("/course", course).Result;
-            var updated = JsonConvert.DeserializeObject<Course>(result);
-            _courses = null; // invalidate cache
-        }
+        // public void AddOrUpdate(Course? course)
+        // {
+        //     if (course == null) return;
+        //     var result = _handler.Post("/course", course).Result;
+        //     if (result == "ERROR" || string.IsNullOrWhiteSpace(result)) return; 
+        //     var updated = JsonConvert.DeserializeObject<Course>(result);
+        //     _courses = null; // invalidate cache
+        // }
+
+public string AddOrUpdate(Course? course)
+{
+    if (course == null) return null;
+    var result = _handler.Post("/course", course).Result;
+    if (result == "ERROR" || string.IsNullOrWhiteSpace(result)) return result;
+    var updated = JsonConvert.DeserializeObject<Course>(result);
+    _courses = null;
+    return result;
+}
 
         public Course? Delete(Course? course)
         {
@@ -286,9 +308,9 @@ namespace Canvas.Library.Services
             return JsonConvert.DeserializeObject<AssignmentGroup>(result);
         }
 
-        public Course CopyCourse(int sourceCourseId, int sectionNumber, int year, SemesterType semester)
+        public Course CopyCourse(int sourceCourseId, int sectionNumber, int year, SemesterType semester, int instructorId)
         {
-            var request = new { SectionNumber = sectionNumber, Year = year, Semester = semester };
+            var request = new { SectionNumber = sectionNumber, Year = year, Semester = semester, InstructorId = instructorId };
             var result = _handler.Post($"/course/{sourceCourseId}/copy", request).Result;
             _courses = null;
             return JsonConvert.DeserializeObject<Course>(result);

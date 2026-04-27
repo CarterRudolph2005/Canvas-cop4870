@@ -13,6 +13,8 @@ namespace Canvas.Library.Model
         public SemesterType Session {get; set;}
         public Semester() { }
         public int Year {get; set;}
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
         public Semester(int y, SemesterType s)
         {
             Year = y;

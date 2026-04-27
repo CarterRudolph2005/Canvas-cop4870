@@ -28,17 +28,28 @@ namespace Canvas.API.Enterprise
 
         public Course? GetById(int id) => CoursesWithAll.FirstOrDefault(c => c.Id == id);
 
-        public Course? Create(Course course)
+public Course? Create(Course course)
+{
+    if (course == null) return null;
+    if (course.Id == 0)
+    {
+        if (course.Instructors != null)
         {
-            if (course == null) return null;
-            if (course.Id == 0)
+            for (int i = 0; i < course.Instructors.Count; i++)
             {
-                course.Id = NextKey;
-                _context.Courses.Add(course);
-                _context.SaveChanges();
+                var existing = _context.Instructors
+                    .FirstOrDefault(ins => ins.Id == course.Instructors[i].Id);
+                if (existing != null)
+                    course.Instructors[i] = existing;
             }
-            return course;
         }
+
+        course.Id = NextKey;
+        _context.Courses.Add(course);
+        _context.SaveChanges();
+    }
+    return course;
+}
 
         public Course? Update(Course course)
         {
@@ -69,6 +80,24 @@ namespace Canvas.API.Enterprise
                     return _context.Courses.Select(i => i.Id).Max() + 1;
                 return 1;
             }
+        }
+
+        // ── SEMESTER ──
+
+        public Course? UpdateSemesterDates(int courseId, DateTime? startDate, DateTime? endDate)
+        {
+            var course = _context.Courses.FirstOrDefault(c => c.Id == courseId);
+            if (course == null) return null;
+
+            course.SemesterTaught.StartDate = startDate.HasValue
+                ? startDate.Value.ToUniversalTime()
+                : null;
+            course.SemesterTaught.EndDate = endDate.HasValue
+                ? endDate.Value.ToUniversalTime()
+                : null;
+
+            _context.SaveChanges();
+            return course;
         }
 
         // ── ASSIGNMENTS ──
@@ -525,55 +554,64 @@ namespace Canvas.API.Enterprise
 
         // ── COPY COURSE ──
 
-        public Course? CopyCourse(int sourceCourseId, int sectionNumber, int year, SemesterType semester)
+public Course? CopyCourse(int sourceCourseId, int sectionNumber, int year, SemesterType semester, int instructorId)
+{
+    var source = CoursesWithAll.FirstOrDefault(c => c.Id == sourceCourseId);
+    if (source == null) return null;
+
+    var copy = new Course
+    {
+        Id = 0,
+        Name = source.Name,
+        Code = source.Code,
+        Description = source.Description,
+        SectionNumber = sectionNumber,
+        SemesterTaught = new Semester(year, semester),
+        Instructors = new List<Instructor>(),
+        Assignments = source.Assignments?.Select(a => new Assignment
         {
-            var source = CoursesWithAll.FirstOrDefault(c => c.Id == sourceCourseId);
-            if (source == null) return null;
-            var newId = NextKey;
-            var copy = new Course
+            Id = 0,
+            Name = a.Name,
+            Description = a.Description,
+            AvailablePoints = a.AvailablePoints,
+            DueDate = a.DueDate,
+            GroupId = 0,
+            Submissions = new List<Submission>()
+        }).ToList() ?? new List<Assignment>(),
+        AssignmentGroups = new List<AssignmentGroup>(),
+        Modules = source.Modules?.Select(m => new Module
+        {
+            Id = 0,
+            ModuleName = m.ModuleName,
+            ModuleContents = m.ModuleContents?.Select(c => c switch
             {
-                Id = 0, // newId,
-                Name = source.Name,
-                Code = source.Code,
-                Description = source.Description,
-                SectionNumber = sectionNumber,
-                SemesterTaught = new Semester(year, semester),
-                Assignments = source.Assignments?.Select(a => new Assignment
-                {
-                    Id = 0,
-                    Name = a.Name,
-                    Description = a.Description,
-                    AvailablePoints = a.AvailablePoints,
-                    DueDate = a.DueDate,
-                    GroupId = 0,
-                    Submissions = new List<Submission>()
-                }).ToList() ?? new List<Assignment>(),
-                AssignmentGroups = new List<AssignmentGroup>(),
-                Modules = source.Modules?.Select(m => new Module
-                {
-                    Id = 0,
-                    ModuleName = m.ModuleName,
-                    ModuleContents = m.ModuleContents?.Select(c => c switch
-                    {
-                        AssignmentContent ac => (ModuleContent)new AssignmentContent { Id = 0, AssignmentId = ac.AssignmentId, Name = ac.Name },
-                        FileContent fc => new FileContent { Id = 0, Name = fc.Name, FilePath = fc.FilePath },
-                        PageContent pc => new PageContent { Id = 0, Name = pc.Name },
-                        _ => null
-                    }).Where(c => c != null).ToList() ?? new List<ModuleContent>()
-                }).ToList() ?? new List<Module>(),
-                Announcements = source.Announcements?.Select(a => new Announcement
-                {
-                    Id = 0,
-                    Title = a.Title,
-                    Body = a.Body,
-                    PostedDate = a.PostedDate.ToUniversalTime()
-                }).ToList() ?? new List<Announcement>(),
-                Roster = new List<Student>()
-            };
-            _context.Courses.Add(copy);
-            _context.SaveChanges();
-            return copy;
-        }
+                AssignmentContent ac => (ModuleContent)new AssignmentContent { Id = 0, AssignmentId = ac.AssignmentId, Name = ac.Name },
+                FileContent fc => new FileContent { Id = 0, Name = fc.Name, FilePath = fc.FilePath ?? string.Empty, MimeType = fc.MimeType ?? string.Empty },
+                PageContent pc => new PageContent { Id = 0, Name = pc.Name, Body = pc.Body ?? string.Empty },
+                _ => null
+            }).Where(c => c != null).ToList() ?? new List<ModuleContent>()
+        }).ToList() ?? new List<Module>(),
+        Announcements = source.Announcements?.Select(a => new Announcement
+        {
+            Id = 0,
+            Title = a.Title,
+            Body = a.Body,
+            PostedDate = a.PostedDate.ToUniversalTime()
+        }).ToList() ?? new List<Announcement>(),
+        Roster = new List<Student>(),
+        GradeScale = new List<LetterGrade>()
+    };
+
+    _context.ChangeTracker.Clear();
+
+    var instructor = _context.Instructors.FirstOrDefault(i => i.Id == instructorId);
+    if (instructor != null)
+        copy.Instructors.Add(instructor);
+
+    _context.Courses.Add(copy);
+    _context.SaveChanges();
+    return copy;
+}
 
         public Submission? GetStudentSubmission(int courseId, int assignmentId, int studentId)
         {
