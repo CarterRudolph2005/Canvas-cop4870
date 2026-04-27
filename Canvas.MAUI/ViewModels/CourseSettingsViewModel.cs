@@ -8,6 +8,23 @@ namespace Canvas.MAUI.ViewModels
 {
     internal class CourseSettingsViewModel : INotifyPropertyChanged, IQueryAttributable
     {
+        private DateTime? _startDate;
+        public DateTime? StartDate
+        {
+            get => _startDate;
+            set { _startDate = value; OnPropertyChanged(); }
+        }
+        public void SaveSemesterDates()
+        {
+            CourseServiceProxy.Current.UpdateSemesterDates(_courseId, StartDate, EndDate);
+        }
+
+        private DateTime? _endDate;
+        public DateTime? EndDate
+        {
+            get => _endDate;
+            set { _endDate = value; OnPropertyChanged(); }
+        }
         public event PropertyChangedEventHandler PropertyChanged;
         private void OnPropertyChanged([CallerMemberName] string name = null)
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
@@ -53,6 +70,9 @@ namespace Canvas.MAUI.ViewModels
             {
                 _courseId = id;
                 LoadGradeScale();
+                var course = CourseServiceProxy.Current.Courses.FirstOrDefault(c => c.Id == id);
+                StartDate = course?.SemesterTaught?.StartDate;
+                EndDate = course?.SemesterTaught?.EndDate;
             }
         }
 

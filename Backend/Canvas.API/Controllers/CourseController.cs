@@ -19,11 +19,36 @@ namespace Canvas.API.Controllers
 
         [HttpGet] public IEnumerable<Course> GetAll() => _ec.GetAll();
         [HttpGet("{id}")] public Course? GetById(int id) => _ec.GetById(id);
-        [HttpPost] public Course? Create([FromBody] Course course) => _ec.Create(course);
+        // [HttpPost] public Course? Create([FromBody] Course course) => _ec.Create(course);
+        [HttpPost]
+        public IActionResult Create([FromBody] Course course)
+        {
+            try
+            {
+                var result = _ec.Create(course);
+                if (result == null) return BadRequest();
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message + " | " + ex.InnerException?.Message);
+            }
+        }
         [HttpPut] public Course? Update([FromBody] Course course) => _ec.Update(course);
         [HttpDelete("{id}")] public Course? Delete(int id) => _ec.Delete(id);
 
-        [HttpPost("{id}/copy")] public Course? CopyCourse(int id, [FromBody] CopyCourseRequest r) => _ec.CopyCourse(id, r.SectionNumber, r.Year, r.Semester);
+        // ── SEMESTER ──
+        [HttpPut("{courseId}/semester-dates")]
+        public IActionResult UpdateSemesterDates(int courseId, [FromBody] UpdateSemesterDatesRequest r)
+        {
+            var result = _ec.UpdateSemesterDates(courseId, r.StartDate, r.EndDate);
+            if (result == null) return NotFound();
+            return Ok(result);
+        }
+
+[HttpPost("{id}/copy")] 
+public Course? CopyCourse(int id, [FromBody] CopyCourseRequest r) 
+    => _ec.CopyCourse(id, r.SectionNumber, r.Year, r.Semester, r.InstructorId);
 
         [HttpGet("{id}/assignments")] public IEnumerable<Assignment>? GetAssignments(int id) => _ec.GetById(id)?.Assignments;
         [HttpGet("{courseId}/assignments/{id}")] public Assignment? GetAssignmentById(int courseId, int id) => _ec.GetAssignmentById(courseId, id);
@@ -217,13 +242,13 @@ namespace Canvas.API.Controllers
             => _ec.GetLetterGradeForScore(courseId, percentage);
     }
 
-    public record CopyCourseRequest(int SectionNumber, int Year, SemesterType Semester);
     public record CopyAssignmentRequest(int AssignmentId, int SourceCourseId);
     public record UpdateContentRequest(int Index, string Content);
+    public record CopyCourseRequest(int SectionNumber, int Year, SemesterType Semester, int InstructorId);
 
-        // ── ADD THESE RECORDS ALONGSIDE THE OTHER RECORDS AT THE BOTTOM OF THE FILE ──
+    public record UpdateSemesterDatesRequest(DateTime? StartDate, DateTime? EndDate);
 
-        public record CreateQuizRequest(int? TimeLimitMinutes, int AllowedAttempts);
-        public record UpdateQuestionRequest(string QuestionText, int Points);
-        public record UpdateOptionRequest(string OptionText, bool IsCorrect);
+    public record CreateQuizRequest(int? TimeLimitMinutes, int AllowedAttempts);
+    public record UpdateQuestionRequest(string QuestionText, int Points);
+    public record UpdateOptionRequest(string OptionText, bool IsCorrect);
 }

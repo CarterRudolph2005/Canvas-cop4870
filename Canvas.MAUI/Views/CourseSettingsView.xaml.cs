@@ -16,8 +16,15 @@ namespace Canvas.MAUI.Views
         private async void SaveClicked(object sender, EventArgs e)
         {
             await _vm.SaveGradeScale();
-            await DisplayAlert("Saved", "Grade scale saved successfully.", "OK");
+            _vm.SaveSemesterDates();
+            await DisplayAlert("Saved", "Settings saved successfully.", "OK");
         }
+        
+        // private async void SaveClicked(object sender, EventArgs e)
+        // {
+        //     await _vm.SaveGradeScale();
+        //     await DisplayAlert("Saved", "Grade scale saved successfully.", "OK");
+        // }
 
         private void PresetColorTapped(object sender, TappedEventArgs e)
         {

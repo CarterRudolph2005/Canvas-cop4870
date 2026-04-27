@@ -218,22 +218,77 @@ namespace Canvas.MAUI.ViewModels
             }
         }
 
-        public void AddCourse()
+        // public void AddCourse()
+        // {
+        //     if (string.IsNullOrWhiteSpace(NewCourseName) || 
+        //         string.IsNullOrWhiteSpace(NewCourseCode)) return;
+        //     var course = new Course
+        //     {
+        //         Name = NewCourseName,
+        //         Code = NewCourseCode,
+        //         SemesterTaught = new Semester(NewCourseSelectedYear, NewCourseSelectedSemester),
+        //         Instructors = new List<Instructor>()
+        //     };
+        //     CourseServiceProxy.Current.AddOrUpdate(course);
+        //     LoadCourses();
+        //     ToggleAddCourseForm();
+        // }
+
+        // public async Task AddCourse()
+        // {
+        //     if (string.IsNullOrWhiteSpace(NewCourseName) || 
+        //         string.IsNullOrWhiteSpace(NewCourseCode)) return;
+        //     try
+        //     {
+        //         var course = new Course
+        //         {
+        //             Name = NewCourseName,
+        //             Code = NewCourseCode,
+        //             SemesterTaught = new Semester(NewCourseSelectedYear, NewCourseSelectedSemester),
+        //             Instructors = new List<Instructor>()
+        //         };
+        //         CourseServiceProxy.Current.AddOrUpdate(course);
+        //         LoadCourses();
+        //         ToggleAddCourseForm();
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         await Application.Current.MainPage.DisplayAlert("Error", ex.Message + "\n\n" + ex.InnerException?.Message, "OK");
+        //     }
+        // }
+
+        public async Task AddCourse()
         {
             if (string.IsNullOrWhiteSpace(NewCourseName) || 
                 string.IsNullOrWhiteSpace(NewCourseCode)) return;
-
-            var course = new Course
+            try
             {
-                Name = NewCourseName,
-                Code = NewCourseCode,
-                SemesterTaught = new Semester(NewCourseSelectedYear, NewCourseSelectedSemester),
-                Instructors = new List<Instructor> { InstructorServiceProxy.Current.GetById(TeacherId) }
-            };
+                var course = new Course
+                {
+                    Name = NewCourseName,
+                    Code = NewCourseCode,
+                    SemesterTaught = new Semester(NewCourseSelectedYear, NewCourseSelectedSemester),
+                    Instructors = new List<Instructor> { new Instructor { Id = TeacherId } },
+                    Assignments = new List<Assignment>(),
+                    Modules = new List<Module>(),
+                    Announcements = new List<Announcement>(),
+                    AssignmentGroups = new List<AssignmentGroup>(),
+                    Roster = new List<Student>(),
+                    GradeScale = new List<LetterGrade>()
+                };
 
-            CourseServiceProxy.Current.AddOrUpdate(course);
-            LoadCourses();
-            ToggleAddCourseForm();
+                var json = Newtonsoft.Json.JsonConvert.SerializeObject(course);
+                await Application.Current.MainPage.DisplayAlert("Sending", json, "OK");
+
+                var response = CourseServiceProxy.Current.AddOrUpdate(course);
+                await Application.Current.MainPage.DisplayAlert("Response", response, "OK");
+                LoadCourses();
+                ToggleAddCourseForm();
+            }
+            catch (Exception ex)
+            {
+                await Application.Current.MainPage.DisplayAlert("Error", ex.Message + "\n\n" + ex.InnerException?.Message, "OK");
+            }
         }
 
 
@@ -244,17 +299,7 @@ namespace Canvas.MAUI.ViewModels
 
         public Course CopyCourseWithDetails(int sourceCourseId, int sectionNumber, int year, SemesterType semester)
         {
-            var copy = CourseServiceProxy.Current.CopyCourse(sourceCourseId, sectionNumber, year, semester);
-            if (copy == null) return null;
-
-            var instructor = InstructorServiceProxy.Current.GetById(teacherId);
-            if (instructor != null)
-            {
-                copy.Instructors ??= new List<Instructor>();
-                if (!copy.Instructors.Any(i => i.Id == instructor.Id))
-                    copy.Instructors.Add(instructor);
-            }
-
+            var copy = CourseServiceProxy.Current.CopyCourse(sourceCourseId, sectionNumber, year, semester, teacherId);
             LoadCourses();
             return copy;
         }
