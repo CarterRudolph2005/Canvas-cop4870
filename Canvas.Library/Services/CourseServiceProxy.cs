@@ -424,6 +424,30 @@ public string AddOrUpdate(Course? course)
             var result = _handler.Get($"/course/{courseId}/gradescale/calculate?percentage={percentage}").Result;
             return result?.Trim('"') ?? "N/A";
         }
+
+        // ── COMMENTS ──
+
+        public List<AssignmentComment> GetComments(int submissionId)
+        {
+            var result = _handler.Get($"/course/submissions/{submissionId}/comments").Result;
+            if (result == null || result == "ERROR") return new List<AssignmentComment>();
+            return JsonConvert.DeserializeObject<List<AssignmentComment>>(result) ?? new List<AssignmentComment>();
+        }
+
+        public AssignmentComment? AddComment(int submissionId, AssignmentComment comment)
+        {
+            comment.SubmissionId = submissionId;
+            var result = _handler.Post($"/course/submissions/{submissionId}/comments", comment).Result;
+            if (result == "ERROR" || string.IsNullOrWhiteSpace(result)) return null;
+            return JsonConvert.DeserializeObject<AssignmentComment>(result);
+        }
+
+        public bool DeleteComment(int submissionId, int commentId)
+        {
+            var result = _handler.Delete($"/course/submissions/{submissionId}/comments/{commentId}").Result;
+            return result != "ERROR";
+        }
+
     }
 }
 

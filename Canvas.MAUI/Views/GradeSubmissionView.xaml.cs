@@ -24,14 +24,6 @@ namespace Canvas.MAUI.Views
             PointsLabel.Text = $"Points Awarded (out of {ViewModel.AvailablePoints})";
         }
 
-        private void StudentPickerChanged(object sender, EventArgs e)
-        {
-            if (StudentPicker.SelectedIndex < 0 || StudentPicker.SelectedIndex >= ViewModel.Submissions.Count) return;
-
-            var submission = ViewModel.Submissions[StudentPicker.SelectedIndex];
-            SubmissionText.Text = submission.Content ?? "No content submitted.";
-            GradeEntry.Text = submission.PointsAwarded?.ToString() ?? string.Empty;
-        }
 
         private async void SubmitGradeClicked(object sender, EventArgs e)
         {
@@ -58,5 +50,31 @@ namespace Canvas.MAUI.Views
         {
             await Shell.Current.GoToAsync("..");
         }
+    
+        private void StudentPickerChanged(object sender, EventArgs e)
+        {
+            if (StudentPicker.SelectedIndex < 0 || StudentPicker.SelectedIndex >= ViewModel.Submissions.Count) return;
+            var submission = ViewModel.Submissions[StudentPicker.SelectedIndex];
+            SubmissionText.Text = submission.Content ?? "No content submitted.";
+            GradeEntry.Text = submission.PointsAwarded?.ToString() ?? string.Empty;
+            ViewModel.LoadComments(submission.Id);
+        }
+
+        private async void PostCommentClicked(object sender, EventArgs e)
+        {
+            if (ViewModel.GetSelectedSubmissionId() == 0)
+            {
+                await DisplayAlert("Error", "Please select a student first.", "OK");
+                return;
+            }
+            if (string.IsNullOrWhiteSpace(ViewModel.NewCommentBody))
+            {
+                await DisplayAlert("Error", "Comment cannot be empty.", "OK");
+                return;
+            }
+            // Replace with actual logged-in instructor id/name when auth is available
+            ViewModel.AddComment(2, "Dr. Smith");
+        }
+
     }
 }

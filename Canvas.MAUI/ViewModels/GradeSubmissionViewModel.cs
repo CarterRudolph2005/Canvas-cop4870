@@ -70,5 +70,51 @@ namespace Canvas.MAUI.ViewModels
         public event PropertyChangedEventHandler? PropertyChanged;
         private void OnPropertyChanged([CallerMemberName] string propertyName = null)
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        
+        public int GetSelectedSubmissionId() => _selectedSubmissionId;
+
+        private List<AssignmentComment> _comments = new();
+        public List<AssignmentComment> Comments
+        {
+            get => _comments;
+            set { _comments = value; OnPropertyChanged(); }
+        }
+
+        private string _newCommentBody = string.Empty;
+        public string NewCommentBody
+        {
+            get => _newCommentBody;
+            set { _newCommentBody = value; OnPropertyChanged(); }
+        }
+
+        private int _selectedSubmissionId;
+
+        public void LoadComments(int submissionId)
+        {
+            _selectedSubmissionId = submissionId;
+            Comments = CourseServiceProxy.Current.GetComments(submissionId);
+        }
+
+        public void AddComment(int authorId, string authorName)
+        {
+            if (string.IsNullOrWhiteSpace(NewCommentBody)) return;
+            var comment = new AssignmentComment
+            {
+                SubmissionId = _selectedSubmissionId,
+                AuthorId = authorId,
+                AuthorName = authorName,
+                Body = NewCommentBody
+            };
+            CourseServiceProxy.Current.AddComment(_selectedSubmissionId, comment);
+            NewCommentBody = string.Empty;
+            LoadComments(_selectedSubmissionId);
+        }
+
+        public void DeleteComment(int commentId)
+        {
+            CourseServiceProxy.Current.DeleteComment(_selectedSubmissionId, commentId);
+            LoadComments(_selectedSubmissionId);
+        }
+
     }
 }

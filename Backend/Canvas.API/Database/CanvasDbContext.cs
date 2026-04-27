@@ -19,6 +19,7 @@ namespace Canvas.API.Data
         public DbSet<PageContent> PageContents { get; set; }
         public DbSet<FileContent> FileContents { get; set; }
         public DbSet<AssignmentContent> AssignmentContents { get; set; }
+        public DbSet<AssignmentComment> AssignmentComments { get; set; }
 
         // ── QUIZ TABLES ──
         public DbSet<Quiz> Quizzes { get; set; }
@@ -52,6 +53,13 @@ namespace Canvas.API.Data
             modelBuilder.Entity<AssignmentGroup>()
                 .Property(g => g.AssignmentIds)
                 .HasColumnType("jsonb");
+
+            // ── SUBMISSION/COMMENT RELATIONSHIPS ──
+            modelBuilder.Entity<Submission>()
+                .HasMany(s => s.Comments)
+                .WithOne(c => c.Submission)
+                .HasForeignKey(c => c.SubmissionId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             // ── COURSE RELATIONSHIPS ──
             modelBuilder.Entity<Course>()

@@ -240,6 +240,28 @@ public Course? CopyCourse(int id, [FromBody] CopyCourseRequest r)
         [HttpGet("{courseId}/gradescale/calculate")]
         public string GetLetterGradeForScore(int courseId, [FromQuery] double percentage)
             => _ec.GetLetterGradeForScore(courseId, percentage);
+
+        // ── COMMENTS ──
+
+        [HttpGet("submissions/{submissionId}/comments")]
+        public List<AssignmentComment> GetComments(int submissionId)
+            => _ec.GetCommentsBySubmission(submissionId);
+
+        [HttpPost("submissions/{submissionId}/comments")]
+        public IActionResult AddComment(int submissionId, [FromBody] AssignmentComment comment)
+        {
+            comment.SubmissionId = submissionId;
+            var result = _ec.AddComment(comment);
+            if (result == null) return BadRequest();
+            return Ok(result);
+        }
+
+        [HttpDelete("submissions/{submissionId}/comments/{commentId}")]
+        public IActionResult DeleteComment(int submissionId, int commentId)
+        {
+            var ok = _ec.DeleteComment(commentId);
+            return ok ? Ok() : NotFound();
+        }
     }
 
     public record CopyAssignmentRequest(int AssignmentId, int SourceCourseId);
