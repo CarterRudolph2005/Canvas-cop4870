@@ -448,6 +448,32 @@ public string AddOrUpdate(Course? course)
             return result != "ERROR";
         }
 
+        // ── FILE UPLOAD ──
+
+        public async Task<(string filePath, string mimeType)> UploadFileAsync(Stream stream, string fileName, string mimeType)
+        {
+            var client = new HttpClient();
+            client.BaseAddress = new Uri("http://localhost:5258");
+
+            var content = new MultipartFormDataContent();
+            var streamContent = new StreamContent(stream);
+            streamContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(mimeType);
+            content.Add(streamContent, "file", fileName);
+
+            var response = await client.PostAsync("/upload", content);
+            if (!response.IsSuccessStatusCode) return (string.Empty, string.Empty);
+
+            var json = await response.Content.ReadAsStringAsync();
+            var result = JsonConvert.DeserializeObject<UploadResult>(json);
+            return (result?.FilePath ?? string.Empty, result?.MimeType ?? string.Empty);
+        }
+
+        private class UploadResult
+        {
+            public string FilePath { get; set; } = string.Empty;
+            public string MimeType { get; set; } = string.Empty;
+        }
+
     }
 }
 

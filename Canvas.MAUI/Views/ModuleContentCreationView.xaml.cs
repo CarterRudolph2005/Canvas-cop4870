@@ -1,5 +1,5 @@
 using Canvas.MAUI.ViewModels;
-using CommunityToolkit.Maui.Storage;
+using Canvas.Library.Services;
 
 namespace Canvas.MAUI.Views
 {
@@ -24,27 +24,33 @@ namespace Canvas.MAUI.Views
                 if (result == null) return;
 
                 var vm = BindingContext as ModuleContentCreationViewModel;
-                vm.FilePath = result.FileName;
-                vm.MimeType = result.ContentType ?? "application/octet-stream";
+                if (vm == null) return;
 
-                // copy to app package resources
                 using var stream = await result.OpenReadAsync();
-                var destPath = Path.Combine(FileSystem.AppDataDirectory, result.FileName);
-                using var destStream = File.Create(destPath);
-                await stream.CopyToAsync(destStream);
+                var mimeType = result.ContentType ?? "application/octet-stream";
 
-                vm.FilePath = result.FileName;
+                var (filePath, returnedMime) = await CourseServiceProxy.Current
+                    .UploadFileAsync(stream, result.FileName, mimeType);
+
+                if (string.IsNullOrEmpty(filePath))
+                {
+                    await DisplayAlert("Upload Failed", "Could not upload the file.", "OK");
+                    return;
+                }
+
+                vm.FilePath = filePath;
+                vm.MimeType = returnedMime;
             }
             catch (Exception ex)
             {
                 await DisplayAlert("Error", ex.Message, "OK");
             }
         }
+
         private async void SaveClicked(object sender, EventArgs e)
         {
             var vm = BindingContext as ModuleContentCreationViewModel;
             if (vm == null) return;
-
             try
             {
                 if (!vm.TrySave())
@@ -54,10 +60,10 @@ namespace Canvas.MAUI.Views
                 }
                 await Shell.Current.GoToAsync("..");
             }
-    catch (Exception ex)
-    {
-        await DisplayAlert("Save Failed", ex.Message, "OK");
-    }
-}
+            catch (Exception ex)
+            {
+                await DisplayAlert("Save Failed", ex.Message, "OK");
+            }
+        }
     }
 }

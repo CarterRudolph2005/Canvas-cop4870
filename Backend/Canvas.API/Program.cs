@@ -4,6 +4,7 @@ using Canvas.API.Data;
 using Microsoft.EntityFrameworkCore;
 
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<CanvasDbContext>(options =>
@@ -24,7 +25,6 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<CanvasDbContext>();
     db.Database.Migrate();
-    DatabaseSeeder.Seed(db);
 }
 
 if (app.Environment.IsDevelopment())
@@ -34,7 +34,12 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+// ── STATIC FILES (for uploaded files) ──
+var uploadsPath = Path.Combine(app.Environment.WebRootPath ??
+    Path.Combine(Directory.GetCurrentDirectory(), "wwwroot"), "uploads");
+Directory.CreateDirectory(uploadsPath);
+app.UseStaticFiles();
+
 // app.UseHttpsRedirection();
 app.MapControllers();
-
 app.Run();

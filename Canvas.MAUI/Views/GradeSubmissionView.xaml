@@ -49,6 +49,27 @@
                 </VerticalStackLayout>
             </Border>
 
+            <!-- Attached File -->
+            <Border StrokeThickness="1"
+                    StrokeShape="RoundRectangle 10"
+                    Padding="14"
+                    BackgroundColor="{AppThemeBinding Light=White, Dark=#2A2A2A}"
+                    Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#444444}"
+                    IsVisible="{Binding HasAttachment}">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Attached File"
+                        FontSize="13"
+                        FontAttributes="Bold"
+                        TextColor="{AppThemeBinding Light=#555555, Dark=#AAAAAA}"/>
+                    <Button Text="📄 Open Attached File"
+                            Clicked="OpenFileClicked"
+                            BackgroundColor="#1565C0"
+                            TextColor="White"
+                            CornerRadius="8"
+                            HorizontalOptions="Start"/>
+                </VerticalStackLayout>
+            </Border>
+
             <Border StrokeThickness="1"
                     StrokeShape="RoundRectangle 10"
                     Padding="14"
