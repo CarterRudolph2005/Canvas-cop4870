@@ -634,56 +634,56 @@
                         </VerticalStackLayout>
                     </Border>
 
-<!-- Search bar -->
-<Border StrokeThickness="1"
-        Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#444444}"
-        StrokeShape="RoundRectangle 10"
-        BackgroundColor="{AppThemeBinding Light=White, Dark=#2A2A2A}"
-        Padding="4,0">
-    <Grid ColumnDefinitions="Auto,*">
-        <Label Grid.Column="0" Text="🔍"
-               FontSize="14"
-               VerticalOptions="Center"
-               Margin="8,0,4,0"
-               TextColor="#888888"/>
-        <Entry Grid.Column="1"
-               Placeholder="Search by name or code…"
-               Text="{Binding SearchQuery}"
-               PlaceholderColor="#888888"
-               TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"
-               BackgroundColor="Transparent"
-               ClearButtonVisibility="WhileEditing"/>
-    </Grid>
-</Border>
+                    <!-- Search bar -->
+                    <Border StrokeThickness="1"
+                            Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#444444}"
+                            StrokeShape="RoundRectangle 10"
+                            BackgroundColor="{AppThemeBinding Light=White, Dark=#2A2A2A}"
+                            Padding="4,0">
+                        <Grid ColumnDefinitions="Auto,*">
+                            <Label Grid.Column="0" Text="🔍"
+                                FontSize="14"
+                                VerticalOptions="Center"
+                                Margin="8,0,4,0"
+                                TextColor="#888888"/>
+                            <Entry Grid.Column="1"
+                                Placeholder="Search by name or code…"
+                                Text="{Binding SearchQuery}"
+                                PlaceholderColor="#888888"
+                                TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"
+                                BackgroundColor="Transparent"
+                                ClearButtonVisibility="WhileEditing"/>
+                        </Grid>
+                    </Border>
 
-<!-- Filtered roster list -->
-<VerticalStackLayout BindableLayout.ItemsSource="{Binding FilteredRoster}" Spacing="8">
-    <BindableLayout.ItemTemplate>
-        <DataTemplate>
-            <Border StrokeThickness="1"
-                    StrokeShape="RoundRectangle 10"
-                    Padding="14"
-                    BackgroundColor="{AppThemeBinding Light=White, Dark=#2A2A2A}"
-                    Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#444444}">
-                <Grid ColumnDefinitions="*,44">
-                    <VerticalStackLayout Grid.Column="0" Spacing="2">
-                        <Label Text="{Binding Name}"
-                               FontSize="14" FontAttributes="Bold"
-                               TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"/>
-                        <Label Text="{Binding Code}"
-                               FontSize="12" TextColor="#888888"/>
+                    <!-- Filtered roster list -->
+                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding FilteredRoster}" Spacing="8">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate>
+                                <Border StrokeThickness="1"
+                                        StrokeShape="RoundRectangle 10"
+                                        Padding="14"
+                                        BackgroundColor="{AppThemeBinding Light=White, Dark=#2A2A2A}"
+                                        Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#444444}">
+                                    <Grid ColumnDefinitions="*,44">
+                                        <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                            <Label Text="{Binding Name}"
+                                                FontSize="14" FontAttributes="Bold"
+                                                TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"/>
+                                            <Label Text="{Binding Code}"
+                                                FontSize="12" TextColor="#888888"/>
+                                        </VerticalStackLayout>
+                                        <Button Grid.Column="1" Text="✕"
+                                                FontSize="12" TextColor="#EF5350"
+                                                BackgroundColor="Transparent"
+                                                Clicked="UnenrollStudentClicked"
+                                                CommandParameter="{Binding .}"
+                                                VerticalOptions="Center"/>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
                     </VerticalStackLayout>
-                    <Button Grid.Column="1" Text="✕"
-                            FontSize="12" TextColor="#EF5350"
-                            BackgroundColor="Transparent"
-                            Clicked="UnenrollStudentClicked"
-                            CommandParameter="{Binding .}"
-                            VerticalOptions="Center"/>
-                </Grid>
-            </Border>
-        </DataTemplate>
-    </BindableLayout.ItemTemplate>
-</VerticalStackLayout>
 
                 </VerticalStackLayout>
 

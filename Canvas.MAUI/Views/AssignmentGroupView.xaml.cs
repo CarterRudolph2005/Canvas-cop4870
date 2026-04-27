@@ -18,7 +18,6 @@ namespace Canvas.MAUI.Views
             {
                 await Shell.Current.GoToAsync("..");
             }
-            // validation error is set inside TrySave and bound to the UI
         }
 
         private async void CancelClicked(object sender, EventArgs e)

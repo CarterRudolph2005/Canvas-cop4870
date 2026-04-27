@@ -165,7 +165,7 @@ namespace Canvas.MAUI.ViewModels
             SelectedSortOption = SortOptions[0];
             ApplyFilters();
         }
-// Form visibility
+
         private bool showAddCourseForm;
         public bool ShowAddCourseForm
         {
@@ -173,7 +173,6 @@ namespace Canvas.MAUI.ViewModels
             set { showAddCourseForm = value; OnPropertyChanged(); }
         }
 
-        // New course fields
         private string newCourseName;
         public string NewCourseName
         {
@@ -202,7 +201,6 @@ namespace Canvas.MAUI.ViewModels
             set { newCourseSelectedSemester = value; OnPropertyChanged(); }
         }
 
-        // Picker sources
         public List<int> NewCourseYears { get; } = Enumerable
             .Range(2026, 10)
             .ToList();
@@ -215,7 +213,6 @@ namespace Canvas.MAUI.ViewModels
         public void ToggleAddCourseForm()
         {
             ShowAddCourseForm = !ShowAddCourseForm;
-            // reset fields when closing
             if (!ShowAddCourseForm)
             {
                 NewCourseName = string.Empty;
@@ -224,45 +221,6 @@ namespace Canvas.MAUI.ViewModels
                 NewCourseSelectedSemester = NewCourseSemesters[0];
             }
         }
-
-        // public void AddCourse()
-        // {
-        //     if (string.IsNullOrWhiteSpace(NewCourseName) || 
-        //         string.IsNullOrWhiteSpace(NewCourseCode)) return;
-        //     var course = new Course
-        //     {
-        //         Name = NewCourseName,
-        //         Code = NewCourseCode,
-        //         SemesterTaught = new Semester(NewCourseSelectedYear, NewCourseSelectedSemester),
-        //         Instructors = new List<Instructor>()
-        //     };
-        //     CourseServiceProxy.Current.AddOrUpdate(course);
-        //     LoadCourses();
-        //     ToggleAddCourseForm();
-        // }
-
-        // public async Task AddCourse()
-        // {
-        //     if (string.IsNullOrWhiteSpace(NewCourseName) || 
-        //         string.IsNullOrWhiteSpace(NewCourseCode)) return;
-        //     try
-        //     {
-        //         var course = new Course
-        //         {
-        //             Name = NewCourseName,
-        //             Code = NewCourseCode,
-        //             SemesterTaught = new Semester(NewCourseSelectedYear, NewCourseSelectedSemester),
-        //             Instructors = new List<Instructor>()
-        //         };
-        //         CourseServiceProxy.Current.AddOrUpdate(course);
-        //         LoadCourses();
-        //         ToggleAddCourseForm();
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         await Application.Current.MainPage.DisplayAlert("Error", ex.Message + "\n\n" + ex.InnerException?.Message, "OK");
-        //     }
-        // }
 
         public async Task AddCourse()
         {
@@ -285,10 +243,8 @@ namespace Canvas.MAUI.ViewModels
                 };
 
                 var json = Newtonsoft.Json.JsonConvert.SerializeObject(course);
-                await Application.Current.MainPage.DisplayAlert("Sending", json, "OK");
-
                 var response = CourseServiceProxy.Current.AddOrUpdate(course);
-                await Application.Current.MainPage.DisplayAlert("Response", response, "OK");
+                
                 LoadCourses();
                 ToggleAddCourseForm();
             }

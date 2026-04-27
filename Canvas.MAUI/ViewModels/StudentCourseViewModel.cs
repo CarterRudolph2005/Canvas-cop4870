@@ -1,13 +1,9 @@
 using Canvas.Library.Model;
 using Canvas.Library.Services;
 using Canvas.MAUI.Models;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Globalization;
 using System.Runtime.CompilerServices;
-using System.Text;
 
 namespace Canvas.MAUI.ViewModels
 {
@@ -99,18 +95,18 @@ namespace Canvas.MAUI.ViewModels
         }
 
         private ObservableCollection<StudentAssignmentDisplay> assignments;
-public bool HasAssignments => Assignments != null && Assignments.Count > 0;
+        public bool HasAssignments => Assignments != null && Assignments.Count > 0;
 
-public ObservableCollection<StudentAssignmentDisplay> Assignments
-{
-    get => assignments;
-    set
-    {
-        assignments = value;
-        OnPropertyChanged();
-        OnPropertyChanged(nameof(HasAssignments));
-    }
-}
+        public ObservableCollection<StudentAssignmentDisplay> Assignments
+        {
+            get => assignments;
+            set
+            {
+                assignments = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(HasAssignments));
+            }
+        }
 
         private ObservableCollection<Announcement> announcements;
         public ObservableCollection<Announcement> Announcements

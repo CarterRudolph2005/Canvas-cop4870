@@ -30,7 +30,7 @@ namespace Canvas.Library.Model
             this.CourseId = other.CourseId;
             this.Name = other.Name;
             this.TotalPoints = other.TotalPoints;
-            this.AssignmentIds = new List<int>(other.AssignmentIds); // deep copy
+            this.AssignmentIds = new List<int>(other.AssignmentIds);
         }
     }
 }

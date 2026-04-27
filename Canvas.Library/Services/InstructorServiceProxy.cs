@@ -1,7 +1,5 @@
 using Canvas.Library.Model;
-using System;
-using System.Collections.Generic;
-using System.Text;
+//this has not been updated to support API calls
 
 namespace Canvas.Library.Services
 {

@@ -43,7 +43,6 @@ namespace Canvas.MAUI.ViewModels
         public bool IsFile => SelectedContentType == "File";
         public bool IsAssignment => SelectedContentType == "Assignment";
 
-        // shared
         private string contentName;
         public string ContentName
         {
@@ -51,7 +50,6 @@ namespace Canvas.MAUI.ViewModels
             set { contentName = value; OnPropertyChanged(); ((Command)SaveCommand).ChangeCanExecute(); }
         }
 
-        // page fields
         private string pageBody;
         public string PageBody
         {
@@ -59,7 +57,6 @@ namespace Canvas.MAUI.ViewModels
             set { pageBody = value; OnPropertyChanged(); }
         }
 
-        // file fields
         private string filePath;
         public string FilePath
         {
@@ -74,7 +71,6 @@ namespace Canvas.MAUI.ViewModels
             set { mimeType = value; OnPropertyChanged(); }
         }
 
-        // assignment fields
         private string assignmentName;
         public string AssignmentName
         {

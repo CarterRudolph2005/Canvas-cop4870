@@ -22,8 +22,6 @@ namespace Canvas.MAUI.ViewModels
 
         public bool IsEditing => _assignmentId > 0;
 
-        // ── Query Attributes ─────────────────────────────────────────────────
-
         public void ApplyQueryAttributes(IDictionary<string, object> query)
         {
             if (query.TryGetValue("courseId", out var cId) && int.TryParse(cId?.ToString(), out int parsedCourseId))
@@ -35,8 +33,6 @@ namespace Canvas.MAUI.ViewModels
                 LoadExistingQuiz();
             }
         }
-
-        // ── Assignment fields ────────────────────────────────────────────────
 
         private string _quizName;
         public string QuizName
@@ -66,8 +62,6 @@ namespace Canvas.MAUI.ViewModels
             set { _dueDate = value; OnPropertyChanged(); }
         }
 
-        // ── Quiz settings ────────────────────────────────────────────────────
-
         private string _timeLimitText;
         public string TimeLimitText
         {
@@ -82,11 +76,7 @@ namespace Canvas.MAUI.ViewModels
             set { _allowedAttemptsText = value; OnPropertyChanged(); }
         }
 
-        // ── Questions ────────────────────────────────────────────────────────
-
         public ObservableCollection<QuestionViewModel> Questions { get; set; } = new();
-
-        // ── Error ────────────────────────────────────────────────────────────
 
         private string _errorMessage;
         public string ErrorMessage
@@ -100,8 +90,6 @@ namespace Canvas.MAUI.ViewModels
             }
         }
         public bool HasError => !string.IsNullOrEmpty(ErrorMessage);
-
-        // ── Load existing quiz for edit ───────────────────────────────────────
 
         private void LoadExistingQuiz()
         {
@@ -130,8 +118,6 @@ namespace Canvas.MAUI.ViewModels
             }
         }
 
-        // ── Questions management ─────────────────────────────────────────────
-
         public void AddQuestion()
         {
             Questions.Add(new QuestionViewModel());
@@ -151,8 +137,6 @@ namespace Canvas.MAUI.ViewModels
         {
             question.Options.Remove(option);
         }
-
-        // ── Save ─────────────────────────────────────────────────────────────
 
         public Task<bool> Save()
         {
@@ -275,8 +259,6 @@ namespace Canvas.MAUI.ViewModels
             return true;
         }
     }
-
-    // ── Supporting ViewModels ────────────────────────────────────────────────
 
     public class QuestionViewModel : INotifyPropertyChanged
     {

@@ -32,7 +32,6 @@ private async void AssignmentTapped(object sender, SelectionChangedEventArgs e)
  
     if (display.Assignment.IsQuiz)
     {
-        // Route to quiz attempt page
         await Shell.Current.GoToAsync(nameof(QuizAttemptPage), new Dictionary<string, object>
         {
             { "courseId", vm.CourseId },
@@ -42,7 +41,6 @@ private async void AssignmentTapped(object sender, SelectionChangedEventArgs e)
     }
     else
     {
-        // Route to regular submission page — match your existing navigation pattern
         await Shell.Current.GoToAsync(
             $"AssignmentSubmissionView?courseId={vm.CourseId}&assignmentId={display.Assignment.Id}&studentId={vm.StudentId}");
     }

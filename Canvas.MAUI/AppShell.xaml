@@ -49,11 +49,6 @@
         ContentTemplate="{DataTemplate views:StudentDetailView}"
         Route="StudentDetailPage"/>
     
-    <!-- <ShellContent
-        Title="Course Menu"
-        ContentTemplate="{DataTemplate views:StudentCourseView}"
-        Route="StudentCourseMenu"/> -->
-    
     
 
 </Shell>

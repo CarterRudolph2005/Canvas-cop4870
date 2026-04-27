@@ -60,7 +60,6 @@ namespace Canvas.MAUI.Views
                 return;
             }
 
-            // step 1 — pick source course
             var options = courses
                 .Select(c => $"{c.Name} — {c.SemesterTaught?.Session} {c.SemesterTaught?.Year} (Section {c.SectionNumber})")
                 .ToArray();
@@ -72,19 +71,16 @@ namespace Canvas.MAUI.Views
             if (index < 0) return;
             var source = courses[index];
 
-            // step 2 — pick semester
             var semesterOptions = Enum.GetNames(typeof(SemesterType));
             var chosenSemester = await DisplayActionSheet("Select Semester", "Cancel", null, semesterOptions);
             if (chosenSemester == null || chosenSemester == "Cancel") return;
             var semesterType = Enum.Parse<SemesterType>(chosenSemester);
 
-            // step 3 — pick year
             var yearOptions = Enumerable.Range(2026, 10).Select(y => y.ToString()).ToArray();
             var chosenYear = await DisplayActionSheet("Select Year", "Cancel", null, yearOptions);
             if (chosenYear == null || chosenYear == "Cancel") return;
             var year = int.Parse(chosenYear);
 
-            // step 4 — enter section number
             var sectionInput = await DisplayPromptAsync(
                 "Section Number",
                 "Enter the section number for the new course:",

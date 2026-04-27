@@ -21,7 +21,7 @@ namespace Canvas.API.Controllers
 
         [HttpGet] public IEnumerable<Course> GetAll() => _ec.GetAll();
         [HttpGet("{id}")] public Course? GetById(int id) => _ec.GetById(id);
-        // [HttpPost] public Course? Create([FromBody] Course course) => _ec.Create(course);
+
         [HttpPost]
         public IActionResult Create([FromBody] Course course)
         {
@@ -36,10 +36,11 @@ namespace Canvas.API.Controllers
                 return StatusCode(500, ex.Message + " | " + ex.InnerException?.Message);
             }
         }
+
         [HttpPut] public Course? Update([FromBody] Course course) => _ec.Update(course);
+
         [HttpDelete("{id}")] public Course? Delete(int id) => _ec.Delete(id);
 
-        // ── SEMESTER ──
         [HttpPut("{courseId}/semester-dates")]
         public IActionResult UpdateSemesterDates(int courseId, [FromBody] UpdateSemesterDatesRequest r)
         {
@@ -48,9 +49,9 @@ namespace Canvas.API.Controllers
             return Ok(result);
         }
 
-[HttpPost("{id}/copy")] 
-public Course? CopyCourse(int id, [FromBody] CopyCourseRequest r) 
-    => _ec.CopyCourse(id, r.SectionNumber, r.Year, r.Semester, r.InstructorId);
+        [HttpPost("{id}/copy")] 
+        public Course? CopyCourse(int id, [FromBody] CopyCourseRequest r) 
+            => _ec.CopyCourse(id, r.SectionNumber, r.Year, r.Semester, r.InstructorId);
 
         [HttpGet("{id}/assignments")] public IEnumerable<Assignment>? GetAssignments(int id) => _ec.GetById(id)?.Assignments;
         [HttpGet("{courseId}/assignments/{id}")] public Assignment? GetAssignmentById(int courseId, int id) => _ec.GetAssignmentById(courseId, id);
@@ -95,10 +96,9 @@ public Course? CopyCourse(int id, [FromBody] CopyCourseRequest r)
         [HttpPost("{id}/announcements")] public void AddAnnouncement(int id, [FromBody] Announcement announcement) => _ec.AddAnnouncement(id, announcement);
         [HttpPut("{id}/announcements")] public void UpdateAnnouncement(int id, [FromBody] Announcement announcement) => _ec.UpdateAnnouncement(id, announcement);
         [HttpDelete("{courseId}/announcements/{id}")] public void DeleteAnnouncement(int courseId, int id) => _ec.DeleteAnnouncement(courseId, id);
-
         [HttpGet("student/{studentId}")] public IEnumerable<Course> GetCoursesForStudent(int studentId) => _ec.GetCoursesForStudent(studentId);
         [HttpGet("{courseId}/grades/{studentId}")] public double CalculateGrade(int courseId, int studentId) => _ec.CalculateGrade(courseId, studentId);
-        // [HttpPost("{courseId}/submissions")] public void SubmitAssignment(int courseId, [FromBody] Submission submission) => _ec.SubmitAssignment(courseId, submission);
+        
         [HttpPost("{courseId}/submissions")]
         public Submission SubmitAssignment(int courseId, [FromBody] Submission submission)
         {
@@ -123,14 +123,6 @@ public Course? CopyCourse(int id, [FromBody] CopyCourseRequest r)
         [HttpGet("{courseId}/submissions/{studentId}")] public List<Submission> GetStudentSubmissions(int courseId, int studentId) => _ec.GetStudentSubmissions(courseId, studentId);
         [HttpPost("{courseId}/modules/{moduleId}/contents")] public bool AddModuleContents(int courseId, int moduleId, [FromBody] ModuleContent content) => _ec.AddModuleContents(courseId, moduleId, content);
         [HttpDelete("{courseId}/modules/{moduleId}/contents/{contentId}")] public void DeleteModuleContents(int courseId, int moduleId, int contentId) => _ec.DeleteModuleContents(courseId, moduleId, contentId);
-           
-        // ────────────────────────────────────────────────────────────────────────────
-        // ADD THESE ENDPOINTS INSIDE CourseController, before the closing brace.
-        // Also add these request records at the bottom of the file alongside
-        // the existing CopyCourseRequest / CopyAssignmentRequest records.
-        // ────────────────────────────────────────────────────────────────────────────
-
-        // ── QUIZ ENDPOINTS ──
 
         [HttpGet("{courseId}/assignments/{assignmentId}/quiz")]
         public IActionResult GetQuiz(int courseId, int assignmentId)
@@ -173,8 +165,6 @@ public Course? CopyCourse(int id, [FromBody] CopyCourseRequest r)
             return ok ? Ok() : NotFound();
         }
 
-        // ── QUIZ QUESTION ENDPOINTS ──
-
         [HttpPost("{courseId}/assignments/{assignmentId}/quiz/questions")]
         public IActionResult AddQuestion(int courseId, int assignmentId, [FromBody] QuizQuestion question)
         {
@@ -198,8 +188,6 @@ public Course? CopyCourse(int id, [FromBody] CopyCourseRequest r)
             return ok ? Ok() : NotFound();
         }
 
-        // ── QUIZ QUESTION OPTION ENDPOINTS ──
-
         [HttpPost("{courseId}/assignments/{assignmentId}/quiz/questions/{questionId}/options")]
         public IActionResult AddOption(int courseId, int assignmentId, int questionId, [FromBody] QuizQuestionOption option)
         {
@@ -222,7 +210,6 @@ public Course? CopyCourse(int id, [FromBody] CopyCourseRequest r)
             var ok = _ec.DeleteOption(courseId, assignmentId, questionId, optionId);
             return ok ? Ok() : NotFound();
         }
-        // ── GRADE SCALE ──
 
         [HttpGet("{courseId}/gradescale")]
         public List<LetterGrade> GetGradeScale(int courseId) => _ec.GetGradeScale(courseId);
@@ -245,8 +232,6 @@ public Course? CopyCourse(int id, [FromBody] CopyCourseRequest r)
         [HttpGet("{courseId}/gradescale/calculate")]
         public string GetLetterGradeForScore(int courseId, [FromQuery] double percentage)
             => _ec.GetLetterGradeForScore(courseId, percentage);
-
-        // ── COMMENTS ──
 
         [HttpGet("submissions/{submissionId}/comments")]
         public List<AssignmentComment> GetComments(int submissionId)

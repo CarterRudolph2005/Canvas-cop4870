@@ -40,7 +40,6 @@ namespace Canvas.Library.Model
     public class AssignmentContent : ModuleContent
     {
         public int AssignmentId { get; set; }
-        // public Assignment ModuleAssignment { get; set; }
         public override string ContentType => "Assignment";
     }
 }

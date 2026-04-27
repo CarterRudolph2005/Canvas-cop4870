@@ -121,8 +121,6 @@ namespace Canvas.MAUI.ViewModels
             }
         }
 
-        // ── Row model ────────────────────────────────────────────────────────
-
         public class LetterGradeRow : INotifyPropertyChanged
         {
             public event PropertyChangedEventHandler PropertyChanged;
