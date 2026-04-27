@@ -116,6 +116,7 @@ namespace Canvas.MAUI.ViewModels
                 SubmittedAt = existingSubmission.SubmissionDate;
                 IsSubmitted = true;
                 OnPropertyChanged(nameof(PointsDisplay));
+                LoadComments();
             }
         }
 
@@ -146,5 +147,41 @@ namespace Canvas.MAUI.ViewModels
         public event PropertyChangedEventHandler PropertyChanged;
         private void OnPropertyChanged([CallerMemberName] string propertyName = null)
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    
+        private List<AssignmentComment> _comments = new();
+        public List<AssignmentComment> Comments
+        {
+            get => _comments;
+            set { _comments = value; OnPropertyChanged(); }
+        }
+
+        private string _newCommentBody = string.Empty;
+        public string NewCommentBody
+        {
+            get => _newCommentBody;
+            set { _newCommentBody = value; OnPropertyChanged(); }
+        }
+
+        public void LoadComments()
+        {
+            if (existingSubmission == null) return;
+            Comments = CourseServiceProxy.Current.GetComments(existingSubmission.Id);
+        }
+
+        public void AddComment()
+        {
+            if (existingSubmission == null || string.IsNullOrWhiteSpace(NewCommentBody)) return;
+            var comment = new AssignmentComment
+            {
+                SubmissionId = existingSubmission.Id,
+                AuthorId = StudentId,
+                AuthorName = $"Student {StudentId}",
+                Body = NewCommentBody
+            };
+            CourseServiceProxy.Current.AddComment(existingSubmission.Id, comment);
+            NewCommentBody = string.Empty;
+            LoadComments();
+        }
+    
     }
 }

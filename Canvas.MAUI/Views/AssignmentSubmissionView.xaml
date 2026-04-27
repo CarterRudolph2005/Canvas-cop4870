@@ -99,6 +99,58 @@
                            HorizontalOptions="Center"/>
                 </Border>
 
+                <!-- Comments -->
+                <Border StrokeThickness="0"
+                        StrokeShape="RoundRectangle 12"
+                        BackgroundColor="#1E2D3D"
+                        Padding="16"
+                        IsVisible="{Binding IsSubmitted}">
+                    <VerticalStackLayout Spacing="12">
+                        <Label Text="COMMENTS"
+                            FontSize="12"
+                            FontAttributes="Bold"
+                            TextColor="#90CAF9"
+                            CharacterSpacing="1.5"/>
+                        <CollectionView ItemsSource="{Binding Comments}"
+                                        HeightRequest="200">
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate>
+                                    <Border StrokeThickness="0"
+                                            StrokeShape="RoundRectangle 8"
+                                            BackgroundColor="#0D1B2A"
+                                            Padding="10"
+                                            Margin="0,4">
+                                        <VerticalStackLayout Spacing="4">
+                                            <Label Text="{Binding AuthorName}"
+                                                FontAttributes="Bold"
+                                                FontSize="12"
+                                                TextColor="#42A5F5"/>
+                                            <Label Text="{Binding Body}"
+                                                FontSize="13"
+                                                TextColor="White"/>
+                                            <Label Text="{Binding CreatedAtLocal}"
+                                                FontSize="11"
+                                                TextColor="#4A6080"/>
+                                        </VerticalStackLayout>
+                                    </Border>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                        <Editor Placeholder="Write a comment..."
+                                PlaceholderColor="#4A6080"
+                                Text="{Binding NewCommentBody}"
+                                TextColor="White"
+                                BackgroundColor="#0D1B2A"
+                                MinimumHeightRequest="80"
+                                AutoSize="TextChanges"/>
+                        <Button Text="Post Comment"
+                                Clicked="PostCommentClicked"
+                                BackgroundColor="#1565C0"
+                                TextColor="White"
+                                CornerRadius="8"/>
+                    </VerticalStackLayout>
+                </Border>
+
             </VerticalStackLayout>
         </ScrollView>
 

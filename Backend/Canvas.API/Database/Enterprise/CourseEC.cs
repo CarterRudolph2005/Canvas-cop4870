@@ -889,6 +889,34 @@ public Course? CopyCourse(int sourceCourseId, int sectionNumber, int year, Semes
                 .FirstOrDefault(g => percentage >= g.MinPercentage && percentage <= g.MaxPercentage);
             return match?.Letter ?? "N/A";
         }
+        // ── COMMENTS ──
+
+        public List<AssignmentComment> GetCommentsBySubmission(int submissionId)
+        {
+            return _context.AssignmentComments
+                .Where(c => c.SubmissionId == submissionId)
+                .OrderBy(c => c.CreatedAt)
+                .ToList();
+        }
+
+        public AssignmentComment? AddComment(AssignmentComment comment)
+        {
+            comment.Id = 0;
+            comment.CreatedAt = DateTime.UtcNow;
+            _context.AssignmentComments.Add(comment);
+            _context.SaveChanges();
+            return comment;
+        }
+
+        public bool DeleteComment(int commentId)
+        {
+            var comment = _context.AssignmentComments.FirstOrDefault(c => c.Id == commentId);
+            if (comment == null) return false;
+            _context.AssignmentComments.Remove(comment);
+            _context.SaveChanges();
+            return true;
+        }
+    
     }
 }
 
