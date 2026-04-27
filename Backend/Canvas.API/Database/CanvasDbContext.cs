@@ -29,13 +29,11 @@ namespace Canvas.API.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // ── USER INHERITANCE (TPH) ──
             modelBuilder.Entity<User>()
                 .HasDiscriminator<string>("UserType")
                 .HasValue<Student>("Student")
                 .HasValue<Instructor>("Instructor");
 
-            // ── MODULECONTENT INHERITANCE (TPH) ──
             modelBuilder.Entity<ModuleContent>(b =>
             {
                 b.HasDiscriminator<string>("Discriminator")
@@ -45,23 +43,19 @@ namespace Canvas.API.Data
                 b.Ignore(m => m.ContentType);
             });
 
-            // ── SEMESTER (owned entity) ──
             modelBuilder.Entity<Course>()
                 .OwnsOne(c => c.SemesterTaught);
 
-            // ── ASSIGNMENTGROUP.ASSIGNMENTIDS (List<int>) ──
             modelBuilder.Entity<AssignmentGroup>()
                 .Property(g => g.AssignmentIds)
                 .HasColumnType("jsonb");
 
-            // ── SUBMISSION/COMMENT RELATIONSHIPS ──
             modelBuilder.Entity<Submission>()
                 .HasMany(s => s.Comments)
                 .WithOne(c => c.Submission)
                 .HasForeignKey(c => c.SubmissionId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // ── COURSE RELATIONSHIPS ──
             modelBuilder.Entity<Course>()
                 .HasMany(c => c.Assignments)
                 .WithOne()
@@ -86,59 +80,49 @@ namespace Canvas.API.Data
                 .HasForeignKey(g => g.CourseId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // ── MODULE RELATIONSHIPS ──
             modelBuilder.Entity<Module>()
                 .HasMany(m => m.ModuleContents)
                 .WithOne()
                 .HasForeignKey("ModuleId")
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // ── ASSIGNMENT RELATIONSHIPS ──
             modelBuilder.Entity<Assignment>()
                 .HasMany(a => a.Submissions)
                 .WithOne()
                 .HasForeignKey("AssignmentId")
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // ── COURSE/STUDENT ROSTER (many-to-many) ──
             modelBuilder.Entity<Course>()
                 .HasMany(c => c.Roster)
                 .WithMany()
                 .UsingEntity("CourseStudents");
 
-            // ── COURSE/INSTRUCTOR (many-to-many) ──
             modelBuilder.Entity<Course>()
                 .HasMany(c => c.Instructors)
                 .WithMany()
                 .UsingEntity("CourseInstructors");
 
-            // ── IGNORE Module.Content (List<string> field, CLI only) ──
             modelBuilder.Entity<Module>()
                 .Ignore("Content");
 
-            // ── QUIZ RELATIONSHIPS ──
-            // Quiz is 1-to-1 with Assignment (one Quiz per quiz-type assignment)
             modelBuilder.Entity<Quiz>()
                 .HasOne<Assignment>()
                 .WithOne()
                 .HasForeignKey<Quiz>(q => q.AssignmentId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Quiz has many QuizQuestions
             modelBuilder.Entity<QuizQuestion>()
                 .HasOne<Quiz>()
                 .WithMany(q => q.Questions)
                 .HasForeignKey(qq => qq.QuizId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // QuizQuestion has many QuizQuestionOptions
             modelBuilder.Entity<QuizQuestionOption>()
                 .HasOne<QuizQuestion>()
                 .WithMany(q => q.Options)
                 .HasForeignKey(o => o.QuizQuestionId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Letter Grade Scale builder
             modelBuilder.Entity<Course>()
                 .HasMany(c => c.GradeScale)
                 .WithOne()

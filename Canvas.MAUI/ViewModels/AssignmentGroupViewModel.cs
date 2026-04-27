@@ -20,8 +20,6 @@ namespace Canvas.MAUI.ViewModels
         public bool IsEditing => _groupId != 0;
         public string Title => IsEditing ? "Edit Group" : "New Group";
 
-        // ── Properties ──────────────────────────────────────────────────────
-
         private string _name;
         public string Name
         {
@@ -54,7 +52,6 @@ namespace Canvas.MAUI.ViewModels
             int.TryParse(TotalPointsText, out int pts) &&
             pts > 0;
 
-        // ── Load ────────────────────────────────────────────────────────────
 
         public void ApplyQueryAttributes(IDictionary<string, object> query)
         {
@@ -80,7 +77,6 @@ namespace Canvas.MAUI.ViewModels
             TotalPointsText = group.TotalPoints.ToString();
         }
 
-        // ── Save / Cancel ────────────────────────────────────────────────────
 
         public bool TrySave(out AssignmentGroup savedGroup)
         {

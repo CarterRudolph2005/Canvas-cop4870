@@ -103,45 +103,45 @@
             </VerticalStackLayout>
         </Border>
 
-<!-- ── SEMESTER DATES ── -->
-<Border Grid.Row="1"
-        StrokeThickness="1"
-        Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#444444}"
-        StrokeShape="RoundRectangle 12"
-        BackgroundColor="{AppThemeBinding Light=White, Dark=#2A2A2A}"
-        Padding="14">
-    <VerticalStackLayout Spacing="12">
+        <!-- ── SEMESTER DATES ── -->
+        <Border Grid.Row="1"
+                StrokeThickness="1"
+                Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#444444}"
+                StrokeShape="RoundRectangle 12"
+                BackgroundColor="{AppThemeBinding Light=White, Dark=#2A2A2A}"
+                Padding="14">
+            <VerticalStackLayout Spacing="12">
 
-        <Label Text="Semester Dates"
-               FontSize="14" FontAttributes="Bold"
-               TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"/>
+                <Label Text="Semester Dates"
+                    FontSize="14" FontAttributes="Bold"
+                    TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"/>
 
-        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12" RowDefinitions="Auto,Auto" RowSpacing="10">
-            <Label Grid.Row="0" Grid.Column="0"
-                   Text="Start Date"
-                   FontSize="13"
-                   TextColor="{AppThemeBinding Light=#555555, Dark=#AAAAAA}"
-                   VerticalOptions="Center"/>
-            <DatePicker Grid.Row="0" Grid.Column="1"
-                        Date="{Binding StartDate}"
-                        Format="MMM dd, yyyy"
-                        TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"
-                        BackgroundColor="Transparent"/>
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12" RowDefinitions="Auto,Auto" RowSpacing="10">
+                    <Label Grid.Row="0" Grid.Column="0"
+                        Text="Start Date"
+                        FontSize="13"
+                        TextColor="{AppThemeBinding Light=#555555, Dark=#AAAAAA}"
+                        VerticalOptions="Center"/>
+                    <DatePicker Grid.Row="0" Grid.Column="1"
+                                Date="{Binding StartDate}"
+                                Format="MMM dd, yyyy"
+                                TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"
+                                BackgroundColor="Transparent"/>
 
-            <Label Grid.Row="1" Grid.Column="0"
-                   Text="End Date"
-                   FontSize="13"
-                   TextColor="{AppThemeBinding Light=#555555, Dark=#AAAAAA}"
-                   VerticalOptions="Center"/>
-            <DatePicker Grid.Row="1" Grid.Column="1"
-                        Date="{Binding EndDate}"
-                        Format="MMM dd, yyyy"
-                        TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"
-                        BackgroundColor="Transparent"/>
-        </Grid>
+                    <Label Grid.Row="1" Grid.Column="0"
+                        Text="End Date"
+                        FontSize="13"
+                        TextColor="{AppThemeBinding Light=#555555, Dark=#AAAAAA}"
+                        VerticalOptions="Center"/>
+                    <DatePicker Grid.Row="1" Grid.Column="1"
+                                Date="{Binding EndDate}"
+                                Format="MMM dd, yyyy"
+                                TextColor="{AppThemeBinding Light=#1A1A1A, Dark=#FFFFFF}"
+                                BackgroundColor="Transparent"/>
+                </Grid>
 
-    </VerticalStackLayout>
-</Border>
+            </VerticalStackLayout>
+        </Border>
 
         <!-- Save button -->
         <Button Grid.Row="2"

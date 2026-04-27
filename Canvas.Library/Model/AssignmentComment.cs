@@ -4,7 +4,6 @@ public class AssignmentComment
 {
     public int Id { get; set; }
     public int SubmissionId { get; set; }
-    // [JsonIgnore]
     public Submission? Submission { get; set; }
     public int AuthorId { get; set; }
     public string AuthorName { get; set; }

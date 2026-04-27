@@ -86,32 +86,6 @@ namespace Canvas.Library.Utilities
             }
         }
 
-// public async Task<string> Post(string url, object obj)
-// {
-//     var fullUrl = $"http://{host}:{port}{url}";
-//     using (var client = new HttpClient())
-//     {
-//         using (var request = new HttpRequestMessage(HttpMethod.Post, fullUrl))
-//         {
-//             var settings = new JsonSerializerSettings();
-//             settings.Converters.Add(new ModuleContentConverter());
-//             var json = JsonConvert.SerializeObject(obj, settings);
-
-//             using (var stringContent = new StringContent(json, Encoding.UTF8, "application/json"))
-//             {
-//                 request.Content = stringContent;
-//                 using (var response = await client
-//                     .SendAsync(request, HttpCompletionOption.ResponseHeadersRead)
-//                     .ConfigureAwait(false))
-//                 {
-//                     // always return the body so we can see the error
-//                     return await response.Content.ReadAsStringAsync();
-//                 }
-//             }
-//         }
-//     }
-// }
-
         public async Task<string> Put(string url, object obj)
         {
             var fullUrl = $"http://{host}:{port}{url}";

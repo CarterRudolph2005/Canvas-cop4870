@@ -12,7 +12,6 @@ namespace Canvas.MAUI.ViewModels
 {
     internal class AssignmentDetailViewModel : INotifyPropertyChanged, IQueryAttributable
     {
-        //************** Set up ******************************
         public event PropertyChangedEventHandler PropertyChanged;
         private void OnPropertyChanged([CallerMemberName] string propertyName = null)
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
@@ -44,9 +43,8 @@ namespace Canvas.MAUI.ViewModels
                 assignmentId = _assignmentId;
                 LoadAssignment();
             }
-        }
+        } 
 
-        //************** Assignment Properties ******************************
         public string CourseName { get; set; }
         public string PageTitle => assignmentId == 0
             ? "New Assignment" : "Edit Assignment";
@@ -93,7 +91,6 @@ namespace Canvas.MAUI.ViewModels
             set { hasValidationError = value; OnPropertyChanged(); }
         }
 
-        //************** Group Picker Properties ******************************
         public ObservableCollection<AssignmentGroup> AvailableGroups { get; set; }
 
         private AssignmentGroup selectedGroup;
@@ -111,7 +108,6 @@ namespace Canvas.MAUI.ViewModels
                 AvailableGroups.Add(g);
         }
 
-        //************** Load Page ******************************
         public void LoadAssignment()
         {
             var course = CourseServiceProxy.Current.Courses.FirstOrDefault(i => i.Id == CourseId);
@@ -130,7 +126,6 @@ namespace Canvas.MAUI.ViewModels
             }
         }
 
-        //************** Helper Functions ******************************
         public bool Validate()
         {
             if (string.IsNullOrWhiteSpace(AssignmentName))

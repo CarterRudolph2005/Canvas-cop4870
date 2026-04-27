@@ -45,8 +45,6 @@ namespace Canvas.MAUI.ViewModels
             }
         }
 
-        // ── Properties ─────────────────────────────────────────────────────
-
         private int sectionNumber;
         public int SectionNumber
         {
@@ -87,8 +85,6 @@ namespace Canvas.MAUI.ViewModels
         public bool IsAssignmentsTab => SelectedTabIndex == 2;
         public bool IsRosterTab => SelectedTabIndex == 3;
 
-        // ── Announcement form ───────────────────────────────────────────────
-
         private bool _showAnnouncementForm;
         public bool ShowAnnouncementForm
         {
@@ -110,8 +106,6 @@ namespace Canvas.MAUI.ViewModels
             set { _newAnnouncementBody = value; OnPropertyChanged(); }
         }
 
-        // ── Module form ─────────────────────────────────────────────────────
-
         private bool _showModuleForm;
         public bool ShowModuleForm
         {
@@ -125,8 +119,6 @@ namespace Canvas.MAUI.ViewModels
             get => _newModuleName;
             set { _newModuleName = value; OnPropertyChanged(); }
         }
-
-        // ── Enroll form ─────────────────────────────────────────────────────
 
         private bool _showEnrollForm;
         public bool ShowEnrollForm
@@ -155,8 +147,6 @@ namespace Canvas.MAUI.ViewModels
         }
         public bool HasEnrollError => !string.IsNullOrEmpty(EnrollError);
 
-        // ── Collections ─────────────────────────────────────────────────────
-
         public ObservableCollection<Announcement> Announcements { get; set; }
         public ObservableCollection<ModuleViewModel> Modules { get; set; }
         public ObservableCollection<Assignment> Assignments { get; set; }
@@ -164,8 +154,6 @@ namespace Canvas.MAUI.ViewModels
         public ObservableCollection<AssignmentGroupDisplay> AssignmentGroups { get; set; }
         public ObservableCollection<Assignment> UngroupedAssignments { get; set; }
         public bool HasUngroupedAssignments => UngroupedAssignments?.Count > 0;
-
-        // ── Load ────────────────────────────────────────────────────────────
 
         public void LoadCourse()
         {
@@ -220,10 +208,6 @@ namespace Canvas.MAUI.ViewModels
             RefreshGroups();
         }
 
-
-
-        // ── Tab switching ───────────────────────────────────────────────────
-
         public void SelectTab(int index)
         {
             SelectedTabIndex = index;
@@ -232,8 +216,6 @@ namespace Canvas.MAUI.ViewModels
             OnPropertyChanged(nameof(IsAssignmentsTab));
             OnPropertyChanged(nameof(IsRosterTab));
         }
-
-        // ── Announcements ───────────────────────────────────────────────────
 
         public void ToggleAnnouncementForm()
             => ShowAnnouncementForm = !ShowAnnouncementForm;
@@ -264,8 +246,6 @@ namespace Canvas.MAUI.ViewModels
         {
             CourseServiceProxy.Current.UpdateAnnouncement(_courseId, announcement);
         }
-
-        // ── Modules ─────────────────────────────────────────────────────────
 
         public void ToggleModuleForm()
             => ShowModuleForm = !ShowModuleForm;
@@ -345,23 +325,6 @@ namespace Canvas.MAUI.ViewModels
             OnPropertyChanged(nameof(Modules));
         }
 
-        // private void RefreshModules()
-        // {
-        //     var course = CourseServiceProxy.Current.Courses.FirstOrDefault(c => c.Id == _courseId);
-        //     Modules = new ObservableCollection<ModuleViewModel>(
-        //         (course?.Modules ?? new List<Module>()).Select(m => new ModuleViewModel
-        //         {
-        //             Id = m.Id,
-        //             ModuleName = m.ModuleName,
-        //             Content = m.Content ?? new List<string>(),
-        //             IsExpanded = true
-        //         })
-        //     );
-        //     OnPropertyChanged(nameof(Modules));
-        // }
-
-        // ── Assignments ─────────────────────────────────────────────────────
-
         public void DeleteAssignment(Assignment assignment)
         {
             // proxy now handles group cleanup internally
@@ -392,8 +355,6 @@ namespace Canvas.MAUI.ViewModels
             Assignments = new ObservableCollection<Assignment>(course?.Assignments ?? new List<Assignment>());
             OnPropertyChanged(nameof(Assignments));
         }
-
-        // ── Roster ──────────────────────────────────────────────────────────
 
         public void ToggleEnrollForm()
             => ShowEnrollForm = !ShowEnrollForm;
@@ -430,8 +391,6 @@ namespace Canvas.MAUI.ViewModels
             OnPropertyChanged(nameof(FilteredRoster));
         }
 
-        // ── Assignment Groups ────────────────────────────────────────────────
-
         public class AssignmentGroupDisplay
         {
             public AssignmentGroup Group { get; set; }
@@ -452,8 +411,6 @@ namespace Canvas.MAUI.ViewModels
         public void DeleteGroup(int groupId)
         {
             CourseServiceProxy.Current.DeleteAssignmentGroup(_courseId, groupId);
-            // RefreshAssignments not needed — proxy resets GroupId fields,
-            // RefreshGroups rebuilds UngroupedAssignments from proxy state
             RefreshGroups();
         }
 
@@ -470,13 +427,11 @@ namespace Canvas.MAUI.ViewModels
 
             var sb = new StringBuilder();
 
-            // Header row: Student, Code, then one column per assignment, then Total
             sb.Append("Student,Code");
             foreach (var a in assignments)
                 sb.Append($",{(a.Name ?? "").Replace(",", " ")}");
             sb.AppendLine(",Total Points,Total Available");
 
-            // One row per student
             foreach (var student in roster)
             {
                 var earned = 0;
@@ -583,7 +538,7 @@ namespace Canvas.MAUI.ViewModels
             OnPropertyChanged(nameof(UngroupedAssignments));
             OnPropertyChanged(nameof(HasUngroupedAssignments));
         }
-        // ── Roster Search ────────────────────────────────────────────────────
+        
         private string _searchQuery;
         public string SearchQuery
         {

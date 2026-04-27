@@ -6,7 +6,7 @@ namespace Canvas.Library.Model
     {
         public int Id { get; set; }
         public int AssignmentId { get; set; }
-        public int? TimeLimitMinutes { get; set; }   // null = no limit
+        public int? TimeLimitMinutes { get; set; }
         public int AllowedAttempts { get; set; } = 1;
         public List<QuizQuestion> Questions { get; set; } = new();
     }

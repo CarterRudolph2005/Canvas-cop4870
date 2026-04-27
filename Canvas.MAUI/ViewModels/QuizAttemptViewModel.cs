@@ -20,8 +20,6 @@ namespace Canvas.MAUI.ViewModels
         private int _assignmentId;
         private int _studentId;
 
-        // ── Query Attributes ─────────────────────────────────────────────────
-
         public void ApplyQueryAttributes(IDictionary<string, object> query)
         {
             if (query.TryGetValue("courseId", out var cId) && int.TryParse(cId?.ToString(), out int parsedCourseId))
@@ -36,8 +34,6 @@ namespace Canvas.MAUI.ViewModels
             if (_courseId > 0 && _assignmentId > 0)
                 LoadQuiz();
         }
-
-        // ── Properties ───────────────────────────────────────────────────────
 
         private string _quizName;
         public string QuizName
@@ -96,8 +92,6 @@ namespace Canvas.MAUI.ViewModels
 
         public ObservableCollection<QuizAttemptQuestionViewModel> Questions { get; set; } = new();
 
-        // ── Load ─────────────────────────────────────────────────────────────
-
         private void LoadQuiz()
         {
             var course = CourseServiceProxy.Current.GetCoursesForStudent(_studentId)
@@ -145,8 +139,6 @@ namespace Canvas.MAUI.ViewModels
                     : "Submitted — awaiting grade";
             }
         }
-
-        // ── Submit ───────────────────────────────────────────────────────────
 
         public Task<bool> Submit()
         {
@@ -202,8 +194,6 @@ namespace Canvas.MAUI.ViewModels
         }
     }
 
-    // ── Supporting ViewModels ────────────────────────────────────────────────
-
     public class QuizAttemptQuestionViewModel : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
@@ -241,7 +231,6 @@ namespace Canvas.MAUI.ViewModels
             get => _isSelected;
             set
             {
-                // Radio-button behavior: deselect all siblings first
                 if (value && ParentQuestion != null)
                     foreach (var opt in ParentQuestion.Options)
                         if (opt != this) opt.SetSelectedSilent(false);
@@ -251,7 +240,6 @@ namespace Canvas.MAUI.ViewModels
             }
         }
 
-        // Used internally to deselect without triggering the radio logic again
         public void SetSelectedSilent(bool val)
         {
             _isSelected = val;

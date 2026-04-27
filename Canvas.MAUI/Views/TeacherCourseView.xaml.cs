@@ -150,7 +150,6 @@ namespace Canvas.MAUI.Views
                 $"{nameof(CourseSettingsPage)}?courseId={vm.CourseId}");
         }
 
-        // ── Tab switching ──────────────────────────────────────────
         private void UpdateTabStyles(int selectedIndex)
         {
             var tabs = new[] { HomeTabBtn, ModulesTabBtn, AssignmentsTabBtn, RosterTabBtn };
@@ -186,7 +185,6 @@ namespace Canvas.MAUI.Views
             UpdateTabStyles(3);
         }
 
-        // ── Announcements ──────────────────────────────────────────
         private void ToggleAnnouncementFormClicked(object sender, EventArgs e)
             => ViewModel.ToggleAnnouncementForm();
 
@@ -202,10 +200,8 @@ namespace Canvas.MAUI.Views
         private async void EditAnnouncementClicked(object sender, EventArgs e)
         {
             var announcement = (sender as Button)?.CommandParameter as Announcement;
-            // placeholder for edit navigation
         }
 
-        // ── Modules ────────────────────────────────────────────────
         private void ToggleModuleFormClicked(object sender, EventArgs e)
             => ViewModel.ToggleModuleForm();
 
@@ -218,13 +214,6 @@ namespace Canvas.MAUI.Views
             ViewModel.DeleteModule(module);
         }
 
-        // private async void AddModuleContentClicked(object sender, EventArgs e)
-        // {
-        //     var module = (sender as Button)?.CommandParameter as ModuleViewModel;
-        //     var content = await DisplayPromptAsync("Add Content", "Enter content item:");
-        //     if (!string.IsNullOrWhiteSpace(content))
-        //         ViewModel.AddModuleContent(module.Id, content);
-        // }
         private async void EditModuleClicked(object sender, EventArgs e)
         {
             var module = (sender as Button)?.CommandParameter as ModuleViewModel;
@@ -329,12 +318,7 @@ namespace Canvas.MAUI.Views
                 await DisplayAlert("Navigation Error", ex.Message, "OK");
             }
         }
-                // public void CopyModuleClicked(object sender, EventArgs e)
-        // {   
-                
-        // }       
 
-        // ── Assignments ────────────────────────────────────────────
         private async void AddAssignmentClicked(object sender, EventArgs e)
             => await Shell.Current.GoToAsync($"AssignmentDetailView?courseId={ViewModel.CourseId}");
 
@@ -423,8 +407,6 @@ namespace Canvas.MAUI.Views
             }
         }
 
-
-        // ── Roster ─────────────────────────────────────────────────
         private void ToggleEnrollFormClicked(object sender, EventArgs e)
             => ViewModel.ToggleEnrollForm();
 
